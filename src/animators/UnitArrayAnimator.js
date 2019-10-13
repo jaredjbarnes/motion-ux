@@ -1,7 +1,6 @@
 import AnimationOptions from "../AnimationOptions.js";
 import UnitAnimator from "./UnitAnimator.js";
-
-const unitRegEx = /^(\d*)(.*?)$/;
+import unitRegEx from "./unitRegEx.js";
 
 export default class UnitArrayAnimator {
   constructor(options) {
@@ -83,11 +82,17 @@ export default class UnitArrayAnimator {
       from
         .trim()
         .split(" ")
-        .every(unit => unitRegEx.test(unit)) &&
+        .every(unit => {
+          unitRegEx.lastIndex = 0;
+          unitRegEx.test(unit);
+        }) &&
       to
         .trim()
         .split(" ")
-        .every(unit => unitRegEx.test(unit))
+        .every(unit => {
+          unitRegEx.lastIndex = 0;
+          unitRegEx.test(unit);
+        })
     );
   }
 }

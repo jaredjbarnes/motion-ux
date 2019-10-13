@@ -96,6 +96,7 @@ export default class RgbaAnimator {
   }
 
   static isMatch(options) {
+    rgbaRegex.lastIndex = 0;
     return rgbaRegex.test(options.from) && rgbaRegex.test(options.to);
   }
 }

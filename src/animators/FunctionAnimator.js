@@ -1,5 +1,6 @@
+import unitRegEx from "./unitRegEx.js";
+
 const functionRegEx = /(.*?)\((.+?)\)/g;
-const unitRegEx = /^(\d*)(.*?)$/;
 
 export default class FunctionAnimator {
   constructor(options) {
@@ -49,9 +50,10 @@ export default class FunctionAnimator {
         const fromUnits = (this.functionNames[functionName].fromUnits = []);
 
         result[2].split(",").forEach(value => {
+          unitRegEx.lastIndex = 0;
           const valueResult = unitRegEx.exec(value.trim());
           const numberValue = new Number(valueResult[1]).valueOf();
-          const unitValue = valueResult[2];
+          const unitValue = valueResult[2] || "";
 
           fromValues.push(numberValue);
           fromUnits.push(unitValue);
@@ -75,7 +77,7 @@ export default class FunctionAnimator {
           unitRegEx.lastIndex = 0;
           const valueResult = unitRegEx.exec(value.trim());
           const numberValue = new Number(valueResult[1]).valueOf();
-          const unitValue = valueResult[2];
+          const unitValue = valueResult[2] || "";
 
           toValues.push(numberValue);
           toUnits.push(unitValue);
@@ -155,6 +157,11 @@ export default class FunctionAnimator {
   }
 
   static isMatch(options) {
-    return functionRegEx.test(options.to) && functionRegEx.test(options.from);
+    functionRegEx.lastIndex = 0;
+    const isMatchWithFrom = functionRegEx.test(options.to);
+    functionRegEx.lastIndex = 0;
+    const isMatchWithTo = functionRegEx.test(options.to);
+
+    return isMatchWithFrom && isMatchWithTo;
   }
 }

@@ -92,6 +92,7 @@ export default class RgbAnimator {
   }
 
   static isMatch(options) {
+    rgbRegex.lastIndex = 0;
     return rgbRegex.test(options.from) && rgbRegex.test(options.to);
   }
 }

@@ -1,4 +1,4 @@
-const unitRegEx = /^(\d*)(.*?)$/;
+import unitRegEx from "./unitRegEx.js";
 
 export default class UnitAnimator {
   constructor(options) {
@@ -90,6 +90,7 @@ export default class UnitAnimator {
   }
 
   static isMatch(options) {
+    unitRegEx.lastIndex = 0;
     return unitRegEx.test(options.to) && unitRegEx.test(options.from);
   }
 }

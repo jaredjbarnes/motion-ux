@@ -104,6 +104,7 @@ export default class HexAnimator {
   }
 
   static isMatch(options) {
+    hexRegEx.lastIndex = 0;
     return hexRegEx.test(options.from) && rgbRegex.test(options.to);
   }
 }

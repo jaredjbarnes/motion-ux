@@ -49,8 +49,8 @@ const timeline = new Timeline({
     {
       target: div.style,
       name: "transform",
-      from: "translate(0px,0px) rotate(0deg)",
-      to: "translate(400px,400px) rotate(720deg)",
+      from: "translate(0px,0px)",
+      to: "translate(400px,400px)",
       startAt: 0,
       endAt: 0.75,
       easing: easings.easeOutElastic
