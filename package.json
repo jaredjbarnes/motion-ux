@@ -1,0 +1,37 @@
+{
+  "name": "motion-ux",
+  "version": "1.0.0",
+  "description": "UI Animation Framework",
+  "main": "lib/Timeline.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babel src --out-dir lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaredjbarnes/motion-ux.git"
+  },
+  "keywords": [
+    "Animation",
+    "Timeline",
+    "UX",
+    "UI"
+  ],
+  "author": "jared.j.barnes@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaredjbarnes/motion-ux/issues"
+  },
+  "homepage": "https://github.com/jaredjbarnes/motion-ux#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.6.0"
+  }
+}
