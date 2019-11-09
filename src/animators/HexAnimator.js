@@ -1,3 +1,5 @@
+import rgbRegex from "./rgbRegEx.js";
+
 const hexRegEx = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 
 export default class HexAnimator {
@@ -18,13 +20,15 @@ export default class HexAnimator {
 
   parsefromValue() {
     if (this.fromValue == null) {
-      this.fromValue = rgbRegex.exec(this.hexToRgb(this.from)).slice(1);
+      rgbRegex.lastIndex = 0;
+      this.fromValue = this.hexToRgb(this.options.from);
     }
   }
 
   parsetoValue() {
     if (this.toValue == null) {
-      this.toValue = rgbRegex.exec(this.hexToRgb(this.to)).slice(1);
+      rgbRegex.lastIndex = 0;
+      this.toValue = this.hexToRgb(this.options.to);
     }
   }
 
@@ -34,7 +38,7 @@ export default class HexAnimator {
       const green = this.toValue[1] - this.fromValue[1];
       const blue = this.toValue[2] - this.fromValue[2];
 
-      this.changes = [red, green, blue];
+      this.change = [red, green, blue];
     }
   }
 
@@ -69,8 +73,6 @@ export default class HexAnimator {
     this.target[this.options.name] = this.toHex();
   }
 
-  
-
   calculateProgress() {
     const progress = this.progress - this.options.startAt;
     const duration = this.options.endAt - this.options.startAt;
@@ -95,16 +97,11 @@ export default class HexAnimator {
   toHex() {
     const values = this.values;
 
-    return (
-      "#" +
-      ((1 << 24) + (values[0] << 16) + (values[1] << 8) + values[2])
-        .toString(16)
-        .slice(1)
-    );
+    return `rgba(${values[0]},${values[1]},${values[2]})`;
   }
 
   static isMatch(options) {
     hexRegEx.lastIndex = 0;
-    return hexRegEx.test(options.from) && rgbRegex.test(options.to);
+    return hexRegEx.test(options.from) && hexRegEx.test(options.to);
   }
 }

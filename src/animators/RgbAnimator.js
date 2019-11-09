@@ -1,4 +1,4 @@
-const rgbRegex = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/;
+import rgbRegex from "./rgbRegEx.js";
 
 export default class RgbAnimator {
   constructor(options) {

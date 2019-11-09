@@ -49,7 +49,7 @@ export default class Timeline {
 
       if (Animator == null) {
         throw new Error(
-          `Cannot Animate Property: Unknown property, "${options.name}".`
+          `Cannot find animator for name, "${options.name}".`
         );
       }
 

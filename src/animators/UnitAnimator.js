@@ -67,7 +67,7 @@ export default class UnitAnimator {
         );
       }
 
-      this.unit = toUnit;
+      this.unit = toUnit || "";
     }
   }
 

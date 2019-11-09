@@ -1,4 +1,7 @@
-import unitRegEx from "./unitRegEx.js";
+import ColorAnimator from "./ColorAnimator.js";
+import AnimationOptions from "../AnimationOptions.js";
+import UnitAnimator from "./UnitAnimator.js";
+import UnitArrayAnimator from "./UnitArrayAnimator.js";
 
 const functionRegEx = /(.*?)\((.+?)\)/g;
 
@@ -9,147 +12,138 @@ export default class FunctionAnimator {
     this.progress = null;
     this.value = null;
     this.duration = null;
-    this.functionNames = null;
+    this.functions = null;
     this.unit = null;
     this.change = null;
+    this.fromFunctions = null;
+    this.toFunctions = null;
 
-    this.parseFunctionNames();
-    this.parseFromValue();
-    this.parseToValue();
-    this.calculateChange();
+    this.parseFromFunctions();
+    this.parseToFunctions();
+    this.assertValues();
+    this.assignAnimator();
   }
 
-  parseFunctionNames() {
-    if (this.functionNames == null) {
-      let result;
-      this.functionNames = {};
+  parseFromFunctions() {
+    let result;
+    this.functions = {};
 
-      functionRegEx.lastIndex = 0;
-      while ((result = functionRegEx.exec(this.options.from))) {
-        const functionName = result[1].trim();
-        this.functionNames[functionName] = {
-          change: null,
-          fromValues: null,
-          toValues: null,
-          fromUnits: null,
-          toUnits: null
-        };
-      }
+    functionRegEx.lastIndex = 0;
+    while ((result = functionRegEx.exec(this.options.from))) {
+      const functionName = result[1].trim();
+
+      this.functions[functionName] = {
+        fromValues: null,
+        toValues: null,
+        animators: null,
+        values: []
+      };
+
+      this.functions[functionName].fromValues = result[2]
+        .split(",")
+        .map(value => value.trim());
     }
   }
 
-  parseFromValue() {
-    if (this.fromValue == null) {
-      let result;
+  parseToFunctions() {
+    let result;
 
-      functionRegEx.lastIndex = 0;
-      while ((result = functionRegEx.exec(this.options.from))) {
-        const functionName = result[1].trim();
+    functionRegEx.lastIndex = 0;
+    while ((result = functionRegEx.exec(this.options.to))) {
+      const functionName = result[1].trim();
+      const functionData = this.functions[functionName];
 
-        const fromValues = (this.functionNames[functionName].fromValues = []);
-        const fromUnits = (this.functionNames[functionName].fromUnits = []);
-
-        result[2].split(",").forEach(value => {
-          unitRegEx.lastIndex = 0;
-          const valueResult = unitRegEx.exec(value.trim());
-          const numberValue = new Number(valueResult[1]).valueOf();
-          const unitValue = valueResult[2] || "";
-
-          fromValues.push(numberValue);
-          fromUnits.push(unitValue);
-        });
+      if (functionData == null) {
+        throw new Error(
+          `Couldn't find corresponding from function with name: "${functionName}"`
+        );
       }
+
+      functionData.toValues = result[2].split(",").map(value => value.trim());
     }
   }
 
-  parseToValue() {
-    if (this.fromValue == null) {
-      let result;
+  assertValues() {
+    Object.keys(this.functions).forEach(functionName => {
+      const { toValues, fromValues } = this.functions[functionName];
 
-      functionRegEx.lastIndex = 0;
-      while ((result = functionRegEx.exec(this.options.to))) {
-        const functionName = result[1].trim();
-
-        const toValues = (this.functionNames[functionName].toValues = []);
-        const toUnits = (this.functionNames[functionName].toUnits = []);
-
-        result[2].split(",").forEach(value => {
-          unitRegEx.lastIndex = 0;
-          const valueResult = unitRegEx.exec(value.trim());
-          const numberValue = new Number(valueResult[1]).valueOf();
-          const unitValue = valueResult[2] || "";
-
-          toValues.push(numberValue);
-          toUnits.push(unitValue);
-        });
+      if (toValues.length !== fromValues.length) {
+        throw new Error(
+          "The 'from' arguments have a different length than the 'to' arguments."
+        );
       }
-    }
+    });
   }
 
-  calculateChange() {
-    if (this.change == null) {
-      Object.keys(this.functionNames).forEach(key => {
-        const functionData = this.functionNames[key];
+  assignAnimator() {
+    Object.keys(this.functions).forEach(functionName => {
+      const functionData = this.functions[functionName];
 
-        if (functionData.fromValues.length !== functionData.toValues.length) {
-          throw new Error(
-            "Invalid Arguments: The from values length don't match the to values length."
-          );
+      functionData.animators = functionData.fromValues.map(
+        (fromValue, index) => {
+          const toValue = functionData.toValues[index];
+
+          if (fromValue == null || fromValue === "") {
+            throw new Error(
+              `Invalid function arguments: ${this.options.from}.`
+            );
+          }
+
+          if (toValue == null || toValue === "") {
+            throw new Error(
+              `Invalid function arguments: ${this.options.to}.`
+            );
+          }
+
+          const animationOptions = new AnimationOptions({
+            name: index.toString(),
+            target: functionData.values,
+            from: fromValue,
+            to: toValue,
+            startAt: this.options.startAt,
+            endAt: this.options.endAt,
+            easing: this.options.easing
+          });
+
+          if (
+            ColorAnimator.isMatch(animationOptions) &&
+            ColorAnimator.isMatch(animationOptions)
+          ) {
+            return new ColorAnimator(animationOptions);
+          }
+
+          if (
+            UnitAnimator.isMatch(animationOptions) &&
+            UnitAnimator.isMatch(animationOptions)
+          ) {
+            return new UnitAnimator(animationOptions);
+          }
+
+          if (
+            UnitArrayAnimator.isMatch(animationOptions) &&
+            UnitArrayAnimator.isMatch(animationOptions)
+          ) {
+            return new UnitArrayAnimator(animationOptions);
+          }
         }
-
-        functionData.change = functionData.toValues.map((to, index) => {
-          return to - functionData.fromValues[index];
-        });
-      });
-    }
+      );
+    });
   }
 
   render(progress, duration) {
-    this.progress = progress;
-    this.duration = duration;
+    const value = Object.keys(this.functions)
+      .map(functionName => {
+        const functionData = this.functions[functionName];
 
-    if (progress <= this.options.startAt) {
-      this.target[this.options.name] = this.options.from;
-      return;
-    }
+        functionData.animators.map((animator, index) => {
+          animator.render(progress, duration);
+        });
 
-    if (progress >= this.options.endAt) {
-      this.target[this.options.name] = this.options.to;
-      return;
-    }
-
-    this.calculateProgress();
-    const value = this.toString();
-    this.target[this.options.name] = value;
-  }
-
-  calculateProgress() {
-    const progress = this.progress - this.options.startAt;
-    const duration = this.options.endAt - this.options.startAt;
-
-    const easingProgress = this.options.easing(progress, 0, 1, duration);
-
-    this.value = Object.keys(this.functionNames)
-      .map(key => {
-        const functionData = this.functionNames[key];
-
-        if (functionData.fromValues.length !== functionData.toValues.length) {
-          throw new Error(
-            "Invalid Arguments: The from values length don't match the to values length."
-          );
-        }
-
-        const values = functionData.fromValues
-          .map((from, index) => {
-            return `${from + easingProgress * functionData.change[index]}${
-              functionData.fromUnits[index]
-            }`;
-          })
-          .join(", ");
-
-        return `${key}(${values})`;
+        return `${functionName}(${functionData.values.join(", ")})`;
       })
       .join(" ");
+
+    this.target[this.options.name] = value;
   }
 
   toString() {
@@ -158,7 +152,7 @@ export default class FunctionAnimator {
 
   static isMatch(options) {
     functionRegEx.lastIndex = 0;
-    const isMatchWithFrom = functionRegEx.test(options.to);
+    const isMatchWithFrom = functionRegEx.test(options.from);
     functionRegEx.lastIndex = 0;
     const isMatchWithTo = functionRegEx.test(options.to);
 

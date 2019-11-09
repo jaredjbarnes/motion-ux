@@ -76,8 +76,8 @@ const timeline = new Timeline({
     {
       target: cardSideA.style,
       name: "transform",
-      from: "rotateY(0deg) scaleX(1)",
-      to: "rotateY(180deg) scaleX(3)",
+      from: "rotateY(0deg ) scaleX(1)",
+      to: "rotateY(180deg) scaleX(3 )",
       startAt: 0,
       endAt: 0.35,
       easing: easings.easeInOutQuad
@@ -85,8 +85,8 @@ const timeline = new Timeline({
     {
       target: cardSideB.style,
       name: "transform",
-      from: "rotateY(180deg) scaleX(1)",
-      to: "rotateY(360deg) scaleX(3)",
+      from: "rotateY(180deg ) scaleX( 1)",
+      to: "rotateY(360deg ) scaleX(3 )",
       startAt: 0,
       endAt: 0.35,
       easing: easings.easeInOutQuad
@@ -108,6 +108,16 @@ const timeline = new Timeline({
       startAt: 0,
       endAt: 0.75,
       easing: easings.linear
+    },
+    ,
+    {
+      target: cardSideB.style,
+      name: "background",
+      from: "linear-gradient(0deg, #ff0000, #00ff00);",
+      to: "linear-gradient(360deg, #0000ff, #ff00ff);",
+      startAt: 0,
+      endAt: 0.75,
+      easing: easings.easeInOutElastic
     }
   ],
   duration: 5000
