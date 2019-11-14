@@ -1,16 +1,13 @@
-const presets = [
+const config = {
+  presets: [
     [
-      "@babel/env",
+      "@babel/preset-env",
       {
-        targets: {
-          edge: "17",
-          firefox: "60",
-          chrome: "67",
-          safari: "11.1",
-        },
-        useBuiltIns: "usage",
-      },
-    ],
-  ];
-  
-  module.exports = { presets };
+        useBuiltIns: "entry",
+        targets: "> 0.25%, not dead"
+      }
+    ]
+  ]
+};
+
+module.exports = config;

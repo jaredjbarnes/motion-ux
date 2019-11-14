@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/animators/unitRegEx.js"],"names":[],"mappings":";;;;;;eAAe,wB","sourcesContent":["export default /^(\\d*\\.?\\d+)\\s?(.+)?$/i;\n"],"file":"unitRegEx.js"}

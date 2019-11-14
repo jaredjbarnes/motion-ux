@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/animators/rgbRegEx.js"],"names":[],"mappings":";;;;;;eAAe,kC","sourcesContent":["export default /^rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)$/;\n"],"file":"rgbRegEx.js"}

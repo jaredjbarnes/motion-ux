@@ -7,8 +7,9 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/babel src --out-dir lib"
+    "test": "node ./.clarity/test.js",
+    "build": "npx babel src --out-dir lib --source-maps",
+    "coverage": "nyc npm run test"
   },
   "repository": {
     "type": "git",
@@ -27,12 +28,14 @@
   },
   "homepage": "https://github.com/jaredjbarnes/motion-ux#readme",
   "devDependencies": {
-    "@babel/cli": "^7.6.4",
-    "@babel/core": "^7.6.4",
-    "@babel/preset-env": "^7.6.3",
-    "jest": "^24.9.0"
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "fs-extra": "^7.0.1",
+    "nyc": "^14.1.1"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.6.0"
+    "@babel/polyfill": "^7.7.0",
+    "clarity-pattern-parser": "0.0.4"
   }
 }
