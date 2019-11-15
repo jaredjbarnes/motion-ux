@@ -1,5 +1,4 @@
-import Timeline from "../../src/Timeline.js";
-import easings from "../../src/easings.js";
+import { Timeline, easings } from "../../src/index.js";
 
 const div = document.createElement("div");
 const cardSideA = document.createElement("div");

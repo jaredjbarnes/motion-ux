@@ -36,6 +36,6 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
-    "clarity-pattern-parser": "0.0.4"
+    "clarity-pattern-parser": "1.0.1"
   }
 }

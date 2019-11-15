@@ -1,1 +1,1 @@
-{"version":3,"sources":["../src/index.js"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;AAAA;;AACA","sourcesContent":["import Timeline from \"./Timeline.js\";\nimport easings from \"./easings\";\n\nexport { Timeline, easings };\n"],"file":"index.js"}
+{"version":3,"sources":["../src/index.js"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;AAAA;;AACA","sourcesContent":["import Timeline from \"./Timeline.js\";\nimport easings from \"./easings.js\";\n\nexport { Timeline, easings };\n"],"file":"index.js"}

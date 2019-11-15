@@ -3,7 +3,7 @@ import {
   AndComposite,
   OrValue,
   RepeatValue,
-} from "clarity-pattern-parser";
+} from "../../node_modules/clarity-pattern-parser/src/index.js";
 
 import number from "./number.js";
 import letter from "./letter.js";

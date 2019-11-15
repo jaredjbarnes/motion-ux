@@ -1,8 +1,7 @@
-import { OrComposite } from "clarity-pattern-parser";
-
+import { OrComposite } from "../../node_modules/clarity-pattern-parser/src/index.js";
 import unit from "./unit.js";
 import hex from "./hex.js";
-import number from "./number";
+import number from "./number.js";
 import method from "./method.js";
 import name from "./name.js"
 

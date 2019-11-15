@@ -1,4 +1,4 @@
-import { RepeatComposite, Literal, RepeatValue } from "clarity-pattern-parser";
+import { RepeatComposite, Literal, RepeatValue } from "../../node_modules/clarity-pattern-parser/src/index.js";
 import value from "./value.js";
 
 const space = new Literal("space", " ");

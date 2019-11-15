@@ -1,7 +1,9 @@
 import DefaultClock from "./DefaultClock.js";
-import AnimationOptions from "./AnimationOptions.js";
+import TimelineOption from "./TimelineOption.js";
 import Scrubber from "./Scrubber.js";
-import getAnimator from "./animators/getAnimator.js";
+import ValuesNodeAnimator from "./animators/ValuesNodeAnimator.js";
+import values from "./patterns/values.js";
+import { Cursor } from "../node_modules/clarity-pattern-parser/src/index.js";
 
 const defaultClock = new DefaultClock();
 
@@ -35,7 +37,7 @@ export default class Timeline {
 
   _convertAnimations() {
     this.animationOptions = this.animations.map(
-      animation => new AnimationOptions(animation)
+      animation => new TimelineOption(animation)
     );
   }
 
@@ -45,15 +47,23 @@ export default class Timeline {
     });
 
     this.animators = this.animationOptions.map(options => {
-      const Animator = getAnimator(options);
+      let fromNode;
+      let toNode;
 
-      if (Animator == null) {
+      try {
+        fromNode = values.parse(new Cursor(options.from));
+        toNode = values.parse(new Cursor(options.to));
+      } catch (error) {
         throw new Error(
-          `Cannot find animator for name, "${options.name}".`
+          `Parse Error: could not parse css ${options.to}, or ${options.from}`
         );
       }
 
-      return new Animator(options);
+      return new ValuesNodeAnimator({
+        ...options,
+        fromNode,
+        toNode
+      });
     });
   }
 
@@ -123,8 +133,12 @@ export default class Timeline {
 
         return min <= max;
       })
-      .forEach(animator =>
-        animator.render(this.scrubber.progress, this.duration)
+      .forEach(
+        animator =>
+          (animator.options.target[animator.options.name] = animator.render(
+            this.scrubber.progress,
+            this.duration
+          ))
       );
   }
 

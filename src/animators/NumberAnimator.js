@@ -1,19 +1,24 @@
 export default class NumberAnimator {
   constructor(options) {
-    this.target = options.target;
     this.options = options;
+    this.from = options.from;
+    this.to = options.to;
+    this.change = this.to - this.from;
   }
 
   render(progress) {
-    this.target[this.options.name] =  this.options.easing(
-      progress - options.startAt,
-      options.from,
-      options.to - options.from,
-      options.endAt - this.options.startAt
-    );
-  }
+    if (progress <= this.options.startAt) {
+      return this.from;
+    }
 
-  static isMatch(options) {
-    return typeof options.to === "number" && options.from === "number";
+    if (progress >= this.options.endAt) {
+      return this.to;
+    }
+
+    const relativeProgress = progress - this.options.startAt;
+    const duration = this.options.endAt - this.options.startAt;
+    const progressWithEasing = this.options.easing(relativeProgress, 0, 1, duration);
+
+    return this.from + this.change * progressWithEasing;
   }
 }
