@@ -1,4 +1,4 @@
-import { Cursor } from "clarity-pattern-parser";
+import { Cursor } from "clarity-pattern-parser";;
 import values from "../patterns/values.js";
 import assert from "assert";
 

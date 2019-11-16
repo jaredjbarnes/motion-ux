@@ -5,7 +5,7 @@ import {
   AndValue,
   AnyOfThese,
   OptionalValue
-} from "../../node_modules/clarity-pattern-parser/src/index.js";
+} from "clarity-pattern-parser";;
 
 const zero = new Literal("zero", "0");
 const bigE = new Literal("big-e", "E");

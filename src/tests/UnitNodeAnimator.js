@@ -1,7 +1,7 @@
 import UnitNodeAnimator from "../animators/UnitNodeAnimator.js";
 import easings from "../easings.js";
 import unit from "../patterns/unit.js";
-import { Cursor } from "clarity-pattern-parser";
+import { Cursor } from "clarity-pattern-parser";;
 import assert from "assert";
 
 exports["UnitNodeAnimator: "] = () => {

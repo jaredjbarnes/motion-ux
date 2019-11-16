@@ -1,7 +1,7 @@
 import HexNodeAnimator from "../animators/HexNodeAnimator.js";
 import easings from "../easings.js";
 import hex from "../patterns/hex.js";
-import { Cursor } from "clarity-pattern-parser";
+import { Cursor } from "clarity-pattern-parser";;
 import assert from "assert";
 
 exports["HexNodeAnimator: "] = () => {

@@ -5,7 +5,7 @@ import {
     AndValue,
     AnyOfThese,
     OptionalValue
-  } from "../../node_modules/clarity-pattern-parser/src/index.js";
+  } from "clarity-pattern-parser";;
 
 const letter = new AnyOfThese(
   "letter",

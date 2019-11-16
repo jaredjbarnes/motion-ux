@@ -1,7 +1,7 @@
 import ValuesNodeAnimator from "../animators/ValuesNodeAnimator.js";
 import easings from "../easings.js";
 import values from "../patterns/values.js";
-import { Cursor } from "clarity-pattern-parser";
+import { Cursor } from "clarity-pattern-parser";;
 import assert from "assert";
 
 exports["ValuesNodeAnimator: "] = () => {

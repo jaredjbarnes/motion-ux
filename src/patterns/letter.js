@@ -1,4 +1,4 @@
-import { AnyOfThese } from "../../node_modules/clarity-pattern-parser/src/index.js";
+import { AnyOfThese } from "clarity-pattern-parser";;
 
 const letter = new AnyOfThese(
   "letter",

@@ -7,7 +7,7 @@ import {
   RepeatComposite,
   RecursivePattern,
   OptionalComposite
-} from "../../node_modules/clarity-pattern-parser/src/index.js";
+} from "clarity-pattern-parser";
 
 import name from "./name.js";
 

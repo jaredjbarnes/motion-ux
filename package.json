@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node ./.clarity/test.js",
-    "build": "npx babel src --out-dir lib --source-maps",
+    "build": "npx babel src --out-dir lib --source-maps && npx webpack --mode=none --config webpack.config.js",
     "coverage": "nyc npm run test"
   },
   "repository": {
@@ -31,11 +31,12 @@
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.2",
     "@babel/preset-env": "^7.7.1",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
     "fs-extra": "^7.0.1",
     "nyc": "^14.1.1"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.7.0",
-    "clarity-pattern-parser": "1.0.1"
+    "clarity-pattern-parser": "1.0.4"
   }
 }

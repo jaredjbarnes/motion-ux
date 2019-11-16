@@ -3,7 +3,7 @@ import {
   OrValue,
   AndValue,
   AnyOfThese,
-} from "../../node_modules/clarity-pattern-parser/src/index.js";
+} from "clarity-pattern-parser";
 
 const letter = new AnyOfThese("letter", "ABCDEFabcdef");
 const number = new AnyOfThese("number", "0987654321");
