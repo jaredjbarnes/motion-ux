@@ -1,5 +1,6 @@
-import { Timeline, easings } from "../../src/index.js";
+import "../../dist/main.js";
 
+const { easings, Timeline } = motionUX;
 const div = document.createElement("div");
 const cardSideA = document.createElement("div");
 const cardSideB = document.createElement("div");

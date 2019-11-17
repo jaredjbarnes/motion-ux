@@ -3,7 +3,7 @@ import TimelineOption from "./TimelineOption.js";
 import Scrubber from "./Scrubber.js";
 import ValuesNodeAnimator from "./animators/ValuesNodeAnimator.js";
 import values from "./patterns/values.js";
-import { Cursor } from "../node_modules/clarity-pattern-parser/src/index.js";
+import { Cursor } from "clarity-pattern-parser";
 
 const defaultClock = new DefaultClock();
 
