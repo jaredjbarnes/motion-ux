@@ -1,9 +1,7 @@
 import DefaultClock from "./DefaultClock.js";
 import TimelineOption from "./TimelineOption.js";
 import Scrubber from "./Scrubber.js";
-import ValuesNodeAnimator from "./animators/ValuesNodeAnimator.js";
-import values from "./patterns/values.js";
-import { Cursor } from "clarity-pattern-parser";
+import AnimatorCreator from "./AnimatorCreator.js";
 
 const defaultClock = new DefaultClock();
 
@@ -14,8 +12,7 @@ export default class Timeline {
 
   constructor({ animations, duration, clock = defaultClock }) {
     this.clock = clock;
-    this.animations = animations;
-    this.animationOptions = [];
+    this.adjustmentAnimators = [];
     this.render = this.render.bind(this);
     this.scrubber = new Scrubber({
       clock,
@@ -23,48 +20,7 @@ export default class Timeline {
       render: this.render
     });
     this.duration = duration;
-
-    this._assertAnimations();
-    this._convertAnimations();
-    this._createAnimators();
-  }
-
-  _assertAnimations() {
-    if (!Array.isArray(this.animations)) {
-      throw new Error("Expected animations to be an array.");
-    }
-  }
-
-  _convertAnimations() {
-    this.animationOptions = this.animations.map(
-      animation => new TimelineOption(animation)
-    );
-  }
-
-  _createAnimators() {
-    this.animationOptions.sort((a, b) => {
-      return a.startAt - b.startAt;
-    });
-
-    this.animators = this.animationOptions.map(options => {
-      let fromNode;
-      let toNode;
-
-      try {
-        fromNode = values.parse(new Cursor(options.from));
-        toNode = values.parse(new Cursor(options.to));
-      } catch (error) {
-        throw new Error(
-          `Parse Error: could not parse css ${options.to}, or ${options.from}`
-        );
-      }
-
-      return new ValuesNodeAnimator({
-        ...options,
-        fromNode,
-        toNode
-      });
-    });
+    this.animators = new AnimatorCreator(animations).getAnimators();
   }
 
   get duration() {
@@ -123,7 +79,7 @@ export default class Timeline {
         return animator.options.startAt <= progress;
       })
       .forEach(animator =>
-        animator.render(this.scrubber.progress, this.duration)
+        (animator.options.target[animator.options.name] = animator.render(this.scrubber.progress, this.duration))
       );
 
     this.animators
