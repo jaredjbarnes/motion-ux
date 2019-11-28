@@ -19,16 +19,16 @@ document.body.appendChild(cardSideB);
 
 const timeline = new Timeline({
   animations: [
-    // {
-    //   target: div.style,
-    //   name: "background-color",
-    //   from: "rgba(0,255,0,1)",
-    //   controls: ["rgba(0,0,0,1)"],
-    //   to: "rgba(255,0,0,1)",
-    //   startAt: 0,
-    //   endAt: 0.5,
-    //   easing: easings.linear
-    // },
+    {
+      target: div.style,
+      name: "background-color",
+      from: "rgba(0,255,0,1)",
+      controls: ["rgba(0,0,0,1)"],
+      to: "rgba(255,0,0,1)",
+      startAt: 0,
+      endAt: 0.5,
+      easing: easings.linear
+    },
     // {
     //   target: div.style,
     //   name: "font-size",
@@ -38,15 +38,15 @@ const timeline = new Timeline({
     //   endAt: 1,
     //   easing: easings.linear
     // },
-    // {
-    //   target: div.style,
-    //   name: "background-color",
-    //   from: "rgba(255,0,0,1)",
-    //   to: "rgba(0,0,255,1)",
-    //   startAt: 0.5,
-    //   endAt: 1,
-    //   easing: easings.easeOutBounce
-    // },
+    {
+      target: div.style,
+      name: "background-color",
+      from: "rgba(255,0,0,1)",
+      to: "rgba(0,0,255,1)",
+      startAt: 0.5,
+      endAt: 1,
+      easing: easings.easeOutBounce
+    },
     {
       target: div.style,
       name: "transform",
@@ -55,7 +55,7 @@ const timeline = new Timeline({
       to: "translate(200px,400px)",
       startAt: 0,
       endAt: 0.5,
-      easing: easings.linear
+      easing: easings.easeInQuad
     },
     {
       target: div.style,
@@ -65,7 +65,7 @@ const timeline = new Timeline({
       to: "translate(200px,150px)",
       startAt: 0.5,
       endAt: 1,
-      easing: easings.linear
+      easing: easings.easeOutQuad
     },
     // {
     //   target: div.style,
@@ -136,7 +136,7 @@ const timeline = new Timeline({
 });
 
 timeline.repeat = Infinity;
-//timeline.repeatDirection = Timeline.repeatDirections.ALTERNATE;
+timeline.repeatDirection = Timeline.repeatDirections.ALTERNATE;
 
 timeline.observeTime(0.75, () => {
   console.log("75");

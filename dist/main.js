@@ -206,13 +206,35 @@ class Timeline {
   render() {
     const progress = this.scrubber.progress;
 
+    const values = this.getValuesAt(progress);
+
+    Array.from(values.keys()).forEach(target => {
+      const changes = values.get(target);
+
+      Object.keys(changes).forEach(key => {
+        target[key] = changes[key];
+      });
+    });
+  }
+
+  getValuesAt(progress) {
+    const results = new Map();
+
     this.animators
       .filter(animator => {
         return animator.options.startAt <= progress;
       })
-      .forEach(animator =>
-        (animator.options.target[animator.options.name] = animator.render(this.scrubber.progress, this.duration))
-      );
+      .forEach(animator => {
+        if (!results.has(animator.options.target)) {
+          results.set(animator.options.target, {});
+        }
+
+        const changes = results.get(animator.options.target);
+        changes[animator.options.name] = animator.render(
+          progress,
+          this.duration
+        );
+      });
 
     this.animators
       .filter(animator => {
@@ -221,13 +243,19 @@ class Timeline {
 
         return min <= max;
       })
-      .forEach(
-        animator =>
-          (animator.options.target[animator.options.name] = animator.render(
-            this.scrubber.progress,
-            this.duration
-          ))
-      );
+      .forEach(animator => {
+        if (!results.has(animator.options.target)) {
+          results.set(animator.options.target, {});
+        }
+
+        const changes = results.get(animator.options.target);
+        changes[animator.options.name] = animator.render(
+          progress,
+          this.duration
+        );
+      });
+
+    return results;
   }
 
   observeTime() {
