@@ -1065,9 +1065,7 @@ class BezierCurve {
     this.percentage = percentage;
 
     this.validatePoints();
-    const value = this.reduceToPoint(this.points);
-    console.log(this.points, this.percentage, value);
-    return value;
+    return this.reduceToPoint(this.points);
   }
 
   validatePoints() {
