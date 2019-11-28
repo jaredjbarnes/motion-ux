@@ -4,8 +4,7 @@ export default class NumberNodeAnimator {
   constructor(options) {
     this.animator = new NumberAnimator({
       ...options,
-      from: parseFloat(options.fromNode.value),
-      to: parseFloat(options.toNode.value)
+      controls: options.controls.map(node => parseFloat(node.value))
     });
   }
 

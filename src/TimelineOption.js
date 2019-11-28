@@ -1,19 +1,25 @@
 import easings from "./easings.js";
 
 export default class TimelineOption {
-  constructor({ name, target, to, from, startAt, endAt, easing }) {
-    this.target = target;
-    this.name = name;
-    this.to = to;
-    this.from = from;
-    this.startAt = startAt;
-    this.endAt = endAt;
+  constructor(animation) {
+    this.target = animation.target;
+    this.name = animation.name;
+    this.to = animation.to;
+    this.from = animation.from;
+    this.startAt = animation.startAt;
+    this.endAt = animation.endAt;
+    this.easing = animation.easing;
+    this.controls = animation.controls;
 
     if (typeof easing === "string") {
       this.easing = easings[easing];
     }
 
-    this.easing = easing || easings.linear;
+    if (!Array.isArray(this.controls)) {
+      this.controls = [];
+    }
+
+    this.easing = this.easing || easings.linear;
 
     this.validate();
   }

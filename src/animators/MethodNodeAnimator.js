@@ -8,21 +8,22 @@ export default class MethodNodeAnimator {
   }
 
   createArgs() {
-    this.fromArgs = this.options.fromNode.children
-      .find(node => node.name === "arguments")
-      .children.filter(node => node.name === "values");
-
-    this.toArgs = this.options.toNode.children
-      .find(node => node.name === "arguments")
-      .children.filter(node => node.name === "values");
+    this.args = this.options.controls.map(node => {
+      return node.children
+        .find(node => node.name === "arguments")
+        .children.filter(node => node.name === "values");
+    });
   }
 
   createAnimators() {
-    this.animators = this.fromArgs.map((node, index) => {
+    this.animators = this.args[0].map((_, index) => {
+      const controls = this.args.map(arg => {
+        return arg[index];
+      });
+
       return new ValuesNodeAnimator({
         ...this.options,
-        fromNode: node,
-        toNode: this.toArgs[index]
+        controls: controls
       });
     });
   }
@@ -39,7 +40,7 @@ export default class MethodNodeAnimator {
   }
 
   getMethodName() {
-    return this.options.fromNode.children.find(node => node.name === "name")
+    return this.options.controls[0].children.find(node => node.name === "name")
       .value;
   }
 }

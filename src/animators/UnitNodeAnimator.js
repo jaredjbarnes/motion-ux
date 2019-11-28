@@ -6,14 +6,15 @@ export default class UnitNodeAnimator {
 
     this.animator = new NumberAnimator({
       ...options,
-      from: parseInt(options.fromNode.children[0].value, 10),
-      to: parseInt(options.toNode.children[0].value, 10)
+      controls: options.controls.map(node =>
+        parseInt(node.children[0].value, 10)
+      )
     });
   }
 
   render(progress) {
     const value = this.animator.render(progress);
-    const unit = this.options.fromNode.children[1].value;
+    const unit = this.options.controls[0].children[1].value;
     return `${value}${unit}`;
   }
 }

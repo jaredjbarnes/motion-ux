@@ -1,24 +1,31 @@
+import BezierCurve from "../BezierCurve";
+
 export default class NumberAnimator {
   constructor(options) {
+    this.controls = Array.isArray(options.controls) ? options.controls : [];
     this.options = options;
-    this.from = options.from;
-    this.to = options.to;
-    this.change = this.to - this.from;
+    this.bezierCurve = new BezierCurve(this.controls);
   }
 
   render(progress) {
     if (progress <= this.options.startAt) {
-      return this.from;
+      return this.controls[0];
     }
 
     if (progress >= this.options.endAt) {
-      return this.to;
+      return this.controls[this.controls.length - 1];
     }
 
     const relativeProgress = progress - this.options.startAt;
     const duration = this.options.endAt - this.options.startAt;
-    const progressWithEasing = this.options.easing(relativeProgress, 0, 1, duration);
+    const progressWithEasing = this.options.easing(
+      relativeProgress,
+      0,
+      1,
+      duration
+    );
 
-    return this.from + this.change * progressWithEasing;
+    const value = this.bezierCurve.valueAt(progressWithEasing);
+    return value;
   }
 }

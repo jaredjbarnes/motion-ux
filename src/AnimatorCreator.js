@@ -33,22 +33,20 @@ export default class AnimatorCreator {
 
   _createAnimators() {
     this.animators = this.timelineOptions.map(options => {
-      let fromNode;
-      let toNode;
+      let points = [options.from, ...options.controls, options.to];
+      let controls;
 
       try {
-        fromNode = values.parse(new Cursor(options.from));
-        toNode = values.parse(new Cursor(options.to));
-      } catch (error) {
-        throw new Error(
-          `Parse Error: could not parse css ${options.to}, or ${options.from}`
+        controls = points.map(point =>
+          values.parse(new Cursor(point))
         );
+      } catch (error) {
+        throw new Error(`Parse Error: could not parse css ${options.controls}`);
       }
 
       return new ValuesNodeAnimator({
         ...options,
-        fromNode,
-        toNode
+        controls
       });
     });
   }

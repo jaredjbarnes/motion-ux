@@ -21,32 +21,24 @@ export default class ValuesNodeAnimator {
   }
 
   createAnimators() {
-    const fromNode = this.options.fromNode;
-    const toNode = this.options.toNode;
-
-    this.animators = fromNode.children.map((from, index) => {
-      const to = toNode.children[index];
+    this.animators = this.options.controls[0].children.map((node, index) => {
+      const controls = this.options.controls.map(node => {
+        return node.children[index];
+      });
 
       const options = {
-        startAt: this.options.startAt,
-        endAt: this.options.endAt,
-        fromNode: from,
-        toNode: to,
-        easing: this.options.easing
+        ...this.options,
+        controls
       };
-      
-      return new this.nameToAnimatorMap[from.name](options);
+
+      return new this.nameToAnimatorMap[node.name](options);
     });
   }
 
   normalizeNodes() {
-    this.options.fromNode.children = this.options.fromNode.children.filter(
-      node => node.name != "spaces"
-    );
-
-    this.options.toNode.children = this.options.toNode.children.filter(
-      node => node.name != "spaces"
-    );
+    this.options.controls.forEach(node => {
+      node.children = node.children.filter(node => node.name != "spaces");
+    });
   }
 
   render(progress) {
