@@ -4029,20 +4029,22 @@ const digit = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["AnyOfThes
 const nonZeroDigit = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["AnyOfThese"]("non-zero-digit", "987654321");
 const digitSequence = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RepeatValue"]("digit-sequence", digit);
 
-const validDigitSequence = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["AndValue"]("non-zero-start", [
-  nonZeroDigit,
-  new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OptionalValue"](digitSequence)
-]);
-
 const plusOrMinus = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OrValue"]("plus-or-minus", [plus, minus]);
 
 const optionalPlusOrMinus = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OptionalValue"](plusOrMinus);
+
+const validDigitSequence = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["AndValue"]("non-zero-start", [
+  optionalPlusOrMinus,
+  nonZeroDigit,
+  new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OptionalValue"](digitSequence)
+]);
 
 const e = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OrValue"]("e", [bigE, littleE]);
 
 const integer = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OrValue"]("integer", [zero, validDigitSequence]);
 
 const fraction = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["AndValue"]("fraction", [
+  optionalPlusOrMinus,
   digitSequence,
   period,
   digitSequence

@@ -7,7 +7,7 @@ const cardSideB = document.createElement("div");
 
 div.innerText = "Text";
 
-cardSideB.style.backgroundColor = "blue";
+cardSideB.style.backgroundColor = "pink";
 cardSideB.style.top = "300px";
 cardSideB.style.left = "150px";
 cardSideA.style.top = "300px";
@@ -19,61 +19,72 @@ document.body.appendChild(cardSideB);
 
 const timeline = new Timeline({
   animations: [
+    // {
+    //   target: div.style,
+    //   name: "background-color",
+    //   from: "rgba(0,255,0,1)",
+    //   controls: ["rgba(0,0,0,1)"],
+    //   to: "rgba(255,0,0,1)",
+    //   startAt: 0,
+    //   endAt: 0.5,
+    //   easing: easings.linear
+    // },
+    // {
+    //   target: div.style,
+    //   name: "font-size",
+    //   from: "14px",
+    //   to: "50px",
+    //   startAt: 0,
+    //   endAt: 1,
+    //   easing: easings.linear
+    // },
+    // {
+    //   target: div.style,
+    //   name: "background-color",
+    //   from: "rgba(255,0,0,1)",
+    //   to: "rgba(0,0,255,1)",
+    //   startAt: 0.5,
+    //   endAt: 1,
+    //   easing: easings.easeOutBounce
+    // },
     {
       target: div.style,
-      name: "background-color",
-      from: "rgba(0,255,0,1)",
-      to: "rgba(255,0,0,1)",
+      name: "transform",
+      from: "translate(200px,150px)",
+      controls: ["translate(-200px,-100px)"],
+      to: "translate(200px,400px)",
       startAt: 0,
       endAt: 0.5,
       easing: easings.linear
     },
     {
       target: div.style,
-      name: "font-size",
-      from: "14px",
-      to: "50px",
-      startAt: 0,
+      name: "transform",
+      from: "translate(200px,400px)",
+      controls: ["translate(600px,-100px)"],
+      to: "translate(200px,150px)",
+      startAt: 0.5,
       endAt: 1,
       easing: easings.linear
     },
-    {
-      target: div.style,
-      name: "background-color",
-      from: "rgba(255,0,0,1)",
-      to: "rgba(0,0,255,1)",
-      startAt: 0.5,
-      endAt: 1,
-      easing: easings.easeOutBounce
-    },
-    {
-      target: div.style,
-      name: "transform",
-      from: "translate(0px,0px)",
-      controls:["translate(400px,0px)","translate(0px,200px)"],
-      to: "translate(400px,400px)",
-      startAt: 0,
-      endAt: 0.75,
-      easing: easings.easeOutElastic
-    },
-    {
-      target: div.style,
-      name: "width",
-      from: "100px",
-      to: "400px",
-      startAt: 0,
-      endAt: 1,
-      easing: easings.easeOutExpo
-    },
-    {
-      target: div.style,
-      name: "height",
-      from: "100px",
-      to: "400px",
-      startAt: 0,
-      endAt: 1,
-      easing: easings.easeOutElastic
-    },
+    // {
+    //   target: div.style,
+    //   name: "width",
+    //   from: "100px",
+    //   to: "400px",
+    //   startAt: 0,
+    //   endAt: 1,
+    //   easing: easings.easeOutExpo
+    // },
+    // {
+    //   target: div.style,
+    //   name: "height",
+    //   from: "100px",
+    //   to: "400px",
+    //   startAt: 0,
+    //   endAt: 1,
+    //   easing: easings.easeOutElastic
+    // },
     {
       target: cardSideA.style,
       name: "transform",
@@ -125,7 +136,7 @@ const timeline = new Timeline({
 });
 
 timeline.repeat = Infinity;
-timeline.repeatDirection = Timeline.repeatDirections.ALTERNATE;
+//timeline.repeatDirection = Timeline.repeatDirections.ALTERNATE;
 
 timeline.observeTime(0.75, () => {
   console.log("75");
