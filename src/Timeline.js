@@ -55,6 +55,10 @@ export default class Timeline {
     this.scrubber.repeatDirection = value;
   }
 
+  get progress() {
+    return this.scrubber.progress;
+  }
+
   play() {
     this.scrubber.play();
   }
@@ -72,7 +76,7 @@ export default class Timeline {
   }
 
   render() {
-    const progress = this.scrubber.progress;
+    const progress = this.progress;
 
     const values = this.getValuesAt(progress);
 
@@ -83,6 +87,10 @@ export default class Timeline {
         target[key] = changes[key];
       });
     });
+  }
+
+  getCurrentValues() {
+    return this.getValuesAt(this.progress);
   }
 
   getValuesAt(progress) {
