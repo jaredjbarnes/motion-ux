@@ -1949,21 +1949,26 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.index = 0;
       this.nodes = [];
       this.node = null;
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = this.cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._assertCursor();
 
@@ -1985,7 +1990,7 @@ function (_ValuePattern) {
         var pattern = this._children[this.index];
 
         try {
-          this.nodes.push(pattern.parse(this.cursor));
+          this.nodes.push(pattern.parse(this.cursor, this.parseError));
         } catch (error) {
           error.stack.push(new _StackInformation.default(this.mark, this));
           throw error;
@@ -2037,7 +2042,10 @@ function (_ValuePattern) {
       });
 
       if (!areTheRestOptional) {
-        throw new _ParseError.default("Could not match ".concat(this.name, " before string ran out."));
+        this.parseError.message = "Could not match ".concat(this.name, " before string ran out.");
+        this.parseError.index = this.index;
+        this.parseError.pattern = this;
+        throw this.parseError;
       }
     }
   }, {
@@ -2421,11 +2429,11 @@ function (_ValuePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
+    value: function parse(cursor, parseError) {
       var mark = cursor.mark();
 
       try {
-        return this.children[0].parse(cursor);
+        return this.children[0].parse(cursor, parseError);
       } catch (error) {
         cursor.moveToMark(mark);
         return null;
@@ -2502,8 +2510,6 @@ function (_ValuePattern) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AnyOfThese).call(this, name));
     _this.characters = characters;
 
-    _this._reset();
-
     _this._assertArguments();
 
     return _this;
@@ -2522,8 +2528,8 @@ function (_ValuePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._assertCursor();
 
@@ -2540,7 +2546,7 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       if (cursor == null) {
         this.cursor = null;
         this.mark = null;
@@ -2550,6 +2556,11 @@ function (_ValuePattern) {
       }
 
       this.node = null;
+      this.parseError = parseError;
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "_tryPattern",
@@ -2571,7 +2582,10 @@ function (_ValuePattern) {
     key: "_processError",
     value: function _processError() {
       var message = "ParseError: Expected one of these characters, '".concat(this.characters, "' but found '").concat(this.cursor.getChar(), "' while parsing for '").concat(this.name, "'.");
-      throw new _ParseError.default(message, this.cursor.getIndex(), this);
+      this.parseError.message = message;
+      this.parseError.index = this.cursor.getIndex();
+      this.parseError.pattern = this;
+      throw this.parseError;
     }
   }, {
     key: "clone",
@@ -2666,8 +2680,8 @@ function (_ValuePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._assertCursor();
 
@@ -2677,7 +2691,7 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = this.cursor.mark();
@@ -2688,7 +2702,12 @@ function (_ValuePattern) {
         this.substring = null;
       }
 
+      this.parseError = parseError;
       this.node = null;
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "_assertCursor",
@@ -2710,7 +2729,10 @@ function (_ValuePattern) {
     key: "_processError",
     value: function _processError() {
       var message = "ParseError: Expected '".concat(this.literal.charAt(this.index), "' but found '").concat(this.cursor.getChar(), "' while parsing for '").concat(this.name, "'.");
-      throw new _ParseError.default(message, this.cursor.getIndex(), this);
+      this.parseError.message = message;
+      this.parseError.index = this.cursor.getIndex();
+      this.parseError.pattern = this;
+      throw this.parseError;
     }
   }, {
     key: "_processMatch",
@@ -2810,21 +2832,26 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.mark = null;
       this.match = "";
       this.node = null;
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = this.cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._tryPattern();
 
@@ -2837,7 +2864,7 @@ function (_ValuePattern) {
         var mark = this.cursor.mark();
 
         try {
-          this.children[0].parse(this.cursor);
+          this.children[0].parse(this.cursor, this.parseError);
           this.cursor.moveToMark(mark);
           break;
         } catch (error) {
@@ -2853,7 +2880,10 @@ function (_ValuePattern) {
     key: "_processMatch",
     value: function _processMatch() {
       if (this.match.length === 0) {
-        throw new _ParseError.default("Didn't find any characters the didn't match the ".concat(this.children[0].name, " pattern."), this.mark.index, this);
+        this.parserError.message = "Didn't find any characters the didn't match the ".concat(this.children[0].name, " pattern.");
+        this.parseError.index = this.mark.index;
+        this.parserError.pattern = this;
+        throw this.parseError;
       } else {
         this.node = new _ValueNode.default(this.name, this.match, this.mark.index, this.mark.index);
         this.cursor.setIndex(this.node.endIndex);
@@ -2902,6 +2932,8 @@ var _Cursor = _interopRequireDefault(__webpack_require__(25));
 var _StackInformation = _interopRequireDefault(__webpack_require__(30));
 
 var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
+
+var _ParseError = _interopRequireDefault(__webpack_require__(29));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2957,22 +2989,27 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.mark = null;
       this.index = 0;
       this.errors = [];
       this.node = null;
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._assertCursor();
 
@@ -2994,7 +3031,7 @@ function (_ValuePattern) {
         var pattern = this._children[this.index];
 
         try {
-          var node = pattern.parse(this.cursor);
+          var node = pattern.parse(this.cursor, this.parseError);
           this.node = new _ValueNode.default(this.name, node.value, node.startIndex, node.endIndex);
           this.cursor.setIndex(this.node.endIndex);
           break;
@@ -3115,20 +3152,25 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.mark = null;
       this.nodes = [];
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = this.cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._tryPattern();
 
@@ -3141,7 +3183,7 @@ function (_ValuePattern) {
         var mark = this.cursor.mark();
 
         try {
-          var node = this._pattern.parse(this.cursor);
+          var node = this._pattern.parse(this.cursor, this.parseError);
 
           this.nodes.push(node);
 
@@ -3158,7 +3200,7 @@ function (_ValuePattern) {
             var _mark = this.cursor.mark();
 
             try {
-              this.nodes.push(this._divider.parse(this.cursor));
+              this.nodes.push(this._divider.parse(this.cursor, this.parseError));
               this.cursor.next();
             } catch (error) {
               this.cursor.moveToMark(_mark);
@@ -3179,7 +3221,10 @@ function (_ValuePattern) {
     key: "_processMatch",
     value: function _processMatch() {
       if (this.nodes.length === 0) {
-        throw new _ParseError.default("Did not find a repeating match of ".concat(this.name, "."), this.mark.index, this);
+        this.parseError.message = "Did not find a repeating match of ".concat(this.name, ".");
+        this.parseError.index = this.mark.index;
+        this.parseError.pattern = this;
+        throw this.parseError;
       } else {
         var value = this.nodes.map(function (node) {
           return node.value;
@@ -3282,21 +3327,26 @@ function (_CompositePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.index = 0;
       this.nodes = [];
       this.node = null;
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = this.cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._assertCursor();
 
@@ -3318,7 +3368,7 @@ function (_CompositePattern) {
         var pattern = this._children[this.index];
 
         try {
-          this.nodes.push(pattern.parse(this.cursor));
+          this.nodes.push(pattern.parse(this.cursor, this.parseError));
         } catch (error) {
           error.stack.push(new _StackInformation.default(this.mark, this));
           throw error;
@@ -3581,12 +3631,12 @@ function (_CompositePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
+    value: function parse(cursor, parseError) {
       var mark = cursor.mark();
       this.mark = mark;
 
       try {
-        return this.children[0].parse(cursor);
+        return this.children[0].parse(cursor, parseError);
       } catch (error) {
         cursor.moveToMark(mark);
         return null;
@@ -3631,6 +3681,8 @@ var _StackInformation = _interopRequireDefault(__webpack_require__(30));
 var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
 
 var _OptionalComposite = _interopRequireDefault(__webpack_require__(39));
+
+var _ParseError = _interopRequireDefault(__webpack_require__(29));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3686,22 +3738,27 @@ function (_CompositePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.mark = null;
       this.index = 0;
       this.errors = [];
       this.node = null;
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._assertCursor();
 
@@ -3723,7 +3780,7 @@ function (_CompositePattern) {
         var pattern = this._children[this.index];
 
         try {
-          this.node = pattern.parse(this.cursor);
+          this.node = pattern.parse(this.cursor, this.parseError);
           this.cursor.setIndex(this.node.endIndex);
           break;
         } catch (error) {
@@ -3829,8 +3886,6 @@ function (_CompositePattern) {
 
     _this._assertArguments();
 
-    _this._reset();
-
     return _this;
   }
 
@@ -3843,20 +3898,25 @@ function (_CompositePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor) {
+    value: function _reset(cursor, parseError) {
       this.cursor = null;
       this.mark = null;
       this.nodes = [];
+      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = this.cursor.mark();
       }
+
+      if (parseError == null) {
+        this.parseError = new _ParseError.default();
+      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
-      this._reset(cursor);
+    value: function parse(cursor, parseError) {
+      this._reset(cursor, parseError);
 
       this._tryPattern();
 
@@ -3867,7 +3927,7 @@ function (_CompositePattern) {
     value: function _tryPattern() {
       while (true) {
         try {
-          this.nodes.push(this._pattern.parse(this.cursor));
+          this.nodes.push(this._pattern.parse(this.cursor, this.parseError));
           this.cursor.next();
 
           if (this._divider != null) {
@@ -3995,7 +4055,7 @@ function (_Pattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor) {
+    value: function parse(cursor, parseError) {
       var pattern = this.getPattern();
 
       if (pattern == null) {
@@ -4004,7 +4064,7 @@ function (_Pattern) {
 
       this.pattern = pattern.clone();
       this.pattern.parent = this;
-      return this.pattern.parse(cursor);
+      return this.pattern.parse(cursor, parseError);
     }
   }, {
     key: "clone",

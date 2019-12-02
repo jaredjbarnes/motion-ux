@@ -1241,10 +1241,10 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-clarity-pattern-parser@1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/clarity-pattern-parser/-/clarity-pattern-parser-1.0.6.tgz#22dd0b17292e9a4f3bd103c94689ac6f7c86dc0a"
-  integrity sha512-1r0WPo0LfvPi7uOwOlOtExEdy1rr8us7k2AUfv3nworQLSl4hp8sS491Yolb/SkDBtmOgLBwlrR4qFgYMpUW1w==
+clarity-pattern-parser@1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/clarity-pattern-parser/-/clarity-pattern-parser-1.0.7.tgz#11b8ccd9fcaa9f4fb457be2e27e0c291e290a927"
+  integrity sha512-55weu+U8/mRP/1o2HyluTnnzkWlFwKGU3ai9Appsce8Q15V/e9R5qJUUtMl/jA0fmIqgc9p9HYLLQvQfv3nNLA==
 
 class-utils@^0.3.5:
   version "0.3.6"
