@@ -135,10 +135,10 @@ export default class Timeline {
   }
 
   observeTime() {
-    this.scrubber.observeTime.apply(this.scrubber, arguments);
+    return this.scrubber.observeTime.apply(this.scrubber, arguments);
   }
 
   observe() {
-    this.scrubber.observe.apply(this.scrubber, arguments);
+    return this.scrubber.observe.apply(this.scrubber, arguments);
   }
 }
