@@ -143,7 +143,7 @@ export default class Scrubber extends Observable {
 
         if (this._iterations >= this._repeat) {
           this.seek(0);
-          this.state = Scrubber.states.STOPPED;
+          this.stop();
           return;
         }
 
@@ -169,7 +169,7 @@ export default class Scrubber extends Observable {
 
         if (this._iterations >= this._repeat) {
           this.seek(1);
-          this.state = Scrubber.states.STOPPED;
+          this.stop();
           return;
         }
 

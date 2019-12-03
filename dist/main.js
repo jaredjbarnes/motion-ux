@@ -663,7 +663,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
         if (this._iterations >= this._repeat) {
           this.seek(0);
-          this.state = Scrubber.states.STOPPED;
+          this.stop();
           return;
         }
 
@@ -689,7 +689,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
         if (this._iterations >= this._repeat) {
           this.seek(1);
-          this.state = Scrubber.states.STOPPED;
+          this.stop();
           return;
         }
 
