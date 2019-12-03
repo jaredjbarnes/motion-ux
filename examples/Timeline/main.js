@@ -10,7 +10,6 @@ const referenceCircle = document.createElement("div");
 referenceCircle.style.backgroundColor = "blue";
 referenceCircle.style.width = "300px";
 referenceCircle.style.height = "300px";
-document.body.appendChild(referenceCircle);
 
 document.body.appendChild(circleWithBezier);
 
@@ -22,25 +21,22 @@ const timeline = new Timeline({
       from: "translate(150px,0px)",
       controls: [
         "translate(300px,0px)",
-        "translate(300px,0px)"
+        "translate(300px,150px)"
       ],
-      to:"translate(300px,150px)",
+      to: "translate(150px,300px)",
       startAt: 0,
-      endAt: 0.25,
-      easing: easings.linear
+      endAt: 1,
+      easing: easings.easeOutExpo
     },
     {
       target: circleWithBezier.style,
-      name: "transform",
-      from: "translate(300px,150px)",
-      controls: [
-        "translate(300px,300px)",
-        "translate(300px,300px)"
-      ],
-      to: "translate(150px,300px)",
-      startAt: 0.25,
-      endAt: 0.5,
-      easing: easings.linear
+      name: "background",
+      from: "linear-gradient(0deg, rgba(255,0,0,0.8), rgba(255,0,0,0))",
+      //controls: ["rgba(0,0,0,0.5)"],
+      to: "linear-gradient(720deg, rgba(0,255,0,0.8), rgba(0,255,0,0))",
+      startAt: 0,
+      endAt: 1,
+      easing: easings.easeOutExpo
     }
   ],
   duration: 5000

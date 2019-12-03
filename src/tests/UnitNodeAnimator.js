@@ -1,7 +1,7 @@
 import UnitNodeAnimator from "../animators/UnitNodeAnimator.js";
 import easings from "../easings.js";
 import unit from "../patterns/unit.js";
-import { Cursor } from "clarity-pattern-parser";;
+import { Cursor } from "clarity-pattern-parser";
 import assert from "assert";
 
 exports["UnitNodeAnimator: "] = () => {
@@ -12,12 +12,9 @@ exports["UnitNodeAnimator: "] = () => {
     startAt: 0,
     endAt: 1,
     easing: easings.linear,
-    fromNode: fromNode,
-    toNode: toNode
+    controls: [fromNode, toNode]
   });
 
   const result = animator.render(0.5);
   assert.equal(result, "150px");
 };
-
-

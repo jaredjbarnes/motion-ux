@@ -1,7 +1,7 @@
 import ValuesNodeAnimator from "../animators/ValuesNodeAnimator.js";
 import easings from "../easings.js";
 import values from "../patterns/values.js";
-import { Cursor } from "clarity-pattern-parser";;
+import { Cursor } from "clarity-pattern-parser";
 import assert from "assert";
 
 exports["ValuesNodeAnimator: "] = () => {
@@ -16,8 +16,7 @@ exports["ValuesNodeAnimator: "] = () => {
     startAt: 0,
     endAt: 1,
     easing: easings.linear,
-    fromNode: fromNode,
-    toNode: toNode
+    controls: [fromNode, toNode]
   });
 
   const result = animator.render(0.75);

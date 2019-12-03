@@ -12,8 +12,7 @@ exports["HexNodeAnimator: "] = () => {
     startAt: 0,
     endAt: 1,
     easing: easings.linear,
-    fromNode: fromNode,
-    toNode: toNode
+    controls: [fromNode, toNode]
   });
 
   const result = animator.render(0.5);

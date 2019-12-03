@@ -36,13 +36,18 @@ export default class AnimatorCreator {
       let points = [options.from, ...options.controls, options.to];
       let controls;
 
-      try {
-        controls = points.map(point =>
-          values.parse(new Cursor(point))
-        );
-      } catch (error) {
-        throw new Error(`Parse Error: could not parse css ${options.controls}`);
-      }
+      controls = points.map(point => {
+        const cursor = new Cursor(point);
+        const node = values.parse(cursor);
+
+        if (cursor.hasUnresolvedError()) {
+          throw new Error(
+            `Parse Error: could not parse css ${options.controls}`
+          );
+        }
+
+        return node;
+      });
 
       return new ValuesNodeAnimator({
         ...options,

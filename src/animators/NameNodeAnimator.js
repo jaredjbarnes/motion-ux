@@ -4,10 +4,10 @@ export default class NameNodeAnimator {
   }
 
   render(progress) {
-    if (progress < 1) {
-      return this.options.controls[0].value;
-    } else {
+    if (progress > 0) {
       return this.options.controls[1].value;
+    } else {
+      return this.options.controls[0].value;
     }
   }
 }

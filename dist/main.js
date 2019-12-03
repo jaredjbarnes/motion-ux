@@ -920,13 +920,18 @@ class AnimatorCreator {
       let points = [options.from, ...options.controls, options.to];
       let controls;
 
-      try {
-        controls = points.map(point =>
-          _patterns_values_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__["Cursor"](point))
-        );
-      } catch (error) {
-        throw new Error(`Parse Error: could not parse css ${options.controls}`);
-      }
+      controls = points.map(point => {
+        const cursor = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__["Cursor"](point);
+        const node = _patterns_values_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(cursor);
+
+        if (cursor.hasUnresolvedError()) {
+          throw new Error(
+            `Parse Error: could not parse css ${options.controls}`
+          );
+        }
+
+        return node;
+      });
 
       return new _animators_ValuesNodeAnimator_js__WEBPACK_IMPORTED_MODULE_0__["default"]({
         ...options,
@@ -1313,10 +1318,10 @@ class NameNodeAnimator {
   }
 
   render(progress) {
-    if (progress < 1) {
-      return this.options.controls[0].value;
-    } else {
+    if (progress > 0) {
       return this.options.controls[1].value;
+    } else {
+      return this.options.controls[0].value;
     }
   }
 }
@@ -1496,23 +1501,23 @@ var _Cursor = _interopRequireDefault(__webpack_require__(25));
 
 var _AndValue = _interopRequireDefault(__webpack_require__(26));
 
-var _AnyOfThese = _interopRequireDefault(__webpack_require__(32));
+var _AnyOfThese = _interopRequireDefault(__webpack_require__(31));
 
-var _Literal = _interopRequireDefault(__webpack_require__(33));
+var _Literal = _interopRequireDefault(__webpack_require__(32));
 
-var _NotValue = _interopRequireDefault(__webpack_require__(34));
+var _NotValue = _interopRequireDefault(__webpack_require__(33));
 
-var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
+var _OptionalValue = _interopRequireDefault(__webpack_require__(30));
 
-var _OrValue = _interopRequireDefault(__webpack_require__(35));
+var _OrValue = _interopRequireDefault(__webpack_require__(34));
 
-var _RepeatValue = _interopRequireDefault(__webpack_require__(36));
+var _RepeatValue = _interopRequireDefault(__webpack_require__(35));
 
 var _ValuePattern = _interopRequireDefault(__webpack_require__(27));
 
-var _AndComposite = _interopRequireDefault(__webpack_require__(37));
+var _AndComposite = _interopRequireDefault(__webpack_require__(36));
 
-var _CompositePattern = _interopRequireDefault(__webpack_require__(38));
+var _CompositePattern = _interopRequireDefault(__webpack_require__(37));
 
 var _OptionalComposite = _interopRequireDefault(__webpack_require__(39));
 
@@ -1524,7 +1529,7 @@ var _ParseError = _interopRequireDefault(__webpack_require__(29));
 
 var _Pattern = _interopRequireDefault(__webpack_require__(28));
 
-var _StackInformation = _interopRequireDefault(__webpack_require__(30));
+var _StackInformation = _interopRequireDefault(__webpack_require__(38));
 
 var _RecursivePattern = _interopRequireDefault(__webpack_require__(42));
 
@@ -1762,15 +1767,40 @@ var Cursor =
 /*#__PURE__*/
 function () {
   function Cursor(string) {
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        verbose = _ref.verbose;
+
     _classCallCheck(this, Cursor);
 
     this.string = string;
     this.index = 0;
     this.length = string.length;
+    this.parseError = null;
+    this.verbose = typeof verbose === "boolean" ? verbose : false;
+    this.isInErrorState = false;
     this.assertValidity();
   }
 
   _createClass(Cursor, [{
+    key: "throwError",
+    value: function throwError(parseError) {
+      this.isInErrorState = true;
+
+      if (this.parseError == null || parseError.index >= this.parseError.index) {
+        this.parseError = parseError;
+      }
+    }
+  }, {
+    key: "resolveError",
+    value: function resolveError() {
+      this.isInErrorState = false;
+    }
+  }, {
+    key: "hasUnresolvedError",
+    value: function hasUnresolvedError() {
+      return this.isInErrorState;
+    }
+  }, {
     key: "assertValidity",
     value: function assertValidity() {
       if (this.isNullOrEmpty(this.string)) {
@@ -1899,9 +1929,7 @@ var _Cursor = _interopRequireDefault(__webpack_require__(25));
 
 var _ParseError = _interopRequireDefault(__webpack_require__(29));
 
-var _StackInformation = _interopRequireDefault(__webpack_require__(30));
-
-var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
+var _OptionalValue = _interopRequireDefault(__webpack_require__(30));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1949,26 +1977,17 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      this.cursor = null;
+    value: function _reset(cursor) {
       this.index = 0;
       this.nodes = [];
       this.node = null;
-      this.parseError = parseError;
-
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-      }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._assertCursor();
 
@@ -1988,12 +2007,12 @@ function (_ValuePattern) {
     value: function _tryPatterns() {
       while (true) {
         var pattern = this._children[this.index];
+        var node = pattern.parse(this.cursor);
 
-        try {
-          this.nodes.push(pattern.parse(this.cursor, this.parseError));
-        } catch (error) {
-          error.stack.push(new _StackInformation.default(this.mark, this));
-          throw error;
+        if (this.cursor.hasUnresolvedError()) {
+          break;
+        } else {
+          this.nodes.push(node);
         }
 
         if (!this._next()) {
@@ -2042,26 +2061,28 @@ function (_ValuePattern) {
       });
 
       if (!areTheRestOptional) {
-        this.parseError.message = "Could not match ".concat(this.name, " before string ran out.");
-        this.parseError.index = this.index;
-        this.parseError.pattern = this;
-        throw this.parseError;
+        var parseError = new _ParseError.default("Could not match ".concat(this.name, " before string ran out."), this.index, this);
+        this.cursor.throwError(parseError);
       }
     }
   }, {
     key: "_processValue",
     value: function _processValue() {
-      this.nodes = this.nodes.filter(function (node) {
-        return node != null;
-      });
-      var lastNode = this.nodes[this.nodes.length - 1];
-      var startIndex = this.mark.index;
-      var endIndex = lastNode.endIndex;
-      var value = this.nodes.map(function (node) {
-        return node.value;
-      }).join("");
-      this.node = new _ValueNode.default(this.name, value, startIndex, endIndex);
-      this.cursor.setIndex(this.node.endIndex);
+      if (this.cursor.hasUnresolvedError()) {
+        this.node = null;
+      } else {
+        this.nodes = this.nodes.filter(function (node) {
+          return node != null;
+        });
+        var lastNode = this.nodes[this.nodes.length - 1];
+        var startIndex = this.mark.index;
+        var endIndex = lastNode.endIndex;
+        var value = this.nodes.map(function (node) {
+          return node.value;
+        }).join("");
+        this.node = new _ValueNode.default(this.name, value, startIndex, endIndex);
+        this.cursor.setIndex(this.node.endIndex);
+      }
     }
   }, {
     key: "clone",
@@ -2356,31 +2377,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var StackInformation = function StackInformation(mark, pattern) {
-  _classCallCheck(this, StackInformation);
-
-  this.mark = mark;
-  this.pattern = pattern;
-  this.expectations = [];
-};
-
-exports.default = StackInformation;
-//# sourceMappingURL=StackInformation.js.map
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
 var _ValuePattern2 = _interopRequireDefault(__webpack_require__(27));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -2429,14 +2425,16 @@ function (_ValuePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
+    value: function parse(cursor) {
       var mark = cursor.mark();
+      var node = this.children[0].parse(cursor);
 
-      try {
-        return this.children[0].parse(cursor, parseError);
-      } catch (error) {
+      if (cursor.hasUnresolvedError()) {
+        cursor.resolveError();
         cursor.moveToMark(mark);
         return null;
+      } else {
+        return node;
       }
     }
   }, {
@@ -2458,7 +2456,7 @@ exports.default = OptionalValue;
 //# sourceMappingURL=OptionalValue.js.map
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2528,8 +2526,8 @@ function (_ValuePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._assertCursor();
 
@@ -2546,21 +2544,10 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      if (cursor == null) {
-        this.cursor = null;
-        this.mark = null;
-      } else {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-      }
-
+    value: function _reset(cursor) {
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
       this.node = null;
-      this.parseError = parseError;
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
     }
   }, {
     key: "_tryPattern",
@@ -2582,10 +2569,8 @@ function (_ValuePattern) {
     key: "_processError",
     value: function _processError() {
       var message = "ParseError: Expected one of these characters, '".concat(this.characters, "' but found '").concat(this.cursor.getChar(), "' while parsing for '").concat(this.name, "'.");
-      this.parseError.message = message;
-      this.parseError.index = this.cursor.getIndex();
-      this.parseError.pattern = this;
-      throw this.parseError;
+      var parseError = new _ParseError.default(message, this.cursor.getIndex(), this);
+      this.cursor.throwError(parseError);
     }
   }, {
     key: "clone",
@@ -2610,7 +2595,7 @@ exports.default = AnyOfThese;
 //# sourceMappingURL=AnyOfThese.js.map
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2680,8 +2665,8 @@ function (_ValuePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._assertCursor();
 
@@ -2691,23 +2676,11 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-        this.substring = this.cursor.string.substring(this.mark.index, this.mark.index + this.literal.length);
-      } else {
-        this.cursor = null;
-        this.mark = null;
-        this.substring = null;
-      }
-
-      this.parseError = parseError;
+    value: function _reset(cursor) {
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
+      this.substring = this.cursor.string.substring(this.mark.index, this.mark.index + this.literal.length);
       this.node = null;
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
     }
   }, {
     key: "_assertCursor",
@@ -2728,11 +2701,9 @@ function (_ValuePattern) {
   }, {
     key: "_processError",
     value: function _processError() {
-      var message = "ParseError: Expected '".concat(this.literal.charAt(this.index), "' but found '").concat(this.cursor.getChar(), "' while parsing for '").concat(this.name, "'.");
-      this.parseError.message = message;
-      this.parseError.index = this.cursor.getIndex();
-      this.parseError.pattern = this;
-      throw this.parseError;
+      var message = "ParseError: Expected '".concat(this.literal, "' but found '").concat(this.substring, "'.");
+      var parseError = new _ParseError.default(message, this.cursor.getIndex(), this);
+      this.cursor.throwError(parseError);
     }
   }, {
     key: "_processMatch",
@@ -2763,7 +2734,7 @@ exports.default = Literal;
 //# sourceMappingURL=Literal.js.map
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2814,8 +2785,6 @@ function (_ValuePattern) {
 
     _this._assertArguments();
 
-    _this._reset();
-
     return _this;
   }
 
@@ -2832,26 +2801,16 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      this.cursor = null;
-      this.mark = null;
+    value: function _reset(cursor) {
       this.match = "";
       this.node = null;
-      this.parseError = parseError;
-
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-      }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._tryPattern();
 
@@ -2862,14 +2821,15 @@ function (_ValuePattern) {
     value: function _tryPattern() {
       while (true) {
         var mark = this.cursor.mark();
+        this.children[0].parse(this.cursor);
 
-        try {
-          this.children[0].parse(this.cursor, this.parseError);
-          this.cursor.moveToMark(mark);
-          break;
-        } catch (error) {
+        if (this.cursor.hasUnresolvedError()) {
+          this.cursor.resolveError();
           this.cursor.moveToMark(mark);
           this.match += this.cursor.getChar();
+          break;
+        } else {
+          this.cursor.moveToMark(mark);
           break;
         }
       }
@@ -2880,10 +2840,8 @@ function (_ValuePattern) {
     key: "_processMatch",
     value: function _processMatch() {
       if (this.match.length === 0) {
-        this.parserError.message = "Didn't find any characters the didn't match the ".concat(this.children[0].name, " pattern.");
-        this.parseError.index = this.mark.index;
-        this.parserError.pattern = this;
-        throw this.parseError;
+        var parseError = new _ParseError.default("Didn't find any characters that didn't match the ".concat(this.children[0].name, " pattern."), this.mark.index, this);
+        this.cursor.throwError(parseError);
       } else {
         this.node = new _ValueNode.default(this.name, this.match, this.mark.index, this.mark.index);
         this.cursor.setIndex(this.node.endIndex);
@@ -2912,7 +2870,7 @@ exports.default = NotValue;
 //# sourceMappingURL=NotValue.js.map
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2929,11 +2887,7 @@ var _ValueNode = _interopRequireDefault(__webpack_require__(24));
 
 var _Cursor = _interopRequireDefault(__webpack_require__(25));
 
-var _StackInformation = _interopRequireDefault(__webpack_require__(30));
-
-var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
-
-var _ParseError = _interopRequireDefault(__webpack_require__(29));
+var _OptionalValue = _interopRequireDefault(__webpack_require__(30));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2989,27 +2943,17 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      this.cursor = null;
-      this.mark = null;
+    value: function _reset(cursor) {
       this.index = 0;
       this.errors = [];
       this.node = null;
-      this.parseError = parseError;
-
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = cursor.mark();
-      }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
+      this.cursor = cursor;
+      this.mark = cursor.mark();
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._assertCursor();
 
@@ -3029,36 +2973,23 @@ function (_ValuePattern) {
     value: function _tryPattern() {
       while (true) {
         var pattern = this._children[this.index];
+        var node = pattern.parse(this.cursor, this.parseError);
 
-        try {
-          var node = pattern.parse(this.cursor, this.parseError);
-          this.node = new _ValueNode.default(this.name, node.value, node.startIndex, node.endIndex);
-          this.cursor.setIndex(this.node.endIndex);
-          break;
-        } catch (error) {
-          this.errors.push(error);
-
+        if (this.cursor.hasUnresolvedError()) {
           if (this.index + 1 < this._children.length) {
+            this.cursor.resolveError();
             this.index++;
             this.cursor.moveToMark(this.mark);
           } else {
-            this.throwError();
+            this.node = null;
+            break;
           }
+        } else {
+          this.node = new _ValueNode.default(this.name, node.value, node.startIndex, node.endIndex);
+          this.cursor.setIndex(this.node.endIndex);
+          break;
         }
       }
-    }
-  }, {
-    key: "throwError",
-    value: function throwError() {
-      var error = this.errors.reduce(function (furthestError, nextError) {
-        if (furthestError.index > nextError.index) {
-          return furthestError;
-        } else {
-          return nextError;
-        }
-      });
-      error.stack.push(new _StackInformation.default(this.mark, this));
-      throw error;
     }
   }, {
     key: "clone",
@@ -3083,7 +3014,7 @@ exports.default = OrValue;
 //# sourceMappingURL=OrValue.js.map
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3100,7 +3031,7 @@ var _ValueNode = _interopRequireDefault(__webpack_require__(24));
 
 var _ParseError = _interopRequireDefault(__webpack_require__(29));
 
-var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
+var _OptionalValue = _interopRequireDefault(__webpack_require__(30));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3138,8 +3069,6 @@ function (_ValuePattern) {
 
     _this._assertArguments();
 
-    _this._reset();
-
     return _this;
   }
 
@@ -3152,25 +3081,15 @@ function (_ValuePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      this.cursor = null;
-      this.mark = null;
+    value: function _reset(cursor) {
       this.nodes = [];
-      this.parseError = parseError;
-
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-      }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._tryPattern();
 
@@ -3180,11 +3099,13 @@ function (_ValuePattern) {
     key: "_tryPattern",
     value: function _tryPattern() {
       while (true) {
-        var mark = this.cursor.mark();
+        var node = this._pattern.parse(this.cursor);
 
-        try {
-          var node = this._pattern.parse(this.cursor, this.parseError);
+        if (this.cursor.hasUnresolvedError()) {
+          this._processMatch();
 
+          break;
+        } else {
           this.nodes.push(node);
 
           if (node.endIndex === this.cursor.lastIndex()) {
@@ -3193,38 +3114,36 @@ function (_ValuePattern) {
             break;
           }
 
-          mark = this.cursor.mark();
           this.cursor.next();
 
           if (this._divider != null) {
-            var _mark = this.cursor.mark();
+            var mark = this.cursor.mark();
 
-            try {
-              this.nodes.push(this._divider.parse(this.cursor, this.parseError));
-              this.cursor.next();
-            } catch (error) {
-              this.cursor.moveToMark(_mark);
+            var _node = this._divider.parse(this.cursor);
+
+            if (this.cursor.hasUnresolvedError()) {
+              this.cursor.moveToMark(mark);
 
               this._processMatch();
 
               break;
+            } else {
+              this.nodes.push(_node);
+              this.cursor.next();
             }
           }
-        } catch (error) {
-          this._processMatch();
-
-          break;
         }
       }
     }
   }, {
     key: "_processMatch",
     value: function _processMatch() {
+      this.cursor.resolveError();
+
       if (this.nodes.length === 0) {
-        this.parseError.message = "Did not find a repeating match of ".concat(this.name, ".");
-        this.parseError.index = this.mark.index;
-        this.parseError.pattern = this;
-        throw this.parseError;
+        var parseError = new _ParseError.default("Did not find a repeating match of ".concat(this.name, "."), this.mark.index, this);
+        this.cursor.throwError(parseError);
+        this.node = null;
       } else {
         var value = this.nodes.map(function (node) {
           return node.value;
@@ -3256,7 +3175,7 @@ exports.default = RepeatValue;
 //# sourceMappingURL=RepeatValue.js.map
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3267,7 +3186,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _CompositePattern2 = _interopRequireDefault(__webpack_require__(38));
+var _CompositePattern2 = _interopRequireDefault(__webpack_require__(37));
 
 var _CompositeNode = _interopRequireDefault(__webpack_require__(23));
 
@@ -3275,9 +3194,9 @@ var _Cursor = _interopRequireDefault(__webpack_require__(25));
 
 var _ParseError = _interopRequireDefault(__webpack_require__(29));
 
-var _StackInformation = _interopRequireDefault(__webpack_require__(30));
+var _StackInformation = _interopRequireDefault(__webpack_require__(38));
 
-var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
+var _OptionalValue = _interopRequireDefault(__webpack_require__(30));
 
 var _OptionalComposite = _interopRequireDefault(__webpack_require__(39));
 
@@ -3327,26 +3246,17 @@ function (_CompositePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      this.cursor = null;
+    value: function _reset(cursor) {
       this.index = 0;
       this.nodes = [];
       this.node = null;
-      this.parseError = parseError;
-
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-      }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._assertCursor();
 
@@ -3366,12 +3276,13 @@ function (_CompositePattern) {
     value: function _tryPatterns() {
       while (true) {
         var pattern = this._children[this.index];
+        var node = pattern.parse(this.cursor);
 
-        try {
-          this.nodes.push(pattern.parse(this.cursor, this.parseError));
-        } catch (error) {
-          error.stack.push(new _StackInformation.default(this.mark, this));
-          throw error;
+        if (this.cursor.hasUnresolvedError()) {
+          this.cursor.moveToMark(this.mark);
+          break;
+        } else {
+          this.nodes.push(node);
         }
 
         if (!this._next()) {
@@ -3420,21 +3331,26 @@ function (_CompositePattern) {
       });
 
       if (!areTheRestOptional) {
-        throw new _ParseError.default("Could not match ".concat(this.name, " before string ran out."));
+        var parseError = new _ParseError.default("Could not match ".concat(this.name, " before string ran out."), this.index, this);
+        this.cursor.throwError(parseError);
       }
     }
   }, {
     key: "_processValue",
     value: function _processValue() {
-      this.nodes = this.nodes.filter(function (node) {
-        return node != null;
-      });
-      var lastNode = this.nodes[this.nodes.length - 1];
-      var startIndex = this.mark.index;
-      var endIndex = lastNode.endIndex;
-      this.node = new _CompositeNode.default(this.name, startIndex, endIndex);
-      this.node.children = this.nodes;
-      this.cursor.setIndex(this.node.endIndex);
+      if (!this.cursor.hasUnresolvedError()) {
+        this.nodes = this.nodes.filter(function (node) {
+          return node != null;
+        });
+        var lastNode = this.nodes[this.nodes.length - 1];
+        var startIndex = this.mark.index;
+        var endIndex = lastNode.endIndex;
+        this.node = new _CompositeNode.default(this.name, startIndex, endIndex);
+        this.node.children = this.nodes;
+        this.cursor.setIndex(this.node.endIndex);
+      } else {
+        this.node = null;
+      }
     }
   }, {
     key: "clone",
@@ -3459,7 +3375,7 @@ exports.default = AndComposite;
 //# sourceMappingURL=AndComposite.js.map
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3572,6 +3488,31 @@ exports.default = CompositePattern;
 //# sourceMappingURL=CompositePattern.js.map
 
 /***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var StackInformation = function StackInformation(mark, pattern) {
+  _classCallCheck(this, StackInformation);
+
+  this.mark = mark;
+  this.pattern = pattern;
+  this.expectations = [];
+};
+
+exports.default = StackInformation;
+//# sourceMappingURL=StackInformation.js.map
+
+/***/ }),
 /* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3583,7 +3524,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _CompositePattern2 = _interopRequireDefault(__webpack_require__(38));
+var _CompositePattern2 = _interopRequireDefault(__webpack_require__(37));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3631,15 +3572,17 @@ function (_CompositePattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
+    value: function parse(cursor) {
       var mark = cursor.mark();
       this.mark = mark;
+      var node = this.children[0].parse(cursor);
 
-      try {
-        return this.children[0].parse(cursor, parseError);
-      } catch (error) {
+      if (cursor.hasUnresolvedError()) {
+        cursor.resolveError();
         cursor.moveToMark(mark);
         return null;
+      } else {
+        return node;
       }
     }
   }, {
@@ -3672,13 +3615,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _CompositePattern2 = _interopRequireDefault(__webpack_require__(38));
+var _CompositePattern2 = _interopRequireDefault(__webpack_require__(37));
 
 var _Cursor = _interopRequireDefault(__webpack_require__(25));
 
-var _StackInformation = _interopRequireDefault(__webpack_require__(30));
+var _StackInformation = _interopRequireDefault(__webpack_require__(38));
 
-var _OptionalValue = _interopRequireDefault(__webpack_require__(31));
+var _OptionalValue = _interopRequireDefault(__webpack_require__(30));
 
 var _OptionalComposite = _interopRequireDefault(__webpack_require__(39));
 
@@ -3738,27 +3681,21 @@ function (_CompositePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
+    value: function _reset(cursor) {
       this.cursor = null;
       this.mark = null;
       this.index = 0;
-      this.errors = [];
       this.node = null;
-      this.parseError = parseError;
 
       if (cursor != null) {
         this.cursor = cursor;
         this.mark = cursor.mark();
       }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._assertCursor();
 
@@ -3778,35 +3715,22 @@ function (_CompositePattern) {
     value: function _tryPattern() {
       while (true) {
         var pattern = this._children[this.index];
+        this.node = pattern.parse(this.cursor);
 
-        try {
-          this.node = pattern.parse(this.cursor, this.parseError);
-          this.cursor.setIndex(this.node.endIndex);
-          break;
-        } catch (error) {
-          this.errors.push(error);
-
+        if (this.cursor.hasUnresolvedError()) {
           if (this.index + 1 < this._children.length) {
+            this.cursor.resolveError();
             this.index++;
             this.cursor.moveToMark(this.mark);
           } else {
-            this.throwError();
+            this.node = null;
+            break;
           }
+        } else {
+          this.cursor.setIndex(this.node.endIndex);
+          break;
         }
       }
-    }
-  }, {
-    key: "throwError",
-    value: function throwError() {
-      var error = this.errors.reduce(function (furthestError, nextError) {
-        if (furthestError.index > nextError.index) {
-          return furthestError;
-        } else {
-          return nextError;
-        }
-      });
-      error.stack.push(new _StackInformation.default(this.mark, this));
-      throw error;
     }
   }, {
     key: "clone",
@@ -3842,7 +3766,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _CompositePattern2 = _interopRequireDefault(__webpack_require__(38));
+var _CompositePattern2 = _interopRequireDefault(__webpack_require__(37));
 
 var _CompositeNode = _interopRequireDefault(__webpack_require__(23));
 
@@ -3898,25 +3822,15 @@ function (_CompositePattern) {
     }
   }, {
     key: "_reset",
-    value: function _reset(cursor, parseError) {
-      this.cursor = null;
-      this.mark = null;
+    value: function _reset(cursor) {
       this.nodes = [];
-      this.parseError = parseError;
-
-      if (cursor != null) {
-        this.cursor = cursor;
-        this.mark = this.cursor.mark();
-      }
-
-      if (parseError == null) {
-        this.parseError = new _ParseError.default();
-      }
+      this.cursor = cursor;
+      this.mark = this.cursor.mark();
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
-      this._reset(cursor, parseError);
+    value: function parse(cursor) {
+      this._reset(cursor);
 
       this._tryPattern();
 
@@ -3926,36 +3840,50 @@ function (_CompositePattern) {
     key: "_tryPattern",
     value: function _tryPattern() {
       while (true) {
-        try {
-          this.nodes.push(this._pattern.parse(this.cursor, this.parseError));
+        var node = this._pattern.parse(this.cursor);
+
+        if (this.cursor.hasUnresolvedError()) {
+          this._processMatch();
+
+          break;
+        } else {
+          this.nodes.push(node);
+
+          if (node.endIndex === this.cursor.lastIndex()) {
+            this._processMatch();
+
+            break;
+          }
+
           this.cursor.next();
 
           if (this._divider != null) {
             var mark = this.cursor.mark();
 
-            try {
-              this.nodes.push(this._divider.parse(this.cursor));
-              this.cursor.next();
-            } catch (error) {
+            var _node = this._divider.parse(this.cursor);
+
+            if (this.cursor.hasUnresolvedError()) {
               this.cursor.moveToMark(mark);
 
               this._processMatch();
 
               break;
+            } else {
+              this.nodes.push(_node);
+              this.cursor.next();
             }
           }
-        } catch (error) {
-          this._processMatch();
-
-          break;
         }
       }
     }
   }, {
     key: "_processMatch",
     value: function _processMatch() {
+      this.cursor.resolveError();
+
       if (this.nodes.length === 0) {
-        throw new _ParseError.default("Did not find a repeating match of ".concat(this.name, "."), this.mark.index, this);
+        this.cursor.throwError(new _ParseError.default("Did not find a repeating match of ".concat(this.name, "."), this.mark.index, this));
+        this.node = null;
       } else {
         this.node = new _CompositeNode.default(this.name, this.nodes[0].startIndex, this.nodes[this.nodes.length - 1].endIndex);
         this.node.children = this.nodes;
@@ -4055,16 +3983,17 @@ function (_Pattern) {
     }
   }, {
     key: "parse",
-    value: function parse(cursor, parseError) {
+    value: function parse(cursor) {
       var pattern = this.getPattern();
 
       if (pattern == null) {
-        throw new _ParseError.default("Couldn't find parent pattern to recursively parse, with the name ".concat(this.name, "."));
+        cursor.throwError(new _ParseError.default("Couldn't find parent pattern to recursively parse, with the name ".concat(this.name, ".")), cursor.index, this);
+        return null;
       }
 
       this.pattern = pattern.clone();
       this.pattern.parent = this;
-      return this.pattern.parse(cursor, parseError);
+      return this.pattern.parse(cursor);
     }
   }, {
     key: "clone",
