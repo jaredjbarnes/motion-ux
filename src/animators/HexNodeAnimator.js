@@ -73,10 +73,18 @@ export default class HexNodeAnimator {
   }
 
   render(progress) {
-    const red = Math.round(this.redAnimator.render(progress));
-    const green = Math.round(this.greenAnimator.render(progress));
-    const blue = Math.round(this.blueAnimator.render(progress));
+    let red = Math.round(this.redAnimator.render(progress));
+    let green = Math.round(this.greenAnimator.render(progress));
+    let blue = Math.round(this.blueAnimator.render(progress));
 
-    return `rgba(${red},${green},${blue}, 1)`;
+    red = red > 255 ? 255 : red;
+    green = green > 255 ? 255 : green;
+    blue = blue > 255 ? 255 : blue;
+
+    red = red < 0 ? 0 : red;
+    green = green < 0 ? 0 : green;
+    blue = blue < 0 ? 0 : blue;
+
+    return `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
   }
 }
