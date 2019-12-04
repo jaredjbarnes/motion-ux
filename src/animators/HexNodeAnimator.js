@@ -55,6 +55,23 @@ export default class HexNodeAnimator {
       : null;
   }
 
+  numberToHex(number) {
+    if (number > 255) {
+      number = 255;
+    }
+
+    if (number < 0) {
+      number = 0;
+    }
+
+    let hex = number.toString(16);
+    if (hex.length < 2) {
+      hex = "0" + hex;
+    }
+
+    return hex;
+  }
+
   createAnimators() {
     this.redAnimator = new NumberAnimator({
       ...this.options,
@@ -73,18 +90,16 @@ export default class HexNodeAnimator {
   }
 
   render(progress) {
-    let red = Math.round(this.redAnimator.render(progress));
-    let green = Math.round(this.greenAnimator.render(progress));
-    let blue = Math.round(this.blueAnimator.render(progress));
+    const red = this.numberToHex(Math.round(this.redAnimator.render(progress)));
 
-    red = red > 255 ? 255 : red;
-    green = green > 255 ? 255 : green;
-    blue = blue > 255 ? 255 : blue;
+    const green = this.numberToHex(
+      Math.round(this.greenAnimator.render(progress))
+    );
 
-    red = red < 0 ? 0 : red;
-    green = green < 0 ? 0 : green;
-    blue = blue < 0 ? 0 : blue;
+    const blue = this.numberToHex(
+      Math.round(this.blueAnimator.render(progress))
+    );
 
-    return `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
+    return `#${red}${green}${blue}`;
   }
 }
