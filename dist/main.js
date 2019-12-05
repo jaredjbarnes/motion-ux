@@ -717,8 +717,8 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
       });
 
       this.state = Scrubber.states.STOPPED;
-      this.clock.cancelAnimationFrame(this._animationFrame);
     }
+    this.clock.cancelAnimationFrame(this._animationFrame);
   }
 
   reverse() {

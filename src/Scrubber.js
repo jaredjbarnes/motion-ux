@@ -197,8 +197,8 @@ export default class Scrubber extends Observable {
       });
 
       this.state = Scrubber.states.STOPPED;
-      this.clock.cancelAnimationFrame(this._animationFrame);
     }
+    this.clock.cancelAnimationFrame(this._animationFrame);
   }
 
   reverse() {
