@@ -1,5 +1,4 @@
 import DefaultClock from "./DefaultClock.js";
-import TimelineOption from "./TimelineOption.js";
 import Scrubber from "./Scrubber.js";
 import AnimatorCreator from "./AnimatorCreator.js";
 
@@ -132,6 +131,10 @@ export default class Timeline {
       });
 
     return results;
+  }
+
+  dispose(){
+    this.scrubber.dispose();
   }
 
   observeTime() {

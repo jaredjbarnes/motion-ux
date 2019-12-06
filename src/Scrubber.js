@@ -225,4 +225,9 @@ export default class Scrubber extends Observable {
       lastProgress: lastProgress
     });
   }
+
+  dispose(){
+    this.stop();
+    super.dispose();
+  }
 }

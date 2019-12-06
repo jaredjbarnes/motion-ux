@@ -35,4 +35,8 @@ export default class Observable {
             observer.notify(event);
         })
     }
+
+    dispose(){
+        this.observers = [];
+    }
 }
