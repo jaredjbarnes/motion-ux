@@ -113,6 +113,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(49);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "easings", function() { return _easings_js__WEBPACK_IMPORTED_MODULE_1__["default"]; });
 
+/* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(12);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BezierCurve", function() { return _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
+
 
 
 
