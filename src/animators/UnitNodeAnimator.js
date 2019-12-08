@@ -15,6 +15,6 @@ export default class UnitNodeAnimator {
   render(progress) {
     const value = this.animator.render(progress);
     const unit = this.options.controls[0].children[1].value;
-    return `${value}${unit}`;
+    return `${Math.trunc(value)}${unit}`;
   }
 }
