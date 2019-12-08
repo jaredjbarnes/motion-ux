@@ -16,5 +16,5 @@ exports["UnitNodeAnimator: "] = () => {
   });
 
   const result = animator.render(0.5);
-  assert.equal(result, "150px");
+  assert.equal(result, "150.000px");
 };
