@@ -16,7 +16,6 @@ export default class ValuesNodeAnimator {
       hex: HexNodeAnimator
     };
 
-    this.normalizeNodes();
     this.createAnimators();
   }
 
@@ -32,12 +31,6 @@ export default class ValuesNodeAnimator {
       };
 
       return new this.nameToAnimatorMap[node.name](options);
-    });
-  }
-
-  normalizeNodes() {
-    this.options.controls.forEach(node => {
-      node.children = node.children.filter(node => node.name != "spaces");
     });
   }
 

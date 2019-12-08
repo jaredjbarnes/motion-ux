@@ -2,11 +2,16 @@ import ValuesNodeAnimator from "./animators/ValuesNodeAnimator.js";
 import values from "./patterns/values.js";
 import { Cursor } from "clarity-pattern-parser";
 import TimelineOption from "./TimelineOption.js";
+import TreeNormalizer from "./TreeNormalizer.js";
+import TreeUtility from "./TreeUtility.js";
+
+const treeUtility = new TreeUtility();
 
 export default class AnimatorCreator {
   constructor(animationOptions) {
     this.animationOptions = animationOptions;
-
+    this._treeNormalizer = new TreeNormalizer();
+    
     this._assertAnimationOptions();
     this._convertAnimationsToTimelineOptions();
     this._sortTimelineOptions();
@@ -39,6 +44,7 @@ export default class AnimatorCreator {
       controls = points.map(point => {
         const cursor = new Cursor(point);
         const node = values.parse(cursor);
+        this._treeNormalizer.normalize(node);
 
         if (cursor.hasUnresolvedError()) {
           throw new Error(
@@ -48,6 +54,21 @@ export default class AnimatorCreator {
 
         return node;
       });
+
+      const fromNode = controls[0];
+      const allStructuresAreEqual = controls.every(node => {
+        return treeUtility.areTreeStructuresEqual(fromNode, node);
+      });
+
+      if (!allStructuresAreEqual) {
+        throw new Error(
+          `Invalid Animation: The value types that are being animated do not match. From: ${JSON.stringify(
+            options.from
+          )}, To:${JSON.stringify(options.to)}, Controls: ${JSON.stringify(
+            options.controls
+          )}`
+        );
+      }
 
       return new ValuesNodeAnimator({
         ...options,

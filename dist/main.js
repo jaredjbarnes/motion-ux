@@ -685,15 +685,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(18);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _TimelineOption_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(48);
+/* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(50);
+/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(52);
 
 
 
 
+
+
+
+const treeUtility = new _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__["default"]();
 
 class AnimatorCreator {
   constructor(animationOptions) {
     this.animationOptions = animationOptions;
-
+    this._treeNormalizer = new _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__["default"]();
+    
     this._assertAnimationOptions();
     this._convertAnimationsToTimelineOptions();
     this._sortTimelineOptions();
@@ -726,6 +733,7 @@ class AnimatorCreator {
       controls = points.map(point => {
         const cursor = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__["Cursor"](point);
         const node = _patterns_values_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(cursor);
+        this._treeNormalizer.normalize(node);
 
         if (cursor.hasUnresolvedError()) {
           throw new Error(
@@ -735,6 +743,21 @@ class AnimatorCreator {
 
         return node;
       });
+
+      const fromNode = controls[0];
+      const allStructuresAreEqual = controls.every(node => {
+        return treeUtility.areTreeStructuresEqual(fromNode, node);
+      });
+
+      if (!allStructuresAreEqual) {
+        throw new Error(
+          `Invalid Animation: The value types that are being animated do not match. From: ${JSON.stringify(
+            options.from
+          )}, To:${JSON.stringify(options.to)}, Controls: ${JSON.stringify(
+            options.controls
+          )}`
+        );
+      }
 
       return new _animators_ValuesNodeAnimator_js__WEBPACK_IMPORTED_MODULE_0__["default"]({
         ...options,
@@ -779,7 +802,6 @@ class ValuesNodeAnimator {
       hex: _HexNodeAnimator_js__WEBPACK_IMPORTED_MODULE_1__["default"]
     };
 
-    this.normalizeNodes();
     this.createAnimators();
   }
 
@@ -795,12 +817,6 @@ class ValuesNodeAnimator {
       };
 
       return new this.nameToAnimatorMap[node.name](options);
-    });
-  }
-
-  normalizeNodes() {
-    this.options.controls.forEach(node => {
-      node.children = node.children.filter(node => node.name != "spaces");
     });
   }
 
@@ -4292,6 +4308,112 @@ const easings = {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (easings);
+
+/***/ }),
+/* 50 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeNormalizer; });
+/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(51);
+
+
+class TreeNormalizer {
+  constructor() {
+    this.removeSpacesVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"](node => {
+      if (Array.isArray(node.children)) {
+        node.children = node.children.filter(child => {
+          return child.name !== "spaces";
+        });
+      }
+    });
+  }
+
+  normalize(node) {
+    this.removeSpacesVisitor.visitDown(node);
+  }
+}
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Visitor; });
+const emptyFn = () => {};
+
+class Visitor {
+  constructor(callback) {
+    if (typeof callback === "function") {
+      this.callback = callback;
+    } else {
+      this.callback = emptyFn;
+    }
+
+    this.callback = callback;
+  }
+
+  walkUp(node) {
+    if (Array.isArray(node.children)) {
+      node.children.forEach(child => {
+        this.walkUp(child);
+      });
+    }
+
+    this.callback(node);
+  }
+
+  visitUp(node) {
+    this.walkUp(node);
+  }
+
+  walkDown(node) {
+    this.callback(node);
+
+    if (Array.isArray(node.children)) {
+      node.children.forEach(child => {
+        this.walkDown(child);
+      });
+    }
+  }
+
+  visitDown(node) {
+    this.walkDown(node);
+  }
+}
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeUtility; });
+/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(51);
+
+
+class TreeUtility {
+    areTreeStructuresEqual(nodeA, nodeB){
+        const nodeASequence = [];
+        const nodeBSequence = [];
+
+        const nodeAVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]((node)=>{
+            nodeASequence.push(node.name);
+        });
+        nodeAVisitor.visitDown(nodeA);
+
+        const nodeBVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]((node)=>{
+            nodeBSequence.push(node.name);
+        });
+        nodeBVisitor.visitDown(nodeB);
+
+        return nodeASequence.join("|") === nodeBSequence.join("|");
+    }
+}
 
 /***/ })
 /******/ ]);

@@ -2,6 +2,7 @@ import ValuesNodeAnimator from "../animators/ValuesNodeAnimator.js";
 import easings from "../easings.js";
 import values from "../patterns/values.js";
 import { Cursor } from "clarity-pattern-parser";
+import TreeNormalizer from "../TreeNormalizer.js";
 import assert from "assert";
 
 exports["ValuesNodeAnimator: "] = () => {
@@ -11,6 +12,10 @@ exports["ValuesNodeAnimator: "] = () => {
   const toNode = values.parse(
     new Cursor("linear-gradient(to left, #fff, #fff 50%, #eee 75%, #333 50%)")
   );
+
+  const treeNormalizer = new TreeNormalizer();
+  treeNormalizer.normalize(fromNode);
+  treeNormalizer.normalize(toNode);
 
   const animator = new ValuesNodeAnimator({
     startAt: 0,
