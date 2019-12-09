@@ -1,5 +1,5 @@
-import ValuesNodeAnimator from "./animators/ValuesNodeAnimator.js";
-import values from "./patterns/values.js";
+import CssValueNodeAnimator from "./animators/CssValueNodeAnimator.js";
+import cssValue from "./patterns/cssValue.js";
 import { Cursor } from "clarity-pattern-parser";
 import TimelineOption from "./TimelineOption.js";
 import TreeNormalizer from "./TreeNormalizer.js";
@@ -11,7 +11,7 @@ export default class AnimatorCreator {
   constructor(animationOptions) {
     this.animationOptions = animationOptions;
     this._treeNormalizer = new TreeNormalizer();
-    
+
     this._assertAnimationOptions();
     this._convertAnimationsToTimelineOptions();
     this._sortTimelineOptions();
@@ -43,7 +43,7 @@ export default class AnimatorCreator {
 
       controls = points.map(point => {
         const cursor = new Cursor(point);
-        const node = values.parse(cursor);
+        const node = cssValue.parse(cursor);
         this._treeNormalizer.normalize(node);
 
         if (cursor.hasUnresolvedError()) {
@@ -70,7 +70,7 @@ export default class AnimatorCreator {
         );
       }
 
-      return new ValuesNodeAnimator({
+      return new CssValueNodeAnimator({
         ...options,
         controls
       });

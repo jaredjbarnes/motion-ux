@@ -1,4 +1,4 @@
-import { Cursor } from "clarity-pattern-parser";;
+import { Cursor } from "clarity-pattern-parser";
 import values from "../patterns/values.js";
 import assert from "assert";
 
@@ -150,18 +150,16 @@ exports["Patterns: multiple methods, mulitple arguments"] = () => {
   const node = values.parse(cursor);
 };
 
+exports[
+  "Patterns: multiple methods, mulitple arguments, with other values"
+] = () => {
+  const cursor = new Cursor(
+    "#222 linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%) linear-gradient(to bottom, #555, #555 50%, #eee 75%, #555 75%)"
+  );
+  const node = values.parse(cursor);
+};
 
-exports["Patterns: multiple methods, mulitple arguments, with other values"] = () => {
-    const cursor = new Cursor(
-      "#222 linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%) linear-gradient(to bottom, #555, #555 50%, #eee 75%, #555 75%)"
-    );
-    const node = values.parse(cursor);
-  };
-
-  exports["Patterns: method rgba"] = () => {
-    const cursor = new Cursor(
-      "rgba(0,0,0,0)"
-    );
-    const node = values.parse(cursor);
-  };
-  
+exports["Patterns: method rgba"] = () => {
+  const cursor = new Cursor("rgba(0,0,0,0)");
+  const node = values.parse(cursor);
+};

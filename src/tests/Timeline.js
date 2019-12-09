@@ -114,3 +114,33 @@ exports["Timeline: Valid Path."] = () => {
 
   assert.equal(value, to);
 };
+
+exports["Timeline: Curved Path."] = () => {
+  const target = {};
+  const clock = new MockClock();
+  const from = "M 0 0 C 0 0, 0 0, 0 0";
+  const to = "M 10 10 C 150 150, 30 30, 20 20";
+
+  const timeline = new Timeline({
+    animations: [
+      {
+        target: target,
+        name: "path",
+        startAt: 0,
+        endAt: 1,
+        from: from,
+        to: to
+      }
+    ],
+    duration: 1000,
+    clock
+  });
+
+  timeline.seek(1);
+  const value = timeline
+    .getCurrentValues()
+    .values()
+    .next().value.path;
+
+  assert.equal(value, to);
+};

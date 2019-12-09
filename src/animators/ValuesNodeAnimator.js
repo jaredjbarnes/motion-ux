@@ -13,7 +13,8 @@ export default class ValuesNodeAnimator {
       unit: UnitNodeAnimator,
       method: MethodNodeAnimator,
       name: NameNodeAnimator,
-      hex: HexNodeAnimator
+      hex: HexNodeAnimator,
+      values: ValuesNodeAnimator
     };
 
     this.createAnimators();

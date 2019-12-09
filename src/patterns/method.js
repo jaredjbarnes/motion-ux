@@ -1,8 +1,5 @@
 import {
   Literal,
-  AndValue,
-  RepeatValue,
-  OptionalValue,
   AndComposite,
   RepeatComposite,
   RecursivePattern,
@@ -10,16 +7,9 @@ import {
 } from "clarity-pattern-parser";
 
 import name from "./name.js";
+import optionalSpaces from "./optionalSpaces.js";
+import divider from "./divider.js";
 
-const comma = new Literal("comma", ",");
-const space = new Literal("space", " ");
-const spaces = new RepeatValue("spaces", space);
-const optionalSpaces = new OptionalValue(spaces);
-const divider = new AndValue("divider", [
-  optionalSpaces,
-  comma,
-  optionalSpaces
-]);
 const openParen = new Literal("open-paren", "(");
 const closeParen = new Literal("close-paren", ")");
 const values = new RecursivePattern("values");
