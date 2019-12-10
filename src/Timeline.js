@@ -97,13 +97,20 @@ export default class Timeline {
 
     this.animators
       .filter(animator => {
+        let obj = results.get(animator.options.target);
+
+        if (obj == null) {
+          obj = {};
+          results.set(animator.options.target, obj);
+        }
+
+        if (obj[animator.options.name] == null){
+          obj[animator.options.name] = animator.options.from;
+        }
+
         return animator.options.startAt <= progress;
       })
       .forEach(animator => {
-        if (!results.has(animator.options.target)) {
-          results.set(animator.options.target, {});
-        }
-
         const changes = results.get(animator.options.target);
         changes[animator.options.name] = animator.render(
           progress,
@@ -119,10 +126,6 @@ export default class Timeline {
         return min <= max;
       })
       .forEach(animator => {
-        if (!results.has(animator.options.target)) {
-          results.set(animator.options.target, {});
-        }
-
         const changes = results.get(animator.options.target);
         changes[animator.options.name] = animator.render(
           progress,
@@ -133,7 +136,7 @@ export default class Timeline {
     return results;
   }
 
-  dispose(){
+  dispose() {
     this.scrubber.dispose();
   }
 

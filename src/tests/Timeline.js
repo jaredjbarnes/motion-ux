@@ -144,3 +144,115 @@ exports["Timeline: Curved Path."] = () => {
 
   assert.equal(value, to);
 };
+
+exports["Timeline: Mutliple startAts on same property."] = () => {
+  const target = {};
+  const clock = new MockClock();
+
+  const timeline = new Timeline({
+    animations: [
+      {
+        target: target,
+        name: "opacity",
+        startAt: 0,
+        endAt: 1,
+        from: "1",
+        to: "0"
+      },
+      {
+        target: target,
+        name: "display",
+        startAt: 0.01,
+        endAt: 0.01,
+        from: "none",
+        to: "block"
+      },
+      {
+        target: target,
+        name: "display",
+        startAt: 0.25,
+        endAt: 0.25,
+        from: "block",
+        to: "none"
+      },
+      {
+        target: target,
+        name: "display",
+        startAt: 0.5,
+        endAt: 0.5,
+        from: "none",
+        to: "block"
+      },
+      {
+        target: target,
+        name: "display",
+        startAt: 0.99,
+        endAt: 0.99,
+        from: "block",
+        to: "none"
+      }
+    ],
+    duration: 1000,
+    clock
+  });
+
+  timeline.seek(1);
+  let values = timeline
+    .getCurrentValues()
+    .values()
+    .next().value;
+
+  let opacity = values.opacity;
+  let display = values.display;
+
+  assert.equal(display, "none");
+  assert.equal(opacity, "0");
+
+  timeline.seek(0.3);
+  values = timeline
+    .getCurrentValues()
+    .values()
+    .next().value;
+
+  opacity = values.opacity;
+  display = values.display;
+
+  assert.equal(display, "none");
+  assert.equal(opacity, "0.7");
+
+  timeline.seek(0.49);
+  values = timeline
+    .getCurrentValues()
+    .values()
+    .next().value;
+
+  opacity = values.opacity;
+  display = values.display;
+
+  assert.equal(display, "none");
+  assert.equal(opacity, "0.51");
+
+  timeline.seek(0.75);
+  values = timeline
+    .getCurrentValues()
+    .values()
+    .next().value;
+
+  opacity = values.opacity;
+  display = values.display;
+
+  assert.equal(display, "block");
+  assert.equal(opacity, "0.25");
+
+  timeline.seek(0);
+  values = timeline
+    .getCurrentValues()
+    .values()
+    .next().value;
+
+  opacity = values.opacity;
+  display = values.display;
+
+  assert.equal(display, "none");
+  assert.equal(opacity, "1");
+};
