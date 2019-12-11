@@ -123,7 +123,7 @@ export default class Scrubber extends Observable {
   tick() {
     const timestamp = this.clock.now();
     const deltaTime = timestamp - this._lastTimestamp;
-    let step = deltaTime / this.duration * this._timeScale;
+    let step = (deltaTime / this.duration) * this._timeScale;
 
     if (step > 1) {
       step = 1;
@@ -217,16 +217,17 @@ export default class Scrubber extends Observable {
     const lastProgress = this._progress;
     this._progress = progress;
 
-    this.render();
+    const values = this.render();
 
     this.notify({
       type: "RENDER",
       progress: progress,
-      lastProgress: lastProgress
+      lastProgress: lastProgress,
+      values
     });
   }
 
-  dispose(){
+  dispose() {
     this.stop();
     super.dispose();
   }

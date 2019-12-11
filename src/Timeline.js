@@ -86,6 +86,8 @@ export default class Timeline {
         target[key] = changes[key];
       });
     });
+
+    return values;
   }
 
   getCurrentValues() {

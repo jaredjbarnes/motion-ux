@@ -221,6 +221,8 @@ class Timeline {
         target[key] = changes[key];
       });
     });
+
+    return values;
   }
 
   getCurrentValues() {
@@ -440,7 +442,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   tick() {
     const timestamp = this.clock.now();
     const deltaTime = timestamp - this._lastTimestamp;
-    let step = deltaTime / this.duration * this._timeScale;
+    let step = (deltaTime / this.duration) * this._timeScale;
 
     if (step > 1) {
       step = 1;
@@ -534,16 +536,17 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     const lastProgress = this._progress;
     this._progress = progress;
 
-    this.render();
+    const values = this.render();
 
     this.notify({
       type: "RENDER",
       progress: progress,
-      lastProgress: lastProgress
+      lastProgress: lastProgress,
+      values
     });
   }
 
-  dispose(){
+  dispose() {
     this.stop();
     super.dispose();
   }
