@@ -217,13 +217,13 @@ export default class Scrubber extends Observable {
     const lastProgress = this._progress;
     this._progress = progress;
 
-    const values = this.render();
+    const animations = this.render();
 
     this.notify({
       type: "RENDER",
       progress: progress,
       lastProgress: lastProgress,
-      values
+      animations
     });
   }
 
