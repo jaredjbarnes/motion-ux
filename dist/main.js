@@ -211,17 +211,7 @@ class Timeline {
 
   render() {
     const progress = this.progress;
-
     const values = this.getValuesAt(progress);
-
-    Array.from(values.keys()).forEach(target => {
-      const changes = values.get(target);
-
-      Object.keys(changes).forEach(key => {
-        target[key] = changes[key];
-      });
-    });
-
     return values;
   }
 
@@ -230,26 +220,25 @@ class Timeline {
   }
 
   getValuesAt(progress) {
-    const results = new Map();
+    const results = {};
 
     this.animators
       .filter(animator => {
-        let obj = results.get(animator.options.target);
+        let animation = results[animator.options.name];
 
-        if (obj == null) {
-          obj = {};
-          results.set(animator.options.target, obj);
+        if (animation == null) {
+          animation = results[animator.options.name] = {};
         }
 
-        if (obj[animator.options.name] == null){
-          obj[animator.options.name] = animator.options.from;
+        if (animation[animator.options.property] == null) {
+          animation[animator.options.property] = animator.options.from;
         }
 
         return animator.options.startAt <= progress;
       })
       .forEach(animator => {
-        const changes = results.get(animator.options.target);
-        changes[animator.options.name] = animator.render(
+        const animation = results[animator.options.name];
+        animation[animator.options.property] = animator.render(
           progress,
           this.duration
         );
@@ -263,8 +252,8 @@ class Timeline {
         return min <= max;
       })
       .forEach(animator => {
-        const changes = results.get(animator.options.target);
-        changes[animator.options.name] = animator.render(
+        const animation = results[animator.options.name];
+        animation[animator.options.property] = animator.render(
           progress,
           this.duration
         );
@@ -4226,8 +4215,8 @@ __webpack_require__.r(__webpack_exports__);
 
 class TimelineOption {
   constructor(animation) {
-    this.target = animation.target;
     this.name = animation.name;
+    this.property = animation.property;
     this.to = animation.to;
     this.from = animation.from;
     this.startAt = animation.startAt;
@@ -4249,21 +4238,21 @@ class TimelineOption {
   }
 
   validate() {
+    if (typeof this.property !== "string") {
+      throw new Error(`The "property" property needs to be a string.`);
+    }
+
+    if (typeof this.to !== "string") {
+      throw new Error(`The "to" property needs to be a string, but found ${this.to}.`);
+    }
+
+    if (typeof this.from !== "string") {
+      throw new Error(`The "from" property needs to be a string, but found ${this.from}.`);
+    }
+
     if (typeof this.name !== "string") {
-      throw new Error(`The "name" property needs to be a string.`);
-    }
-
-    if (this.to == null) {
-      throw new Error(`The "to" property cannot be null or undefined.`);
-    }
-
-    if (this.from == null) {
-      throw new Error(`The "from" property cannot be null or undefined.`);
-    }
-
-    if (typeof this.target !== "object" || this.target == null) {
       throw new Error(
-        `Invalid Arguments: The "target" property needs to be an object.`
+        `Invalid Arguments: The "name" property needs to be an string.`
       );
     }
 

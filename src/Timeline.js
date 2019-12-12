@@ -76,17 +76,7 @@ export default class Timeline {
 
   render() {
     const progress = this.progress;
-
     const values = this.getValuesAt(progress);
-
-    Array.from(values.keys()).forEach(target => {
-      const changes = values.get(target);
-
-      Object.keys(changes).forEach(key => {
-        target[key] = changes[key];
-      });
-    });
-
     return values;
   }
 
@@ -95,26 +85,25 @@ export default class Timeline {
   }
 
   getValuesAt(progress) {
-    const results = new Map();
+    const results = {};
 
     this.animators
       .filter(animator => {
-        let obj = results.get(animator.options.target);
+        let animation = results[animator.options.name];
 
-        if (obj == null) {
-          obj = {};
-          results.set(animator.options.target, obj);
+        if (animation == null) {
+          animation = results[animator.options.name] = {};
         }
 
-        if (obj[animator.options.name] == null){
-          obj[animator.options.name] = animator.options.from;
+        if (animation[animator.options.property] == null) {
+          animation[animator.options.property] = animator.options.from;
         }
 
         return animator.options.startAt <= progress;
       })
       .forEach(animator => {
-        const changes = results.get(animator.options.target);
-        changes[animator.options.name] = animator.render(
+        const animation = results[animator.options.name];
+        animation[animator.options.property] = animator.render(
           progress,
           this.duration
         );
@@ -128,8 +117,8 @@ export default class Timeline {
         return min <= max;
       })
       .forEach(animator => {
-        const changes = results.get(animator.options.target);
-        changes[animator.options.name] = animator.render(
+        const animation = results[animator.options.name];
+        animation[animator.options.property] = animator.render(
           progress,
           this.duration
         );

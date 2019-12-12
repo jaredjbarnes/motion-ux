@@ -3,14 +3,14 @@ import MockClock from "../MockClock.js";
 import assert from "assert";
 
 exports["Timeline: Get current values as 0."] = () => {
-  const target = {};
+  const name = "my-animation";
   const clock = new MockClock();
 
   const timeline = new Timeline({
     animations: [
       {
-        target: target,
-        name: "opacity",
+        name: name,
+        property: "opacity",
         startAt: 0,
         endAt: 1,
         from: "0",
@@ -23,18 +23,18 @@ exports["Timeline: Get current values as 0."] = () => {
 
   const values = timeline.getValuesAt(0);
 
-  assert.equal(values.values().next().value.opacity, 0);
+  assert.equal(values[name].opacity, 0);
 };
 
 exports["Timeline: Dispose."] = () => {
-  const target = {};
+  const name = "my-animation";
   const clock = new MockClock();
 
   const timeline = new Timeline({
     animations: [
       {
-        target: target,
-        name: "opacity",
+        name: name,
+        property: "opacity",
         startAt: 0,
         endAt: 1,
         from: "0",
@@ -57,7 +57,7 @@ exports["Timeline: Dispose."] = () => {
 };
 
 exports["Timeline: Animated value types do not match."] = () => {
-  const target = {};
+  const name = "my-animation";
   const clock = new MockClock();
 
   assert.throws(
@@ -65,8 +65,8 @@ exports["Timeline: Animated value types do not match."] = () => {
       new Timeline({
         animations: [
           {
-            target: target,
-            name: "opacity",
+            name: name,
+            property: "opacity",
             startAt: 0,
             endAt: 1,
             from: "0px",
@@ -84,7 +84,7 @@ exports["Timeline: Animated value types do not match."] = () => {
 };
 
 exports["Timeline: Valid Path."] = () => {
-  const target = {};
+  const name = "my-animation";
   const clock = new MockClock();
   const from =
     "M 10 315 L 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10";
@@ -94,8 +94,8 @@ exports["Timeline: Valid Path."] = () => {
   const timeline = new Timeline({
     animations: [
       {
-        target: target,
-        name: "path",
+        name: name,
+        property: "path",
         startAt: 0,
         endAt: 1,
         from: from,
@@ -107,16 +107,13 @@ exports["Timeline: Valid Path."] = () => {
   });
 
   timeline.seek(1);
-  const value = timeline
-    .getCurrentValues()
-    .values()
-    .next().value.path;
+  const value = timeline.getCurrentValues()[name].path;
 
   assert.equal(value, to);
 };
 
 exports["Timeline: Curved Path."] = () => {
-  const target = {};
+  const name = "my-animation";
   const clock = new MockClock();
   const from = "M 0 0 C 0 0, 0 0, 0 0";
   const to = "M 10 10 C 150 150, 30 30, 20 20";
@@ -124,8 +121,8 @@ exports["Timeline: Curved Path."] = () => {
   const timeline = new Timeline({
     animations: [
       {
-        target: target,
-        name: "path",
+        name: name,
+        property: "path",
         startAt: 0,
         endAt: 1,
         from: from,
@@ -137,55 +134,52 @@ exports["Timeline: Curved Path."] = () => {
   });
 
   timeline.seek(1);
-  const value = timeline
-    .getCurrentValues()
-    .values()
-    .next().value.path;
+  const value = timeline.getCurrentValues()[name].path;
 
   assert.equal(value, to);
 };
 
 exports["Timeline: Mutliple startAts on same property."] = () => {
-  const target = {};
+  const name = "my-animation";
   const clock = new MockClock();
 
   const timeline = new Timeline({
     animations: [
       {
-        target: target,
-        name: "opacity",
+        name: name,
+        property: "opacity",
         startAt: 0,
         endAt: 1,
         from: "1",
         to: "0"
       },
       {
-        target: target,
-        name: "display",
+        name: name,
+        property: "display",
         startAt: 0.01,
         endAt: 0.01,
         from: "none",
         to: "block"
       },
       {
-        target: target,
-        name: "display",
+        name: name,
+        property: "display",
         startAt: 0.25,
         endAt: 0.25,
         from: "block",
         to: "none"
       },
       {
-        target: target,
-        name: "display",
+        name: name,
+        property: "display",
         startAt: 0.5,
         endAt: 0.5,
         from: "none",
         to: "block"
       },
       {
-        target: target,
-        name: "display",
+        name: name,
+        property: "display",
         startAt: 0.99,
         endAt: 0.99,
         from: "block",
@@ -197,11 +191,8 @@ exports["Timeline: Mutliple startAts on same property."] = () => {
   });
 
   timeline.seek(1);
-  let values = timeline
-    .getCurrentValues()
-    .values()
-    .next().value;
 
+  let values = timeline.getCurrentValues()[name];
   let opacity = values.opacity;
   let display = values.display;
 
@@ -209,10 +200,7 @@ exports["Timeline: Mutliple startAts on same property."] = () => {
   assert.equal(opacity, "0");
 
   timeline.seek(0.3);
-  values = timeline
-    .getCurrentValues()
-    .values()
-    .next().value;
+  values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity;
   display = values.display;
@@ -221,10 +209,7 @@ exports["Timeline: Mutliple startAts on same property."] = () => {
   assert.equal(opacity, "0.7");
 
   timeline.seek(0.49);
-  values = timeline
-    .getCurrentValues()
-    .values()
-    .next().value;
+  values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity;
   display = values.display;
@@ -233,10 +218,7 @@ exports["Timeline: Mutliple startAts on same property."] = () => {
   assert.equal(opacity, "0.51");
 
   timeline.seek(0.75);
-  values = timeline
-    .getCurrentValues()
-    .values()
-    .next().value;
+  values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity;
   display = values.display;
@@ -245,10 +227,7 @@ exports["Timeline: Mutliple startAts on same property."] = () => {
   assert.equal(opacity, "0.25");
 
   timeline.seek(0);
-  values = timeline
-    .getCurrentValues()
-    .values()
-    .next().value;
+  values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity;
   display = values.display;

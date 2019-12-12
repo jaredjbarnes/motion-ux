@@ -2,8 +2,8 @@ import easings from "./easings.js";
 
 export default class TimelineOption {
   constructor(animation) {
-    this.target = animation.target;
     this.name = animation.name;
+    this.property = animation.property;
     this.to = animation.to;
     this.from = animation.from;
     this.startAt = animation.startAt;
@@ -25,21 +25,21 @@ export default class TimelineOption {
   }
 
   validate() {
+    if (typeof this.property !== "string") {
+      throw new Error(`The "property" property needs to be a string.`);
+    }
+
+    if (typeof this.to !== "string") {
+      throw new Error(`The "to" property needs to be a string, but found ${this.to}.`);
+    }
+
+    if (typeof this.from !== "string") {
+      throw new Error(`The "from" property needs to be a string, but found ${this.from}.`);
+    }
+
     if (typeof this.name !== "string") {
-      throw new Error(`The "name" property needs to be a string.`);
-    }
-
-    if (this.to == null) {
-      throw new Error(`The "to" property cannot be null or undefined.`);
-    }
-
-    if (this.from == null) {
-      throw new Error(`The "from" property cannot be null or undefined.`);
-    }
-
-    if (typeof this.target !== "object" || this.target == null) {
       throw new Error(
-        `Invalid Arguments: The "target" property needs to be an object.`
+        `Invalid Arguments: The "name" property needs to be an string.`
       );
     }
 
