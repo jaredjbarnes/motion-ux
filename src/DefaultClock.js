@@ -10,7 +10,7 @@ export default class DefaultClock {
       callback();
     });
 
-    requestAnimationFrame(this._tick);
+    this.animationFrame = requestAnimationFrame(this._tick);
   }
 
   register(callback) {
