@@ -16,21 +16,18 @@ document.body.appendChild(circleWithBezier);
 const timeline = new Timeline({
   animations: [
     {
-      target: circleWithBezier.style,
-      name: "transform",
+      name: "circle",
+      property: "transform",
       from: "translate(150px,0px)",
-      controls: [
-        "translate(300px,0px)",
-        "translate(300px,150px)"
-      ],
+      controls: ["translate(300px,0px)", "translate(300px,150px)"],
       to: "translate(150px,300px)",
       startAt: 0,
       endAt: 1,
       easing: easings.easeOutExpo
     },
     {
-      target: circleWithBezier.style,
-      name: "background",
+      name: "circle",
+      property: "background",
       from: "linear-gradient(0deg, rgba(255,0,0,0.8), rgba(255,0,0,0))",
       //controls: ["rgba(0,0,0,0.5)"],
       to: "linear-gradient(720deg, rgba(0,255,0,0.8), rgba(0,255,0,0))",
@@ -53,6 +50,12 @@ timeline.observeTime(0.75, () => {
 timeline.observeTime(0.03, () => {
   console.log("3");
   //timeline.play();
+});
+
+timeline.observe("RENDER", ({ animations }) => {
+  Object.keys(animations.circle).forEach(key => {
+    circleWithBezier.style[key] = animations.circle[key];
+  });
 });
 
 //timeline.seek(0.35);

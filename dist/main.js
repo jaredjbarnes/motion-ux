@@ -286,44 +286,33 @@ __webpack_require__.r(__webpack_exports__);
 class DefaultClock {
   constructor() {
     this.registeredCallbacks = new Map();
-    this.count = 1;
+    this._tick = this._tick.bind(this);
     this.animationFrame = null;
   }
 
-  tickIfNecessary() {
+  _tick() {
+    this.registeredCallbacks.forEach(callback => {
+      callback();
+    });
+
+    requestAnimationFrame(this._tick);
+  }
+
+  register(callback) {
+    this.registeredCallbacks.set(callback, callback);
+
     if (this.animationFrame == null) {
-      this.animationFrame = requestAnimationFrame(() => {
-        this.animationFrame = null;
-
-        this.registeredCallbacks.forEach(callback => {
-          callback();
-        });
-
-        if (this.registeredCallbacks.size > 0) {
-          this.tickIfNecessary();
-        }
-        
-      });
+      this._tick();
     }
   }
 
-  stopIfNecessary() {
-    if (this.registeredCallbacks.size <= 0){
+  unregister(callback) {
+    this.registeredCallbacks.delete(callback);
+
+    if (this.registeredCallbacks.size <= 0) {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
-  }
-
-  requestAnimationFrame(callback) {
-    const id = this.count++;
-    this.registeredCallbacks.set(id, callback);
-    this.tickIfNecessary();
-    return id;
-  }
-
-  cancelAnimationFrame(id) {
-    this.registeredCallbacks.delete(id);
-    this.stopIfNecessary();
   }
 
   now() {
@@ -378,7 +367,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = repeatDirection;
-    this._step = this._step.bind(this);
+    this.tick = this.tick.bind(this);
 
     this.clock = clock;
     this.state = Scrubber.states.STOPPED;
@@ -450,18 +439,8 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.FORWARD;
-      this._loop();
+      this.clock.register(this.tick);
     }
-  }
-
-  _step() {
-    this._loop();
-    this.tick();
-  }
-
-  _loop() {
-    this.clock.cancelAnimationFrame(this._animationFrame);
-    this._animationFrame = this.clock.requestAnimationFrame(this._step);
   }
 
   tick() {
@@ -541,8 +520,8 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
       });
 
       this.state = Scrubber.states.STOPPED;
+      this.clock.unregister(this.tick);
     }
-    this.clock.cancelAnimationFrame(this._animationFrame);
   }
 
   reverse() {
@@ -553,7 +532,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.REVERSE;
-      this._loop();
+      this.clock.register(this.tick);
     }
   }
 

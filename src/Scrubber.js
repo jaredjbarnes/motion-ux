@@ -36,7 +36,7 @@ export default class Scrubber extends Observable {
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = repeatDirection;
-    this._step = this._step.bind(this);
+    this.tick = this.tick.bind(this);
 
     this.clock = clock;
     this.state = Scrubber.states.STOPPED;
@@ -108,18 +108,8 @@ export default class Scrubber extends Observable {
 
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.FORWARD;
-      this._loop();
+      this.clock.register(this.tick);
     }
-  }
-
-  _step() {
-    this._loop();
-    this.tick();
-  }
-
-  _loop() {
-    this.clock.cancelAnimationFrame(this._animationFrame);
-    this._animationFrame = this.clock.requestAnimationFrame(this._step);
   }
 
   tick() {
@@ -199,8 +189,8 @@ export default class Scrubber extends Observable {
       });
 
       this.state = Scrubber.states.STOPPED;
+      this.clock.unregister(this.tick);
     }
-    this.clock.cancelAnimationFrame(this._animationFrame);
   }
 
   reverse() {
@@ -211,7 +201,7 @@ export default class Scrubber extends Observable {
 
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.REVERSE;
-      this._loop();
+      this.clock.register(this.tick);
     }
   }
 

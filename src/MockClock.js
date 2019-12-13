@@ -4,16 +4,13 @@ export default class MockClock {
     this.idCount = 1;
     this.time = 0;
   }
-  requestAnimationFrame(callback) {
-    const id = this.idCount;
-    this.idCount++;
-    this.requests.set(id, callback);
 
-    return id;
+  register(callback) {
+    this.requests.set(callback, callback);
   }
 
-  cancelAnimationFrame(id) {
-    this.requests.delete(id); 
+  unregister(callback) {
+    this.requests.delete(callback); 
   }
 
   now() {
