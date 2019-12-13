@@ -28,7 +28,7 @@ export default class DefaultClock {
   }
 
   requestAnimationFrame(callback) {
-    const id = count++;
+    const id = this.count++;
     this.registeredCallbacks.set(id, callback);
     this.tickIfNecessary();
     return id;
