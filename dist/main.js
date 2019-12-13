@@ -292,15 +292,17 @@ class DefaultClock {
 
   tickIfNecessary() {
     if (this.animationFrame == null) {
-      this.animationFrame = null;
+      this.animationFrame = requestAnimationFrame(() => {
+        this.animationFrame = null;
 
-      this.animationFrame = this.requestAnimationFrame(() => {
         this.registeredCallbacks.forEach(callback => {
           callback();
         });
+
         if (this.registeredCallbacks.size > 0) {
           this.tickIfNecessary();
         }
+        
       });
     }
   }
