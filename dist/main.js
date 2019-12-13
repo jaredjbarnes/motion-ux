@@ -284,12 +284,44 @@ class Timeline {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DefaultClock; });
 class DefaultClock {
+  constructor() {
+    this.registeredCallbacks = new Map();
+    this.count = 1;
+    this.animationFrame = null;
+  }
+
+  tickIfNecessary() {
+    if (this.animationFrame == null) {
+      this.animationFrame = null;
+
+      this.animationFrame = this.requestAnimationFrame(() => {
+        this.registeredCallbacks.forEach(callback => {
+          callback();
+        });
+        if (this.registeredCallbacks.size > 0) {
+          this.tickIfNecessary();
+        }
+      });
+    }
+  }
+
+  stopIfNecessary() {
+    if (this.registeredCallbacks.size <= 0){
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
+    }
+  }
+
   requestAnimationFrame(callback) {
-    return requestAnimationFrame(callback);
+    const id = count++;
+    this.registeredCallbacks.set(id, callback);
+    this.tickIfNecessary();
+    return id;
   }
 
   cancelAnimationFrame(id) {
-    return cancelAnimationFrame(id);
+    this.registeredCallbacks.delete(id);
+    this.stopIfNecessary();
   }
 
   now() {
@@ -344,6 +376,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = repeatDirection;
+    this._step = this._step.bind(this);
 
     this.clock = clock;
     this.state = Scrubber.states.STOPPED;
@@ -419,13 +452,14 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     }
   }
 
+  _step() {
+    this._loop();
+    this.tick();
+  }
+
   _loop() {
     this.clock.cancelAnimationFrame(this._animationFrame);
-
-    this._animationFrame = this.clock.requestAnimationFrame(() => {
-      this._loop();
-      this.tick();
-    });
+    this._animationFrame = this.clock.requestAnimationFrame(this._step);
   }
 
   tick() {

@@ -36,6 +36,7 @@ export default class Scrubber extends Observable {
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = repeatDirection;
+    this._step = this._step.bind(this);
 
     this.clock = clock;
     this.state = Scrubber.states.STOPPED;
@@ -111,13 +112,14 @@ export default class Scrubber extends Observable {
     }
   }
 
+  _step() {
+    this._loop();
+    this.tick();
+  }
+
   _loop() {
     this.clock.cancelAnimationFrame(this._animationFrame);
-
-    this._animationFrame = this.clock.requestAnimationFrame(() => {
-      this._loop();
-      this.tick();
-    });
+    this._animationFrame = this.clock.requestAnimationFrame(this._step);
   }
 
   tick() {
