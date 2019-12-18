@@ -10,7 +10,11 @@ export default class DefaultClock {
       callback();
     });
 
-    this.animationFrame = requestAnimationFrame(this._tick);
+    if (this.registeredCallbacks.size > 0) {
+      this.animationFrame = requestAnimationFrame(this._tick);
+    } else {
+      this.animationFrame = null;
+    }
   }
 
   register(callback) {
@@ -23,11 +27,6 @@ export default class DefaultClock {
 
   unregister(callback) {
     this.registeredCallbacks.delete(callback);
-
-    if (this.registeredCallbacks.size <= 0) {
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = null;
-    }
   }
 
   now() {

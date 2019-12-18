@@ -39,7 +39,7 @@ const timeline = new Timeline({
   duration: 5000
 });
 
-timeline.repeat = Infinity;
+timeline.repeat = 1;
 // timeline.repeatDirection = Timeline.repeatDirections.ALTERNATE;
 
 timeline.observeTime(0.75, () => {
