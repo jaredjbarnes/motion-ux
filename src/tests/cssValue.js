@@ -172,7 +172,7 @@ exports["cssValue: method rgba"] = () => {
   const node = cssValue.parse(cursor);
 };
 
-exports["cssValue: svg path."] = () => {
+exports["cssValue: simple svg path."] = () => {
   const cursor = new Cursor("M 0 0 C 0 0, 0 0, 0 0");
   const cursor2 = new Cursor("M 300 300 C 20 20, 10 10, 5 5");
 
@@ -180,4 +180,12 @@ exports["cssValue: svg path."] = () => {
   const node2 = cssValue.parse(cursor2);
 };
 
+
+exports["cssValue: complex svg path."] = () => {
+  const cursor = new Cursor("M 10 315 L 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10");
+  const cursor2 = new Cursor("M 300 300 C 20 20, 10 10, 5 5");
+
+  const node = cssValue.parse(cursor);
+  const node2 = cssValue.parse(cursor2);
+};
 
