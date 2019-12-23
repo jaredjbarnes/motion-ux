@@ -163,3 +163,10 @@ exports["Patterns: method rgba"] = () => {
   const cursor = new Cursor("rgba(0,0,0,0)");
   const node = values.parse(cursor);
 };
+
+exports["Patterns: radial gradient"] = () => {
+  const cursor = new Cursor(
+    "radial-gradient(at 40% 40%, rgba(187,202,218,1) 0%, rgba(187,202,218,1) 20%, rgba(187,202,218,1) 100%)"
+  );
+  const node = values.parse(cursor);
+};

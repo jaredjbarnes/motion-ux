@@ -1913,9 +1913,9 @@ function (_ValuePattern) {
     value: function _tryPattern() {
       var result = this.regex.exec(this.substring);
 
-      if (result != null) {
+      if (result != null && result.index === 0) {
         var currentIndex = this.cursor.getIndex();
-        var newIndex = currentIndex + this.regex.lastIndex - 1;
+        var newIndex = currentIndex + result[0].length - 1;
         this.node = new _ValueNode.default(this.name, result[0], currentIndex, newIndex);
         this.cursor.setIndex(newIndex);
       } else {
@@ -4100,7 +4100,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const unitType = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RegexValue"]("unit-type", "[a-zA-Z]+|%");
+const unitType = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RegexValue"]("unit-type", "[a-zA-Z%]+");
 const unit = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["AndComposite"]("unit", [_number_js__WEBPACK_IMPORTED_MODULE_1__["default"], unitType]);
 
 /* harmony default export */ __webpack_exports__["default"] = (unit);
