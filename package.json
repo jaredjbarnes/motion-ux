@@ -1,6 +1,6 @@
 {
   "name": "motion-ux",
-  "version": "2.0.10",
+  "version": "2.0.2",
   "description": "UI Animation Framework",
   "main": "lib/index.js",
   "directories": {
@@ -37,6 +37,6 @@
     "nyc": "^14.1.1"
   },
   "dependencies": {
-    "clarity-pattern-parser": "1.1.2"
+    "clarity-pattern-parser": "1.1.3"
   }
 }
