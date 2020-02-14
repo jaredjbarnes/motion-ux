@@ -795,6 +795,9 @@ class CssValueNodeAnimator {
   constructor(options) {
     this.options = options;
     this.createAnimators();
+    
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   createAnimators() {
@@ -850,6 +853,9 @@ class ValuesNodeAnimator {
     };
 
     this.createAnimators();
+    
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   createAnimators() {
@@ -885,10 +891,15 @@ __webpack_require__.r(__webpack_exports__);
 
 class NumberNodeAnimator {
   constructor(options) {
+    this.options = options;
+    
     this.animator = new _NumberAnimator_js__WEBPACK_IMPORTED_MODULE_0__["default"]({
       ...options,
       controls: options.controls.map(node => parseFloat(node.value))
     });
+
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   render(progress) {
@@ -1020,6 +1031,9 @@ class HexNodeAnimator {
       return this.hexToRgb(this.convertToFullHex(node.value));
     });
 
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
+
     const { reds, greens, blues } = values.reduce(
       (acc, rgb) => {
         acc.reds.push(rgb[0]);
@@ -1128,11 +1142,16 @@ class UnitNodeAnimator {
         parseInt(node.children[0].value, 10)
       )
     });
+
+    this.unit = this.options.controls[0].children[1].value;
+
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   render(progress) {
     const value = this.animator.render(progress);
-    const unit = this.options.controls[0].children[1].value;
+    const unit = this.unit;
     return `${value.toFixed(3)}${unit}`;
   }
 }
@@ -1153,6 +1172,10 @@ class MethodNodeAnimator {
     this.options = options;
     this.createArgs();
     this.createAnimators();
+    this.methodName = this.getMethodName();
+
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   createArgs() {
@@ -1176,8 +1199,13 @@ class MethodNodeAnimator {
     });
   }
 
+  getMethodName() {
+    return this.options.controls[0].children.find(node => node.name === "name")
+      .value;
+  }
+
   render(progress) {
-    const methodName = this.getMethodName();
+    const methodName = this.methodName;
     const args = this.getArgs(progress);
 
     return `${methodName}(${args})`;
@@ -1185,11 +1213,6 @@ class MethodNodeAnimator {
 
   getArgs(progress) {
     return this.animators.map(animator => animator.render(progress)).join(", ");
-  }
-
-  getMethodName() {
-    return this.options.controls[0].children.find(node => node.name === "name")
-      .value;
   }
 }
 
@@ -1204,13 +1227,19 @@ __webpack_require__.r(__webpack_exports__);
 class NameNodeAnimator {
   constructor(options) {
     this.options = options;
+    this.values = this.options.controls.map(node => {
+      return node.value;
+    });
+
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   render(progress) {
     if (progress > 0) {
-      return this.options.controls[this.options.controls.length - 1].value;
+      return this.values[this.values.length - 1];
     } else {
-      return this.options.controls[0].value;
+      return this.values[0];
     }
   }
 }

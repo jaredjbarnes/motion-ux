@@ -18,6 +18,9 @@ export default class ValuesNodeAnimator {
     };
 
     this.createAnimators();
+    
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   createAnimators() {

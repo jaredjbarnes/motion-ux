@@ -5,6 +5,10 @@ export default class MethodNodeAnimator {
     this.options = options;
     this.createArgs();
     this.createAnimators();
+    this.methodName = this.getMethodName();
+
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
   }
 
   createArgs() {
@@ -28,8 +32,13 @@ export default class MethodNodeAnimator {
     });
   }
 
+  getMethodName() {
+    return this.options.controls[0].children.find(node => node.name === "name")
+      .value;
+  }
+
   render(progress) {
-    const methodName = this.getMethodName();
+    const methodName = this.methodName;
     const args = this.getArgs(progress);
 
     return `${methodName}(${args})`;
@@ -37,10 +46,5 @@ export default class MethodNodeAnimator {
 
   getArgs(progress) {
     return this.animators.map(animator => animator.render(progress)).join(", ");
-  }
-
-  getMethodName() {
-    return this.options.controls[0].children.find(node => node.name === "name")
-      .value;
   }
 }

@@ -17,6 +17,9 @@ export default class HexNodeAnimator {
       return this.hexToRgb(this.convertToFullHex(node.value));
     });
 
+    // The nodes become quite the memory hogs, so we need to remove references.
+    this.options.controls.length = 0;
+
     const { reds, greens, blues } = values.reduce(
       (acc, rgb) => {
         acc.reds.push(rgb[0]);
