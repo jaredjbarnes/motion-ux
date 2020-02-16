@@ -704,11 +704,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const treeUtility = new _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__["default"]();
+const treeNormalizer = new _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__["default"]();
 
 class AnimatorCreator {
   constructor(animationOptions) {
     this.animationOptions = animationOptions;
-    this._treeNormalizer = new _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__["default"]();
 
     this._assertAnimationOptions();
     this._convertAnimationsToTimelineOptions();
@@ -742,7 +742,7 @@ class AnimatorCreator {
       controls = points.map(point => {
         const cursor = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__["Cursor"](point);
         const node = _patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(cursor);
-        this._treeNormalizer.normalize(node);
+        treeNormalizer.normalize(node);
 
         if (cursor.hasUnresolvedError()) {
           throw new Error(
@@ -4441,17 +4441,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
 
 
+const filterOutSpaces = child => child.name !== "spaces";
+const filterOutDividers = child => child.name !== "divider";
+
 class TreeNormalizer {
   constructor() {
-    this.removeSpacesVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"](node => {
-      if (Array.isArray(node.children)) {
-        node.children = node.children.filter(child => child.name !== "spaces");
-      }
+    this.removeSpacesVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.visitNode);
+  }
 
-      if (node.name === "css-value") {
-        node.children = node.children.filter(child => child.name !== "divider");
-      }
-    });
+  visitNode(node) {
+    if (Array.isArray(node.children)) {
+      node.children = node.children.filter(filterOutSpaces);
+    }
+
+    if (node.name === "css-value") {
+      node.children = node.children.filter(filterOutDividers);
+    }
   }
 
   normalize(node) {

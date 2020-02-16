@@ -6,11 +6,11 @@ import TreeNormalizer from "./TreeNormalizer.js";
 import TreeUtility from "./TreeUtility.js";
 
 const treeUtility = new TreeUtility();
+const treeNormalizer = new TreeNormalizer();
 
 export default class AnimatorCreator {
   constructor(animationOptions) {
     this.animationOptions = animationOptions;
-    this._treeNormalizer = new TreeNormalizer();
 
     this._assertAnimationOptions();
     this._convertAnimationsToTimelineOptions();
@@ -44,7 +44,7 @@ export default class AnimatorCreator {
       controls = points.map(point => {
         const cursor = new Cursor(point);
         const node = cssValue.parse(cursor);
-        this._treeNormalizer.normalize(node);
+        treeNormalizer.normalize(node);
 
         if (cursor.hasUnresolvedError()) {
           throw new Error(
