@@ -1167,6 +1167,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ValuesNodeAnimator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
 
 
+const findArguments = node => node.name === "arguments";
+const filterValues = node => node.name === "values";
+const findMethodName = node => node.name === "name";
+const findArgs = node => {
+  return node.children.find(findArguments).children.filter(filterValues);
+};
+
 class MethodNodeAnimator {
   constructor(options) {
     this.options = options;
@@ -1179,11 +1186,7 @@ class MethodNodeAnimator {
   }
 
   createArgs() {
-    this.args = this.options.controls.map(node => {
-      return node.children
-        .find(node => node.name === "arguments")
-        .children.filter(node => node.name === "values");
-    });
+    this.args = this.options.controls.map(findArgs);
   }
 
   createAnimators() {
@@ -1200,8 +1203,7 @@ class MethodNodeAnimator {
   }
 
   getMethodName() {
-    return this.options.controls[0].children.find(node => node.name === "name")
-      .value;
+    return this.options.controls[0].children.find(findMethodName).value;
   }
 
   render(progress) {
