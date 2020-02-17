@@ -2,14 +2,7 @@ const emptyFn = () => {};
 
 export default class Visitor {
   constructor(callback) {
-    if (typeof callback === "function") {
-      this.callback = callback;
-    } else {
-      this.callback = emptyFn;
-    }
-
-    this.callback = callback;
-
+    this.setCallback(callback);
     this.visitDown = this.visitDown.bind(this);
     this.visitUp = this.visitUp.bind(this);
   }
@@ -37,4 +30,14 @@ export default class Visitor {
   visitDown(node) {
     this.walkDown(node);
   }
+
+  setCallback(callback){
+    if (typeof callback === "function") {
+      this.callback = callback;
+    } else {
+      this.callback = emptyFn;
+    }
+
+    this.callback = callback;
+  };
 }

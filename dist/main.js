@@ -4478,14 +4478,7 @@ const emptyFn = () => {};
 
 class Visitor {
   constructor(callback) {
-    if (typeof callback === "function") {
-      this.callback = callback;
-    } else {
-      this.callback = emptyFn;
-    }
-
-    this.callback = callback;
-
+    this.setCallback(callback);
     this.visitDown = this.visitDown.bind(this);
     this.visitUp = this.visitUp.bind(this);
   }
@@ -4513,6 +4506,16 @@ class Visitor {
   visitDown(node) {
     this.walkDown(node);
   }
+
+  setCallback(callback){
+    if (typeof callback === "function") {
+      this.callback = callback;
+    } else {
+      this.callback = emptyFn;
+    }
+
+    this.callback = callback;
+  };
 }
 
 
@@ -4526,24 +4529,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
 
 
+const visitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+
 class TreeUtility {
-    areTreeStructuresEqual(nodeA, nodeB){
-        const nodeASequence = [];
-        const nodeBSequence = [];
+  areTreeStructuresEqual(nodeA, nodeB) {
+    const nodeASequence = [];
+    const nodeBSequence = [];
 
-        const nodeAVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]((node)=>{
-            nodeASequence.push(node.name);
-        });
-        nodeAVisitor.visitDown(nodeA);
+    visitor.setCallback(node => {
+      nodeASequence.push(node.name);
+    });
+    visitor.visitDown(nodeA);
 
-        const nodeBVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]((node)=>{
-            nodeBSequence.push(node.name);
-        });
-        nodeBVisitor.visitDown(nodeB);
+    visitor.setCallback(node => {
+      nodeBSequence.push(node.name);
+    });
+    visitor.visitDown(nodeB);
 
-        return nodeASequence.join("|") === nodeBSequence.join("|");
-    }
+    return nodeASequence.join("|") === nodeBSequence.join("|");
+  }
 }
+
 
 /***/ })
 /******/ ]);
