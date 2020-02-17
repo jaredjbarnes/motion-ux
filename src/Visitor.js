@@ -9,13 +9,14 @@ export default class Visitor {
     }
 
     this.callback = callback;
+
+    this.visitDown = this.visitDown.bind(this);
+    this.visitUp = this.visitUp.bind(this);
   }
 
   walkUp(node) {
     if (Array.isArray(node.children)) {
-      node.children.forEach(child => {
-        this.walkUp(child);
-      });
+      node.children.forEach(this.visitUp);
     }
 
     this.callback(node);
@@ -29,9 +30,7 @@ export default class Visitor {
     this.callback(node);
 
     if (Array.isArray(node.children)) {
-      node.children.forEach(child => {
-        this.walkDown(child);
-      });
+      node.children.forEach(this.visitDown);
     }
   }
 
