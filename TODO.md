@@ -1,0 +1,1 @@
+We should have a Player class which really is the Scrubber. Then we can have different types of Renderers. Timeline, BezierTimeline etc.
