@@ -1,31 +1,34 @@
 export default class BezierCurve {
   constructor(points) {
     this.points = points;
-    this.percentage = 0;
+    this.reducedPoints = new Array(points.length);
   }
 
-  reduceToPoint(points) {
-    const reducedPoints = points.reduce((reducedPoints, point, index) => {
-      if (index !== points.length - 1) {
-        const nextPoint = points[index + 1];
-        reducedPoints.push((nextPoint - point) * this.percentage + point);
-      }
-
-      return reducedPoints;
-    }, []);
-
-    if (reducedPoints.length > 1) {
-      return this.reduceToPoint(reducedPoints);
-    }
-
-    return reducedPoints[0];
+  clone() {
+    return new BezierCurve(this.points.slice());
   }
 
   valueAt(percentage) {
-    this.percentage = percentage;
+    const points = this.points;
+    const reducedPoints = this.reducedPoints;
+    const length = points.length;
 
-    this.validatePoints();
-    return this.reduceToPoint(this.points);
+    for (let x = 0; x < length; x++) {
+      reducedPoints[x] = points[x];
+    }
+
+    for (let x = 0; x < length; x++) {
+      const innerLength = length - x - 1;
+
+      for (let y = 0; y < innerLength; y++) {
+        const nextPoint = reducedPoints[y + 1];
+        const point = reducedPoints[y];
+
+        reducedPoints[y] = (nextPoint - point) * percentage + point;
+      }
+    }
+
+    return reducedPoints[0];
   }
 
   validatePoints() {
@@ -35,7 +38,7 @@ export default class BezierCurve {
 
     const controlPoints = this.points.slice(1, this.points.length - 2);
 
-    controlPoints.forEach(point => this.assertValidPoint(point));
+    controlPoints.forEach((point) => this.assertValidPoint(point));
   }
 
   assertValidPoint(point) {

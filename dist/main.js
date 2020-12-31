@@ -116,6 +116,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BezierCurve", function() { return _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
+/* harmony import */ var _BlendedBezierCurve_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(58);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BlendedBezierCurve", function() { return _BlendedBezierCurve_js__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+
+
 
 
 
@@ -959,31 +963,34 @@ __webpack_require__.r(__webpack_exports__);
 class BezierCurve {
   constructor(points) {
     this.points = points;
-    this.percentage = 0;
+    this.reducedPoints = new Array(points.length);
   }
 
-  reduceToPoint(points) {
-    const reducedPoints = points.reduce((reducedPoints, point, index) => {
-      if (index !== points.length - 1) {
-        const nextPoint = points[index + 1];
-        reducedPoints.push((nextPoint - point) * this.percentage + point);
-      }
-
-      return reducedPoints;
-    }, []);
-
-    if (reducedPoints.length > 1) {
-      return this.reduceToPoint(reducedPoints);
-    }
-
-    return reducedPoints[0];
+  clone() {
+    return new BezierCurve(this.points.slice());
   }
 
   valueAt(percentage) {
-    this.percentage = percentage;
+    const points = this.points;
+    const reducedPoints = this.reducedPoints;
+    const length = points.length;
 
-    this.validatePoints();
-    return this.reduceToPoint(this.points);
+    for (let x = 0; x < length; x++) {
+      reducedPoints[x] = points[x];
+    }
+
+    for (let x = 0; x < length; x++) {
+      const innerLength = length - x - 1;
+
+      for (let y = 0; y < innerLength; y++) {
+        const nextPoint = reducedPoints[y + 1];
+        const point = reducedPoints[y];
+
+        reducedPoints[y] = (nextPoint - point) * percentage + point;
+      }
+    }
+
+    return reducedPoints[0];
   }
 
   validatePoints() {
@@ -993,7 +1000,7 @@ class BezierCurve {
 
     const controlPoints = this.points.slice(1, this.points.length - 2);
 
-    controlPoints.forEach(point => this.assertValidPoint(point));
+    controlPoints.forEach((point) => this.assertValidPoint(point));
   }
 
   assertValidPoint(point) {
@@ -4547,6 +4554,60 @@ class TreeUtility {
     visitor.visitDown(nodeB);
 
     return nodeASequence.join("|") === nodeBSequence.join("|");
+  }
+}
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BlendedBezierCurve; });
+/* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
+
+
+class BlendedBezierCurve {
+  constructor(options) {
+    options = options || {};
+    this.bezierCurveA = options.bezierCurveA;
+    this.bezierCurveB = options.bezierCurveB;
+
+    const offsetValue = this.bezierCurveA.valueAt(options.offset);
+    const pointsA = this.bezierCurveA.points
+      .map((p) => this.bezierCurveA.valueAt(p) - offsetValue)
+      .filter((p) => p > 0);
+
+    const points = this.bezierCurveB.points.slice();
+    const firstPoint = pointsA[0];
+    for (let x = 0; x < points.length; x++) {
+      if (points[x] <= firstPoint) {
+        points[x] = firstPoint;
+      }
+    }
+
+    pointsA.unshift(0);
+    points.splice(0, 0, ...pointsA);
+
+    this.bezierCurve = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"](points);
+    this.validateOptions();
+  }
+
+  valueAt(percentage) {
+    const value = this.bezierCurve.valueAt(percentage);
+    return value;
+  }
+
+  validateOptions() {
+    if (
+      typeof this.bezierCurveA.valueAt !== "function" ||
+      typeof this.bezierCurveB.valueAt !== "function"
+    ) {
+      throw new Error(
+        "Both bezierCurveA and BezierCurveB need to have valueAt functions."
+      );
+    }
   }
 }
 
