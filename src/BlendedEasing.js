@@ -1,17 +1,17 @@
 import BezierCurve from "./BezierCurve.js";
 
-export default class BlendedBezierCurve {
+export default class BlendedEasing {
   constructor(options) {
     options = options || {};
-    this.bezierCurveA = options.bezierCurveA;
-    this.bezierCurveB = options.bezierCurveB;
+    this.easingA = options.bezierCurveA;
+    this.easingB = options.bezierCurveB;
 
-    const offsetValue = this.bezierCurveA.valueAt(options.offset);
-    const pointsA = this.bezierCurveA.points
-      .map((p) => this.bezierCurveA.valueAt(p) - offsetValue)
+    const offsetValue = this.easingA.valueAt(options.offset);
+    const pointsA = this.easingA.points
+      .map((p) => this.easingA.valueAt(p) - offsetValue)
       .filter((p) => p >= 0);
 
-    const points = this.bezierCurveB.points.slice();
+    const points = this.easingB.points.slice();
     const firstPoint = pointsA[0];
     for (let x = 0; x < points.length; x++) {
       if (points[x] <= firstPoint) {
@@ -35,8 +35,8 @@ export default class BlendedBezierCurve {
 
   validateOptions() {
     if (
-      typeof this.bezierCurveA.valueAt !== "function" ||
-      typeof this.bezierCurveB.valueAt !== "function"
+      typeof this.easingA.valueAt !== "function" ||
+      typeof this.easingB.valueAt !== "function"
     ) {
       throw new Error(
         "Both bezierCurveA and BezierCurveB need to have valueAt functions."

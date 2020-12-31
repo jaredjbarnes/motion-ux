@@ -1,25 +1,19 @@
 import "../../dist/main.js";
 
-const {
-  easings,
-  Timeline,
-  BezierCurve,
-  BlendedBezierCurve,
-  PointReducer,
-} = motionUX;
+const { easings, Timeline, Easing, BlendedEasing, PointReducer } = motionUX;
 
 const jsonTextarea = document.querySelector("textarea");
 const stepInput = document.querySelector("input");
 const chartButton = document.querySelector("button");
 const canvas = document.querySelector("canvas");
 
-const firstEasing = new BezierCurve([0, 1, 1, 1, 1, 1]);
-const secondEasing = new BezierCurve([0, 0, 0, 0, 0, 1]);
+const firstEasing = new Easing([0, 1, 1, 1, 1, 1]);
+const secondEasing = new Easing([0, 0, 0, 0, 0, 1]);
 
-const blendedBezierCurve = new BlendedBezierCurve({
-  bezierCurveA: firstEasing,
-  bezierCurveB: secondEasing,
-  offset: 0.75,
+const blendedEasing = new BlendedEasing({
+  easingA: firstEasing,
+  easingB: secondEasing,
+  offset: 0,
 });
 
 const getJSONPoints = () => {
@@ -43,7 +37,7 @@ const getStep = () => {
 
 const drawPoints = (points, step) => {
   const context = canvas.getContext("2d");
-  const bezierCurve = blendedBezierCurve;
+  const bezierCurve = blendedEasing;
   const offset = 0;
   const size = canvas.width;
 
