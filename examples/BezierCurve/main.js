@@ -13,13 +13,13 @@ const stepInput = document.querySelector("input");
 const chartButton = document.querySelector("button");
 const canvas = document.querySelector("canvas");
 
-const easeOut = new BezierCurve([0, 0, 0, 0, 0, 1]);
-const easeIn = new BezierCurve([0, 1, 1, 1, 1]);
+const firstEasing = new BezierCurve([0, 1, 1, 1, 1, 1]);
+const secondEasing = new BezierCurve([0, 0, 0, 0, 0, 1]);
 
 const blendedBezierCurve = new BlendedBezierCurve({
-  bezierCurveA: easeIn,
-  bezierCurveB: easeOut,
-  offset: 0.05,
+  bezierCurveA: firstEasing,
+  bezierCurveB: secondEasing,
+  offset: 0.75,
 });
 
 const getJSONPoints = () => {

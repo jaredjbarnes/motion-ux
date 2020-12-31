@@ -9,7 +9,7 @@ export default class BlendedBezierCurve {
     const offsetValue = this.bezierCurveA.valueAt(options.offset);
     const pointsA = this.bezierCurveA.points
       .map((p) => this.bezierCurveA.valueAt(p) - offsetValue)
-      .filter((p) => p > 0);
+      .filter((p) => p >= 0);
 
     const points = this.bezierCurveB.points.slice();
     const firstPoint = pointsA[0];
@@ -19,8 +19,10 @@ export default class BlendedBezierCurve {
       }
     }
 
+    const index = points.lastIndexOf(0);
+
     pointsA.unshift(0);
-    points.splice(0, 0, ...pointsA);
+    points.splice(index + 1, 0, ...pointsA);
 
     this.bezierCurve = new BezierCurve(points);
     this.validateOptions();
