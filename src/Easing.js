@@ -1,7 +1,7 @@
 import BezierCurve from "./BezierCurve.js";
 
 export default class Easing extends BezierCurve {
-  constructor() {
+  constructor(points) {
     super(points);
   }
 

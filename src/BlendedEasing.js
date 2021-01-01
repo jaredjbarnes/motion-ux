@@ -3,8 +3,8 @@ import BezierCurve from "./BezierCurve.js";
 export default class BlendedEasing {
   constructor(options) {
     options = options || {};
-    this.easingA = options.bezierCurveA;
-    this.easingB = options.bezierCurveB;
+    this.easingA = options.easingA;
+    this.easingB = options.easingB;
 
     const offsetValue = this.easingA.valueAt(options.offset);
     const pointsA = this.easingA.points

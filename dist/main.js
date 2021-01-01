@@ -4575,8 +4575,8 @@ __webpack_require__.r(__webpack_exports__);
 class BlendedEasing {
   constructor(options) {
     options = options || {};
-    this.easingA = options.bezierCurveA;
-    this.easingB = options.bezierCurveB;
+    this.easingA = options.easingA;
+    this.easingB = options.easingB;
 
     const offsetValue = this.easingA.valueAt(options.offset);
     const pointsA = this.easingA.points
@@ -4629,7 +4629,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Easing extends _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor() {
+  constructor(points) {
     super(points);
   }
 
