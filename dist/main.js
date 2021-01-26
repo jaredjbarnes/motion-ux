@@ -4303,7 +4303,7 @@ class TimelineOption {
       throw new Error(`The "endAt" property must be a number between 0 and 1.`);
     }
 
-    if (!(this.easing instanceof _Easing_js__WEBPACK_IMPORTED_MODULE_1__["default"])) {
+    if (this.easing == null || typeof this.easing.valueAt !== "function") {
       throw new Error(`The "easing" property must be an instance of Easing.`);
     }
   }
@@ -4553,14 +4553,12 @@ class BlendedEasing {
   constructor(options) {
     options = options || {};
     this.easingA = options.easingA;
-    this.easingB = options.easingB;
     this.offset = options.offset;
-
+    
     const slope = this.getSlope();
-    const points = this.easingB.points.slice();
-
+    
+    this.to = options.easingB;
     this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
-    this.to = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"](points);
     this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1, 1, 1, 1]);
 
     this.validateOptions();
@@ -4588,7 +4586,7 @@ class BlendedEasing {
   validateOptions() {
     if (
       typeof this.easingA.valueAt !== "function" ||
-      typeof this.easingB.valueAt !== "function"
+      typeof this.to.valueAt !== "function"
     ) {
       throw new Error(
         "Both bezierCurveA and BezierCurveB need to have valueAt functions."

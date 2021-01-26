@@ -62,7 +62,7 @@ export default class TimelineOption {
       throw new Error(`The "endAt" property must be a number between 0 and 1.`);
     }
 
-    if (!(this.easing instanceof Easing)) {
+    if (this.easing == null || typeof this.easing.valueAt !== "function") {
       throw new Error(`The "easing" property must be an instance of Easing.`);
     }
   }
