@@ -11,7 +11,7 @@ export default class BlendedEasing {
 
     const slope = this.getSlope();
     this.from = new BezierCurve([0, slope]);
-    this.easing = new BezierCurve([0, 0, 0, 1, 1, 1, 1, 1, 1]);
+    this.easing = new BezierCurve([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]);
   }
 
   getSlope() {

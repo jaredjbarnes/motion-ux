@@ -4558,7 +4558,7 @@ class BlendedEasing {
 
     const slope = this.getSlope();
     this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
-    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1, 1, 1, 1]);
+    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]);
   }
 
   getSlope() {
