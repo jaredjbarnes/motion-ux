@@ -7,13 +7,13 @@ const stepInput = document.querySelector("input");
 const chartButton = document.querySelector("button");
 const canvas = document.querySelector("canvas");
 
-const firstEasing = new Easing([0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1]);
-const secondEasing = new Easing([0, 0, 1, 1, 1]);
+const firstEasing = new Easing([0, 1]);
+const secondEasing = new Easing([0, 1, 1, 1, 1]);
 
 const blendedEasing = new BlendedEasing({
   easingA: firstEasing,
   easingB: secondEasing,
-  offset: 0.5,
+  offset: 0.4,
 });
 
 const getJSONPoints = () => {
@@ -28,39 +28,46 @@ const getJSONPoints = () => {
 };
 
 const getStep = () => {
-  const step = new Number(stepInput.value);
-  if (isNaN(step)) {
-    return "0.1";
+  const step = Number(stepInput.value);
+  if (isNaN(step) || step < 0.01) {
+    return 0.01;
   }
   return step;
 };
 
-const drawPoints = (points, step) => {
-  const context = canvas.getContext("2d");
-  const bezierCurve = blendedEasing;
-  const offset = 0;
-  const size = canvas.width;
+const context = canvas.getContext("2d");
+context.save();
 
-  context.clearRect(0, 0, 0, 0);
+const drawPoints = (bezierCurve, step) => {
+  const offset = -50;
+  const size = 200;
+
+  context.clearRect(0, 0, 300, 300);
+  context.restore();
 
   context.strokeStyle = "#000";
-  context.moveTo(offset, offset);
+  
+  context.beginPath();
+  for (let i = 0; i < 1; i += step) {
+    const x = size * i - offset;
+    const y = size - (size * bezierCurve.valueAt(i) + offset);
 
-  for (let x = 0; x < 1; x += step) {
-    context.lineTo(
-      size * x + offset,
-      size - (size * bezierCurve.valueAt(x) + offset)
-    );
+    if (i === 0) {
+      context.moveTo(x, y);
+    }
+
+    context.lineTo(x, y);
   }
-
-  context.lineTo(
-    size * 1 + offset,
-    size - (size * bezierCurve.valueAt(1) + offset)
-  );
 
   context.stroke();
 };
 
-chartButton.addEventListener("click", () => {});
+chartButton.addEventListener("click", () => {
+  const points = getJSONPoints();
+  const easing = new Easing(points);
+  const step = getStep();
 
-drawPoints([0, 0, 1], 0.01);
+  drawPoints(easing, step);
+});
+
+drawPoints(blendedEasing, 0.01);
