@@ -2,7 +2,9 @@ import "../../dist/main.js";
 
 const { easings, Timeline, Easing, BlendedEasing, PointReducer } = motionUX;
 
-const jsonTextarea = document.querySelector("textarea");
+const firstJsonTextarea = document.querySelector("#first");
+const secondJsonTextarea = document.querySelector("#second");
+const offsetInput = document.querySelector("#offset");
 const stepInput = document.querySelector("input");
 const chartButton = document.querySelector("button");
 const canvas = document.querySelector("canvas");
@@ -16,8 +18,19 @@ const blendedEasing = new BlendedEasing({
   offset: 0.4,
 });
 
-const getJSONPoints = () => {
-  const json = jsonTextarea.value;
+const getFirstJSONPoints = () => {
+  const json = firstJsonTextarea.value;
+  let points;
+
+  try {
+    points = JSON.parse(json);
+  } catch (error) {}
+
+  return Array.isArray(points) ? points : [0, 1];
+};
+
+const getSecondJSONPoints = () => {
+  const json = secondJsonTextarea.value;
   let points;
 
   try {
@@ -35,6 +48,14 @@ const getStep = () => {
   return step;
 };
 
+const getOffset = () => {
+  const offset = Number(offsetInput.value);
+  if (isNaN(offset)) {
+    return 0;
+  }
+  return offset;
+};
+
 const context = canvas.getContext("2d");
 context.save();
 
@@ -46,7 +67,7 @@ const drawPoints = (bezierCurve, step) => {
   context.restore();
 
   context.strokeStyle = "#000";
-  
+
   context.beginPath();
   for (let i = 0; i < 1; i += step) {
     const x = size * i - offset;
@@ -63,8 +84,14 @@ const drawPoints = (bezierCurve, step) => {
 };
 
 chartButton.addEventListener("click", () => {
-  const points = getJSONPoints();
-  const easing = new Easing(points);
+  const firstEasing = new Easing(getFirstJSONPoints());
+  const secondEasing = new Easing(getSecondJSONPoints());
+  const offset = getOffset();
+  const easing = new BlendedEasing({
+    easingA: firstEasing,
+    easingB: secondEasing,
+    offset,
+  });
   const step = getStep();
 
   drawPoints(easing, step);

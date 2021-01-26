@@ -4556,27 +4556,33 @@ class BlendedEasing {
     this.easingB = options.easingB;
     this.offset = options.offset;
 
-    const firstControlPoint = this.getTangent();
+    const slope = this.getSlope();
     const points = this.easingB.points.slice();
-    points.splice(1, 0, firstControlPoint);
 
-    this.bezierCurve = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"](points);
+    this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
+    this.to = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"](points);
+    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1, 1, 1, 1]);
+
     this.validateOptions();
   }
 
-  getTangent() {
+  getSlope() {
     const deltaX = 0.0001;
     const rise =
       this.easingA.valueAt(deltaX + this.offset) -
       this.easingA.valueAt(this.offset);
     const run = deltaX;
 
-    return (rise / run) * this.offset;
+    return rise / run;
   }
 
   valueAt(percentage) {
-    const value = this.bezierCurve.valueAt(percentage);
-    return value;
+    const adjustedPercentage = this.easing.valueAt(percentage);
+
+    const toValue = this.to.valueAt(percentage);
+    const fromValue = this.from.valueAt(percentage);
+
+    return fromValue + (toValue - fromValue) * adjustedPercentage;
   }
 
   validateOptions() {
