@@ -4238,6 +4238,8 @@ const spaces = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RepeatVa
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TimelineOption; });
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(55);
+
 
 
 class TimelineOption {
@@ -4270,11 +4272,15 @@ class TimelineOption {
     }
 
     if (typeof this.to !== "string") {
-      throw new Error(`The "to" property needs to be a string, but found ${this.to}.`);
+      throw new Error(
+        `The "to" property needs to be a string, but found ${this.to}.`
+      );
     }
 
     if (typeof this.from !== "string") {
-      throw new Error(`The "from" property needs to be a string, but found ${this.from}.`);
+      throw new Error(
+        `The "from" property needs to be a string, but found ${this.from}.`
+      );
     }
 
     if (typeof this.name !== "string") {
@@ -4297,8 +4303,8 @@ class TimelineOption {
       throw new Error(`The "endAt" property must be a number between 0 and 1.`);
     }
 
-    if (typeof this.easing !== "function") {
-      throw new Error(`The "easing" property must be a function.`);
+    if (!(this.easing instanceof _Easing_js__WEBPACK_IMPORTED_MODULE_1__["default"])) {
+      throw new Error(`The "easing" property must be an instance of Easing.`);
     }
   }
 }

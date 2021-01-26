@@ -1,4 +1,5 @@
 import easings from "./easings.js";
+import Easing from "./Easing.js";
 
 export default class TimelineOption {
   constructor(animation) {
@@ -30,11 +31,15 @@ export default class TimelineOption {
     }
 
     if (typeof this.to !== "string") {
-      throw new Error(`The "to" property needs to be a string, but found ${this.to}.`);
+      throw new Error(
+        `The "to" property needs to be a string, but found ${this.to}.`
+      );
     }
 
     if (typeof this.from !== "string") {
-      throw new Error(`The "from" property needs to be a string, but found ${this.from}.`);
+      throw new Error(
+        `The "from" property needs to be a string, but found ${this.from}.`
+      );
     }
 
     if (typeof this.name !== "string") {
@@ -57,8 +62,8 @@ export default class TimelineOption {
       throw new Error(`The "endAt" property must be a number between 0 and 1.`);
     }
 
-    if (typeof this.easing !== "function") {
-      throw new Error(`The "easing" property must be a function.`);
+    if (!(this.easing instanceof Easing)) {
+      throw new Error(`The "easing" property must be an instance of Easing.`);
     }
   }
 }
