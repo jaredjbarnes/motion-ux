@@ -36,7 +36,7 @@ const timeline = new Timeline({
       easing: easings.easeOutExpo
     }
   ],
-  duration: 5000
+  duration: 15000
 });
 
 timeline.repeat = 1;
