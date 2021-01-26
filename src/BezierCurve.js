@@ -2,6 +2,8 @@ export default class BezierCurve {
   constructor(points) {
     this.points = points;
     this.reducedPoints = new Array(points.length);
+
+    Object.freeze(this.points);
   }
 
   clone() {

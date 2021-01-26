@@ -116,10 +116,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BezierCurve", function() { return _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(58);
+/* harmony import */ var _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(59);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BlendedEasing", function() { return _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__["default"]; });
 
-/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(59);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(55);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Easing", function() { return _Easing_js__WEBPACK_IMPORTED_MODULE_4__["default"]; });
 
 
@@ -702,8 +702,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(19);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _TimelineOption_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
-/* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(55);
-/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(57);
+/* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(56);
+/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(58);
 
 
 
@@ -944,12 +944,8 @@ class NumberAnimator {
 
     const relativeProgress = progress - this.options.startAt;
     const duration = this.options.endAt - this.options.startAt;
-    const progressWithEasing = this.options.easing(
-      relativeProgress,
-      0,
-      1,
-      duration
-    );
+    const progressWithEasing =
+      this.options.easing.valueAt(relativeProgress) * duration;
 
     const value = this.bezierCurve.valueAt(progressWithEasing);
     return value;
@@ -968,6 +964,8 @@ class BezierCurve {
   constructor(points) {
     this.points = points;
     this.reducedPoints = new Array(points.length);
+
+    Object.freeze(this.points);
   }
 
   clone() {
@@ -4312,137 +4310,83 @@ class TimelineOption {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
+
+
 const easings = {
-    easeInQuad: function (t, b, c, d) {
-        return c * (t /= d) * t + b;
-    },
-    easeOutQuad: function (t, b, c, d) {
-        return -c * (t /= d) * (t - 2) + b;
-    },
-    easeInOutQuad: function (t, b, c, d) {
-        if ((t /= d / 2) < 1) return c / 2 * t * t + b;
-        return -c / 2 * ((--t) * (t - 2) - 1) + b;
-    },
-    easeInCubic: function (t, b, c, d) {
-        return c * (t /= d) * t * t + b;
-    },
-    easeOutCubic: function (t, b, c, d) {
-        return c * ((t = t / d - 1) * t * t + 1) + b;
-    },
-    easeInOutCubic: function (t, b, c, d) {
-        if ((t /= d / 2) < 1) return c / 2 * t * t * t + b;
-        return c / 2 * ((t -= 2) * t * t + 2) + b;
-    },
-    easeInQuart: function (t, b, c, d) {
-        return c * (t /= d) * t * t * t + b;
-    },
-    easeOutQuart: function (t, b, c, d) {
-        return -c * ((t = t / d - 1) * t * t * t - 1) + b;
-    },
-    easeInOutQuart: function (t, b, c, d) {
-        if ((t /= d / 2) < 1) return c / 2 * t * t * t * t + b;
-        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
-    },
-    easeInQuint: function (t, b, c, d) {
-        return c * (t /= d) * t * t * t * t + b;
-    },
-    easeOutQuint: function (t, b, c, d) {
-        return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
-    },
-    easeInOutQuint: function (t, b, c, d) {
-        if ((t /= d / 2) < 1) return c / 2 * t * t * t * t * t + b;
-        return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
-    },
-    easeInSine: function (t, b, c, d) {
-        return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
-    },
-    easeOutSine: function (t, b, c, d) {
-        return c * Math.sin(t / d * (Math.PI / 2)) + b;
-    },
-    easeInOutSine: function (t, b, c, d) {
-        return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
-    },
-    easeInExpo: function (t, b, c, d) {
-        return (t == 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
-    },
-    easeOutExpo: function (t, b, c, d) {
-        return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
-    },
-    easeInOutExpo: function (t, b, c, d) {
-        if (t == 0) return b;
-        if (t == d) return b + c;
-        if ((t /= d / 2) < 1) return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
-        return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
-    },
-    easeInCirc: function (t, b, c, d) {
-        return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
-    },
-    easeOutCirc: function (t, b, c, d) {
-        return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
-    },
-    easeInOutCirc: function (t, b, c, d) {
-        if ((t /= d / 2) < 1) return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
-        return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
-    },
-    easeInElastic: function (t, b, c, d) {
-        var s = 1.70158; var p = 0; var a = c;
-        if (t == 0) return b; if ((t /= d) == 1) return b + c; if (!p) p = d * .3;
-        if (a < Math.abs(c)) { a = c; var s = p / 4; }
-        else var s = p / (2 * Math.PI) * Math.asin(c / a);
-        return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-    },
-    easeOutElastic: function (t, b, c, d) {
-        var s = 1.70158; var p = 0; var a = c;
-        if (t == 0) return b; if ((t /= d) == 1) return b + c; if (!p) p = d * .3;
-        if (a < Math.abs(c)) { a = c; var s = p / 4; }
-        else var s = p / (2 * Math.PI) * Math.asin(c / a);
-        return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
-    },
-    easeInOutElastic: function (t, b, c, d) {
-        var s = 1.70158; var p = 0; var a = c;
-        if (t == 0) return b; if ((t /= d / 2) == 2) return b + c; if (!p) p = d * (.3 * 1.5);
-        if (a < Math.abs(c)) { a = c; var s = p / 4; }
-        else var s = p / (2 * Math.PI) * Math.asin(c / a);
-        if (t < 1) return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
-    },
-    easeInBack: function (t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        return c * (t /= d) * t * ((s + 1) * t - s) + b;
-    },
-    easeOutBack: function (t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
-    },
-    easeInOutBack: function (t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        if ((t /= d / 2) < 1) return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
-        return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
-    },
-    easeInBounce: function (t, b, c, d) {
-        return c - easings.easeOutBounce(d - t, 0, c, d) + b;
-    },
-    easeOutBounce: function (t, b, c, d) {
-        if ((t /= d) < (1 / 2.75)) {
-            return c * (7.5625 * t * t) + b;
-        } else if (t < (2 / 2.75)) {
-            return c * (7.5625 * (t -= (1.5 / 2.75)) * t + .75) + b;
-        } else if (t < (2.5 / 2.75)) {
-            return c * (7.5625 * (t -= (2.25 / 2.75)) * t + .9375) + b;
-        } else {
-            return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
-        }
-    },
-    easeInOutBounce: function (t, b, c, d) {
-        if (t < d / 2) return easings.easeInBounce(t * 2, 0, c, d) * .5 + b;
-        return easings.easeOutBounce(t * 2 - d, 0, c, d) * .5 + c * .5 + b;
-    },
-    linear: function (t, b, c, d) {
-        return c * t / d + b;
-    }
+  easeInQuad: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1]),
+  easeOutQuad: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1]),
+  easeInOutQuad: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1, 1]),
+  easeInCubic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1]),
+  easeOutCubic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1]),
+  easeInOutCubic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1]),
+  easeInQuart: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 1]),
+  easeOutQuart: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1]),
+  easeInOutQuart: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 1, 1, 1, 1]),
+  easeInQuint: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 1]),
+  easeOutQuint: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1, 1]),
+  easeInOutQuint: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
+  easeInSine: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1]),
+  easeOutSine: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1]),
+  easeInOutSine: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1, 1]),
+  easeInExpo: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 0, 1]),
+  easeOutExpo: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1, 1, 1]),
+  easeInOutExpo: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]),
+  easeInCirc: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35, 1]),
+  easeOutCirc: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1]),
+  easeInOutCirc: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]),
+  easeInElastic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([
+    0,
+    0,
+    0,
+    0.15,
+    -0.25,
+    0.25,
+    -0.5,
+    -0.5,
+    2,
+    -1,
+    -1,
+    1,
+  ]),
+  easeOutElastic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([
+    0,
+    2,
+    2,
+    -1,
+    1.5,
+    1.5,
+    0.75,
+    1.25,
+    0.85,
+    1,
+    1,
+    1,
+  ]),
+  easeInOutElastic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([
+    0,
+    0,
+    0,
+    0,
+    0.5,
+    -0.75,
+    -2,
+    3,
+    1.75,
+    0.5,
+    1,
+    1,
+    1,
+    1,
+  ]),
+  easeInBack: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, -0.5, 1]),
+  easeOutBack: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1.5, 1, 1]),
+  easeInOutBack: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, -0.5, 1.5, 1, 1]),
+  linear: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1]),
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (easings);
+
 
 /***/ }),
 /* 55 */
@@ -4450,8 +4394,35 @@ const easings = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Easing; });
+/* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
+
+
+class Easing extends _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(points) {
+    super(points);
+  }
+
+  validatePoints() {
+    if (this.points[0] !== 0) {
+      throw new Error("The first point needs to be zero");
+    }
+
+    if (this.points[this.points.length - 1] !== 1) {
+      throw new Error("The last point needs to be one.");
+    }
+  }
+}
+
+
+/***/ }),
+/* 56 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeNormalizer; });
-/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(57);
 
 
 const filterOutSpaces = child => child.name !== "spaces";
@@ -4479,7 +4450,7 @@ class TreeNormalizer {
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4531,13 +4502,13 @@ class Visitor {
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeUtility; });
-/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(57);
 
 
 const visitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
@@ -4563,7 +4534,7 @@ class TreeUtility {
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4610,33 +4581,6 @@ class BlendedEasing {
       throw new Error(
         "Both bezierCurveA and BezierCurveB need to have valueAt functions."
       );
-    }
-  }
-}
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Easing; });
-/* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
-
-
-class Easing extends _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor(points) {
-    super(points);
-  }
-
-  validatePoints() {
-    if (this.points[0] !== 0) {
-      throw new Error("The first point needs to be zero");
-    }
-
-    if (this.points[this.points.length - 1] !== 1) {
-      throw new Error("The last point needs to be one.");
     }
   }
 }

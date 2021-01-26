@@ -18,12 +18,8 @@ export default class NumberAnimator {
 
     const relativeProgress = progress - this.options.startAt;
     const duration = this.options.endAt - this.options.startAt;
-    const progressWithEasing = this.options.easing(
-      relativeProgress,
-      0,
-      1,
-      duration
-    );
+    const progressWithEasing =
+      this.options.easing.valueAt(relativeProgress) * duration;
 
     const value = this.bezierCurve.valueAt(progressWithEasing);
     return value;
