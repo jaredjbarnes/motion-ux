@@ -4238,8 +4238,6 @@ const spaces = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RepeatVa
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TimelineOption; });
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
-/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(55);
-
 
 
 class TimelineOption {
@@ -4554,14 +4552,13 @@ class BlendedEasing {
     options = options || {};
     this.easingA = options.easingA;
     this.offset = options.offset;
-    
-    const slope = this.getSlope();
-    
     this.to = options.easingB;
-    this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
-    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1, 1, 1, 1]);
 
     this.validateOptions();
+
+    const slope = this.getSlope();
+    this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
+    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1, 1, 1, 1]);
   }
 
   getSlope() {
@@ -4589,7 +4586,7 @@ class BlendedEasing {
       typeof this.to.valueAt !== "function"
     ) {
       throw new Error(
-        "Both bezierCurveA and BezierCurveB need to have valueAt functions."
+        "Both easingA and easingB need to have a valueAt function."
       );
     }
   }

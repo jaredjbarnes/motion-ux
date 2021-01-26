@@ -1,5 +1,4 @@
 import easings from "./easings.js";
-import Easing from "./Easing.js";
 
 export default class TimelineOption {
   constructor(animation) {
