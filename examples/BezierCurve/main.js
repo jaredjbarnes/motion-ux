@@ -7,25 +7,13 @@ const stepInput = document.querySelector("input");
 const chartButton = document.querySelector("button");
 const canvas = document.querySelector("canvas");
 
-const firstEasing = new Easing([0, 0, 0, 0, 0, 1]);
-const secondEasing = new Easing([
-  0,
-  1.5,
-  1.5,
-  0.5,
-  0.5,
-  0.5,
-  1.5,
-  1.5,
-  0.85,
-  0.85,
-  1,
-]);
+const firstEasing = new Easing([0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1]);
+const secondEasing = new Easing([0, 0, 1, 1, 1]);
 
 const blendedEasing = new BlendedEasing({
   easingA: firstEasing,
   easingB: secondEasing,
-  offset: 0.95,
+  offset: 0.5,
 });
 
 const getJSONPoints = () => {
