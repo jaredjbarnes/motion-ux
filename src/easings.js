@@ -1,75 +1,67 @@
-import Easing from "./Easing.js";
+import EaseInQuad from "./easingFunctions/EaseInQuad.js";
+import EaseOutQuad from "./easingFunctions/EaseOutQuad.js";
+import EaseInOutQuad from "./easingFunctions/EaseInOutQuad.js";
+import EaseInElastic from "./easingFunctions/EaseInElastic.js";
+import EaseInOutElastic from "./easingFunctions/EaseInOutElastic.js";
+import EaseOutElastic from "./easingFunctions/EaseOutElastic.js";
+import EaseInOutBack from "./easingFunctions/EaseInOutBack.js";
+import EaseInOutBounce from "./easingFunctions/EaseInOutBounce.js";
+import EaseInBounce from "./easingFunctions/EaseInBounce.js";
+import EaseOutBounce from "./easingFunctions/EaseOutBounce.js";
+import EaseInCubic from "./easingFunctions/EaseInCubic.js";
+import EaseOutCubic from "./easingFunctions/EaseOutCubic.js";
+import EaseInOutCubic from "./easingFunctions/EaseInOutCubic.js";
+import EaseInQuart from "./easingFunctions/EaseInQuart.js";
+import EaseOutQuart from "./easingFunctions/EaseOutQuart.js";
+import EaseInOutQuart from "./easingFunctions/EaseInOutQuart.js";
+import EaseInQuint from "./easingFunctions/EaseInQuint.js";
+import EaseOutQuint from "./easingFunctions/EaseOutQuint.js";
+import EaseInOutQuint from "./easingFunctions/EaseInOutQuint.js";
+import EaseInSine from "./easingFunctions/EaseInSine.js";
+import EaseOutSine from "./easingFunctions/EaseOutSine.js";
+import EaseInOutSine from "./easingFunctions/EaseInOutSine.js";
+import EaseInExpo from "./easingFunctions/EaseInExpo.js";
+import EaseOutExpo from "./easingFunctions/EaseOutExpo.js";
+import EaseInOutExpo from "./easingFunctions/EaseInOutExpo.js";
+import EaseInCirc from "./easingFunctions/EaseInCirc.js";
+import EaseOutCirc from "./easingFunctions/EaseOutCirc.js";
+import EaseInOutCirc from "./easingFunctions/EaseInOutCirc.js";
+import EaseInBack from "./easingFunctions/EaseInBack.js";
+import EaseOutBack from "./easingFunctions/EaseOutBack.js";
+import EaseLinear from "./easingFunctions/EaseLinear.js";
 
 const easings = {
-  easeInQuad: new Easing([0, 0, 1]),
-  easeOutQuad: new Easing([0, 1, 1]),
-  easeInOutQuad: new Easing([0, 0, 1, 1]),
-  easeInCubic: new Easing([0, 0, 0, 1]),
-  easeOutCubic: new Easing([0, 1, 1, 1]),
-  easeInOutCubic: new Easing([0, 0, 0, 1, 1, 1]),
-  easeInQuart: new Easing([0, 0, 0, 0, 1]),
-  easeOutQuart: new Easing([0, 1, 1, 1, 1]),
-  easeInOutQuart: new Easing([0, 0, 0, 0, 1, 1, 1, 1]),
-  easeInQuint: new Easing([0, 0, 0, 0, 0, 1]),
-  easeOutQuint: new Easing([0, 1, 1, 1, 1, 1]),
-  easeInOutQuint: new Easing([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
-  easeInSine: new Easing([0, 0, 1]),
-  easeOutSine: new Easing([0, 1, 1]),
-  easeInOutSine: new Easing([0, 0, 1, 1]),
-  easeInExpo: new Easing([0, 0, 0, 0, 0, 0, 1]),
-  easeOutExpo: new Easing([0, 1, 1, 1, 1, 1, 1]),
-  easeInOutExpo: new Easing([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]),
-  easeInCirc: new Easing([0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35, 1]),
-  easeOutCirc: new Easing([0, 0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1]),
-  easeInOutCirc: new Easing([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]),
-  easeInElastic: new Easing([
-    0,
-    0,
-    0,
-    0.15,
-    -0.25,
-    0.25,
-    -0.5,
-    -0.5,
-    2,
-    -1,
-    -1,
-    1,
-  ]),
-  easeOutElastic: new Easing([
-    0,
-    2,
-    2,
-    -1,
-    1.5,
-    1.5,
-    0.75,
-    1.25,
-    0.85,
-    1,
-    1,
-    1,
-  ]),
-  easeInOutElastic: new Easing([
-    0,
-    0,
-    0,
-    0,
-    0.5,
-    -0.75,
-    -2,
-    3,
-    1.75,
-    0.5,
-    1,
-    1,
-    1,
-    1,
-  ]),
-  easeInBack: new Easing([0, 0, -0.5, 1]),
-  easeOutBack: new Easing([0, 1.5, 1, 1]),
-  easeInOutBack: new Easing([0, 0, -0.5, 1.5, 1, 1]),
-  linear: new Easing([0, 1]),
+  easeInQuad: new EaseInQuad(),
+  easeOutQuad: new EaseOutQuad(),
+  easeInOutQuad: new EaseInOutQuad(),
+  easeInCubic: new EaseInCubic(),
+  easeOutCubic: new EaseOutCubic(),
+  easeInOutCubic: new EaseInOutCubic(),
+  easeInQuart: new EaseInQuart(),
+  easeOutQuart: new EaseOutQuart(),
+  easeInOutQuart: new EaseInOutQuart(),
+  easeInQuint: new EaseInQuint(),
+  easeOutQuint: new EaseOutQuint(),
+  easeInOutQuint: EaseInOutQuint(),
+  easeInSine: new EaseInSine(),
+  easeOutSine: new EaseOutSine(),
+  easeInOutSine: new EaseInOutSine(),
+  easeInExpo: new EaseInExpo(),
+  easeOutExpo: new EaseOutExpo(),
+  easeInOutExpo: new EaseInOutExpo(),
+  easeInCirc: new EaseInCirc(),
+  easeOutCirc: new EaseOutCirc(),
+  easeInOutCirc: new EaseInOutCirc(),
+  easeInElastic: new EaseInElastic(),
+  easeOutElastic: new EaseOutElastic(),
+  easeInOutElastic: new EaseInOutElastic(),
+  easeInBack: new EaseInBack(),
+  easeOutBack: new EaseOutBack(),
+  easeInOutBack: new EaseInOutBack(),
+  easeInBounce: new EaseInBounce(),
+  easeOutBounce: new EaseOutBounce(),
+  easeInOutBounce: new EaseInOutBounce(),
+  linear: new EaseLinear(),
 };
 
 export default easings;

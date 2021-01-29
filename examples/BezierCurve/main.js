@@ -8,6 +8,7 @@ const offsetInput = document.querySelector("#offset");
 const stepInput = document.querySelector("input");
 const chartButton = document.querySelector("button");
 const canvas = document.querySelector("canvas");
+const useFirst = document.querySelector("#use-first");
 
 const firstEasing = new Easing([0, 1]);
 const secondEasing = new Easing([0, 1, 1, 1, 1]);
@@ -84,17 +85,26 @@ const drawPoints = (bezierCurve, step) => {
 };
 
 chartButton.addEventListener("click", () => {
-  const firstEasing = new Easing(getFirstJSONPoints());
-  const secondEasing = new Easing(getSecondJSONPoints());
-  const offset = getOffset();
-  const easing = new BlendedEasing({
-    easingA: firstEasing,
-    easingB: secondEasing,
-    offset,
-  });
-  const step = getStep();
+  const shouldOnlyUseFirst = useFirst.checked;
 
-  drawPoints(easing, step);
+  if (shouldOnlyUseFirst) {
+    const easing = new Easing(getFirstJSONPoints());
+    const step = getStep();
+
+    drawPoints(easings.easeInOutBounce, step);
+  } else {
+    const firstEasing = new Easing(getFirstJSONPoints());
+    const secondEasing = new Easing(getSecondJSONPoints());
+    const offset = getOffset();
+    const easing = new BlendedEasing({
+      easingA: firstEasing,
+      easingB: secondEasing,
+      offset,
+    });
+    const step = getStep();
+
+    drawPoints(easing, step);
+  }
 });
 
 drawPoints(blendedEasing, 0.01);

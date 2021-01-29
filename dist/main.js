@@ -116,10 +116,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BezierCurve", function() { return _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(59);
+/* harmony import */ var _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(90);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BlendedEasing", function() { return _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__["default"]; });
 
-/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(55);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(91);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Easing", function() { return _Easing_js__WEBPACK_IMPORTED_MODULE_4__["default"]; });
 
 
@@ -702,8 +702,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(19);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _TimelineOption_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
-/* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(56);
-/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(58);
+/* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(87);
+/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(89);
 
 
 
@@ -4314,79 +4314,101 @@ class TimelineOption {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
+/* harmony import */ var _easingFunctions_EaseInQuad_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
+/* harmony import */ var _easingFunctions_EaseOutQuad_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(57);
+/* harmony import */ var _easingFunctions_EaseInOutQuad_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(58);
+/* harmony import */ var _easingFunctions_EaseInElastic_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(59);
+/* harmony import */ var _easingFunctions_EaseInOutElastic_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(60);
+/* harmony import */ var _easingFunctions_EaseOutElastic_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(61);
+/* harmony import */ var _easingFunctions_EaseInOutBack_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(62);
+/* harmony import */ var _easingFunctions_EaseInOutBounce_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(63);
+/* harmony import */ var _easingFunctions_EaseInBounce_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(64);
+/* harmony import */ var _easingFunctions_EaseOutBounce_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(65);
+/* harmony import */ var _easingFunctions_EaseInCubic_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(66);
+/* harmony import */ var _easingFunctions_EaseOutCubic_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(67);
+/* harmony import */ var _easingFunctions_EaseInOutCubic_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(68);
+/* harmony import */ var _easingFunctions_EaseInQuart_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(69);
+/* harmony import */ var _easingFunctions_EaseOutQuart_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(70);
+/* harmony import */ var _easingFunctions_EaseInOutQuart_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(71);
+/* harmony import */ var _easingFunctions_EaseInQuint_js__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(72);
+/* harmony import */ var _easingFunctions_EaseOutQuint_js__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(73);
+/* harmony import */ var _easingFunctions_EaseInOutQuint_js__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(74);
+/* harmony import */ var _easingFunctions_EaseInSine_js__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(75);
+/* harmony import */ var _easingFunctions_EaseOutSine_js__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(76);
+/* harmony import */ var _easingFunctions_EaseInOutSine_js__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(77);
+/* harmony import */ var _easingFunctions_EaseInExpo_js__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(78);
+/* harmony import */ var _easingFunctions_EaseOutExpo_js__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(79);
+/* harmony import */ var _easingFunctions_EaseInOutExpo_js__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(80);
+/* harmony import */ var _easingFunctions_EaseInCirc_js__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(81);
+/* harmony import */ var _easingFunctions_EaseOutCirc_js__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(82);
+/* harmony import */ var _easingFunctions_EaseInOutCirc_js__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(83);
+/* harmony import */ var _easingFunctions_EaseInBack_js__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(84);
+/* harmony import */ var _easingFunctions_EaseOutBack_js__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(85);
+/* harmony import */ var _easingFunctions_EaseLinear_js__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(86);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const easings = {
-  easeInQuad: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1]),
-  easeOutQuad: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1]),
-  easeInOutQuad: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1, 1]),
-  easeInCubic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1]),
-  easeOutCubic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1]),
-  easeInOutCubic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 1, 1, 1]),
-  easeInQuart: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 1]),
-  easeOutQuart: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1]),
-  easeInOutQuart: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 1, 1, 1, 1]),
-  easeInQuint: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 1]),
-  easeOutQuint: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1, 1]),
-  easeInOutQuint: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
-  easeInSine: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1]),
-  easeOutSine: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1]),
-  easeInOutSine: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1, 1]),
-  easeInExpo: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 0, 1]),
-  easeOutExpo: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1, 1, 1]),
-  easeInOutExpo: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]),
-  easeInCirc: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35, 1]),
-  easeOutCirc: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1]),
-  easeInOutCirc: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]),
-  easeInElastic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([
-    0,
-    0,
-    0,
-    0.15,
-    -0.25,
-    0.25,
-    -0.5,
-    -0.5,
-    2,
-    -1,
-    -1,
-    1,
-  ]),
-  easeOutElastic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([
-    0,
-    2,
-    2,
-    -1,
-    1.5,
-    1.5,
-    0.75,
-    1.25,
-    0.85,
-    1,
-    1,
-    1,
-  ]),
-  easeInOutElastic: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([
-    0,
-    0,
-    0,
-    0,
-    0.5,
-    -0.75,
-    -2,
-    3,
-    1.75,
-    0.5,
-    1,
-    1,
-    1,
-    1,
-  ]),
-  easeInBack: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, -0.5, 1]),
-  easeOutBack: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1.5, 1, 1]),
-  easeInOutBack: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, -0.5, 1.5, 1, 1]),
-  linear: new _Easing_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1]),
+  easeInQuad: new _easingFunctions_EaseInQuad_js__WEBPACK_IMPORTED_MODULE_0__["default"](),
+  easeOutQuad: new _easingFunctions_EaseOutQuad_js__WEBPACK_IMPORTED_MODULE_1__["default"](),
+  easeInOutQuad: new _easingFunctions_EaseInOutQuad_js__WEBPACK_IMPORTED_MODULE_2__["default"](),
+  easeInCubic: new _easingFunctions_EaseInCubic_js__WEBPACK_IMPORTED_MODULE_10__["default"](),
+  easeOutCubic: new _easingFunctions_EaseOutCubic_js__WEBPACK_IMPORTED_MODULE_11__["default"](),
+  easeInOutCubic: new _easingFunctions_EaseInOutCubic_js__WEBPACK_IMPORTED_MODULE_12__["default"](),
+  easeInQuart: new _easingFunctions_EaseInQuart_js__WEBPACK_IMPORTED_MODULE_13__["default"](),
+  easeOutQuart: new _easingFunctions_EaseOutQuart_js__WEBPACK_IMPORTED_MODULE_14__["default"](),
+  easeInOutQuart: new _easingFunctions_EaseInOutQuart_js__WEBPACK_IMPORTED_MODULE_15__["default"](),
+  easeInQuint: new _easingFunctions_EaseInQuint_js__WEBPACK_IMPORTED_MODULE_16__["default"](),
+  easeOutQuint: new _easingFunctions_EaseOutQuint_js__WEBPACK_IMPORTED_MODULE_17__["default"](),
+  easeInOutQuint: Object(_easingFunctions_EaseInOutQuint_js__WEBPACK_IMPORTED_MODULE_18__["default"])(),
+  easeInSine: new _easingFunctions_EaseInSine_js__WEBPACK_IMPORTED_MODULE_19__["default"](),
+  easeOutSine: new _easingFunctions_EaseOutSine_js__WEBPACK_IMPORTED_MODULE_20__["default"](),
+  easeInOutSine: new _easingFunctions_EaseInOutSine_js__WEBPACK_IMPORTED_MODULE_21__["default"](),
+  easeInExpo: new _easingFunctions_EaseInExpo_js__WEBPACK_IMPORTED_MODULE_22__["default"](),
+  easeOutExpo: new _easingFunctions_EaseOutExpo_js__WEBPACK_IMPORTED_MODULE_23__["default"](),
+  easeInOutExpo: new _easingFunctions_EaseInOutExpo_js__WEBPACK_IMPORTED_MODULE_24__["default"](),
+  easeInCirc: new _easingFunctions_EaseInCirc_js__WEBPACK_IMPORTED_MODULE_25__["default"](),
+  easeOutCirc: new _easingFunctions_EaseOutCirc_js__WEBPACK_IMPORTED_MODULE_26__["default"](),
+  easeInOutCirc: new _easingFunctions_EaseInOutCirc_js__WEBPACK_IMPORTED_MODULE_27__["default"](),
+  easeInElastic: new _easingFunctions_EaseInElastic_js__WEBPACK_IMPORTED_MODULE_3__["default"](),
+  easeOutElastic: new _easingFunctions_EaseOutElastic_js__WEBPACK_IMPORTED_MODULE_5__["default"](),
+  easeInOutElastic: new _easingFunctions_EaseInOutElastic_js__WEBPACK_IMPORTED_MODULE_4__["default"](),
+  easeInBack: new _easingFunctions_EaseInBack_js__WEBPACK_IMPORTED_MODULE_28__["default"](),
+  easeOutBack: new _easingFunctions_EaseOutBack_js__WEBPACK_IMPORTED_MODULE_29__["default"](),
+  easeInOutBack: new _easingFunctions_EaseInOutBack_js__WEBPACK_IMPORTED_MODULE_6__["default"](),
+  easeInBounce: new _easingFunctions_EaseInBounce_js__WEBPACK_IMPORTED_MODULE_8__["default"](),
+  easeOutBounce: new _easingFunctions_EaseOutBounce_js__WEBPACK_IMPORTED_MODULE_9__["default"](),
+  easeInOutBounce: new _easingFunctions_EaseInOutBounce_js__WEBPACK_IMPORTED_MODULE_7__["default"](),
+  linear: new _easingFunctions_EaseLinear_js__WEBPACK_IMPORTED_MODULE_30__["default"](),
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (easings);
@@ -4398,23 +4420,16 @@ const easings = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Easing; });
-/* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInQuad; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
 
 
-class Easing extends _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor(points) {
-    super(points);
-  }
-
-  validatePoints() {
-    if (this.points[0] !== 0) {
-      throw new Error("The first point needs to be zero");
-    }
-
-    if (this.points[this.points.length - 1] !== 1) {
-      throw new Error("The last point needs to be one.");
-    }
+class EaseInQuad extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return percentage * percentage;
+    };
+    super(func);
   }
 }
 
@@ -4425,8 +4440,780 @@ class Easing extends _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FunctionEasing; });
+class FunctionEasing {
+  constructor(func) {
+    this.func = func;
+    this.validateFunction();
+  }
+
+  valueAt(percentage) {
+    return this.func(percentage);
+  }
+
+  validateFunction() {
+    if (typeof this.func !== "function") {
+      throw new Error("Function easing needs a function to work properly.");
+    }
+  }
+}
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutQuad; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutQuad extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return -percentage * (percentage - 2);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutQuad; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutQuad extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if ((percentage /= 1 / 2) < 1) return (1 / 2) * percentage * percentage;
+      return (-1 / 2) * (--percentage * (percentage - 2) - 1);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInElastic; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(tension) {
+    const func = (percentage) => {
+      const p = 0.3 / this.tension;
+      const s = p / 4;
+      const a = 1;
+
+      if (percentage === 0) return 0;
+      if ((percentage /= 1) === 1) return 1;
+
+      return -(
+        a *
+        Math.pow(2, 10 * (percentage -= 1)) *
+        Math.sin(((percentage - s) * (2 * Math.PI)) / p)
+      );
+    };
+
+    super(func);
+    this.tension = tension === "number" ? tension : 1;
+  }
+}
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutElastic; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(tension) {
+    const func = (percentage) => {
+      const p = 0.3 / this.tension;
+      const s = p / 4;
+      const a = 1;
+
+      if (percentage === 0) return 0;
+      if ((percentage /= 1 / 2) === 2) return 1;
+
+      if (percentage < 1)
+        return (
+          -0.5 *
+          (a *
+            Math.pow(2, 10 * (percentage -= 1)) *
+            Math.sin(((percentage - s) * (2 * Math.PI)) / p))
+        );
+      return (
+        a *
+          Math.pow(2, -10 * (percentage -= 1)) *
+          Math.sin(((percentage - s) * (2 * Math.PI)) / p) *
+          0.5 +
+        1
+      );
+    };
+
+    super(func);
+    this.tension = tension === "number" ? tension : 1;
+  }
+}
+
+
+/***/ }),
+/* 61 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutElastic; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(tension) {
+    const func = (percentage) => {
+      const p = 0.3 / this.tension;
+      const s = p / 4;
+      const a = 1;
+
+      if (percentage === 0) return 0;
+      if ((percentage /= 1) == 1) return 1;
+
+      return (
+        a *
+          Math.pow(2, -10 * percentage) *
+          Math.sin(((percentage - s) * (2 * Math.PI)) / p) +
+        1
+      );
+    };
+
+    super(func);
+    this.tension = tension === "number" ? tension : 1;
+  }
+}
+
+
+/***/ }),
+/* 62 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutBack; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutBack extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      const s = 1.70158 * 1.525;
+
+      if ((percentage /= 1 / 2) < 1) {
+        return (1 / 2) * (percentage * percentage * ((s + 1) * percentage - s));
+      }
+
+      return (
+        (1 / 2) *
+        ((percentage -= 2) * percentage * ((s + 1) * percentage + s) + 2)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 63 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutBounce; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+/* harmony import */ var _EaseInBounce_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(64);
+/* harmony import */ var _EaseOutBounce_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(65);
+
+
+
+
+const easeInBounce = new _EaseInBounce_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
+const easeOutBounce = new _EaseOutBounce_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
+
+class EaseInOutBounce extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if (percentage < 0.5) {
+        return easeInBounce.valueAt(percentage * 2) * 0.5;
+      } else {
+        return easeOutBounce.valueAt(percentage * 2 - 1) * 0.5 + 0.5;
+      }
+    };
+
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 64 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInBounce; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+/* harmony import */ var _EaseOutBounce_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(65);
+
+
+
+const easeOutBounce = new _EaseOutBounce_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
+
+class EaseInBounce extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return 1 - easeOutBounce.valueAt(1 - percentage);
+    };
+
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 65 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutBounce; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutBounce extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      let t = percentage;
+
+      if ((t /= 1) < 1 / 2.75) {
+        return 7.5625 * t * t;
+      } else if (t < 2 / 2.75) {
+        return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+      } else if (t < 2.5 / 2.75) {
+        return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+      } else {
+        return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+      }
+    };
+
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 66 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInCubic; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInCubic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return 1 * (percentage /= 1) * percentage * percentage;
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 67 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutCubic; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutCubic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return (
+        1 * ((percentage = percentage / 1 - 1) * percentage * percentage + 1)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 68 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutCubic; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutCubic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * percentage * percentage * percentage;
+      return (1 / 2) * ((t -= 2) * percentage * percentage + 2);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 69 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInQuart; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInQuart extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return 1 * (percentage /= 1) * percentage * percentage * percentage;
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 70 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutQuart; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutQuart extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return (
+        -1 *
+        ((percentage = percentage / 1 - 1) *
+          percentage *
+          percentage *
+          percentage -
+          1)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 71 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutQuart; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutQuart extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * percentage * percentage * percentage * percentage;
+      return (
+        (-1 / 2) *
+        ((percentage -= 2) * percentage * percentage * percentage - 2)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 72 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInQuint; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInQuint extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return (
+        1 *
+        (percentage /= 1) *
+        percentage *
+        percentage *
+        percentage *
+        percentage
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 73 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutQuint; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutQuint extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return (
+        1 *
+        ((percentage = percentage / 1 - 1) *
+          percentage *
+          percentage *
+          percentage *
+          percentage +
+          1)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 74 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutQuint; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutQuint extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+        return (
+          (1 / 2) *
+          percentage *
+          percentage *
+          percentage *
+          percentage *
+          percentage
+        );
+      return (
+        (1 / 2) *
+        ((percentage -= 2) * percentage * percentage * percentage * percentage +
+          2)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 75 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInSine; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInSine extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return -1 * Math.cos((percentage / 1) * (Math.PI / 2)) + percentage;
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 76 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutSine; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutSine extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return 1 * Math.sin((percentage / 1) * (Math.PI / 2));
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 77 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutSine; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutSine extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return (-1 / 2) * (Math.cos((Math.PI * percentage) / 1) - 1);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 78 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInExpo; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInExpo extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return percentage == 0 ? 0 : 1 * Math.pow(2, 10 * (percentage / 1 - 1));
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 79 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutExpo; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutExpo extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return percentage == 1
+        ? 1
+        : 1 * (-Math.pow(2, (-10 * percentage) / 1) + 1);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 80 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutExpo; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutExpo extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if (percentage == 0) return 0;
+      if (percentage == 1) return 1;
+      if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * Math.pow(2, 10 * (percentage - 1));
+      return (1 / 2) * (-Math.pow(2, -10 * --percentage) + 2);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 81 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInCirc; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInCirc extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return -1 * (Math.sqrt(1 - (percentage /= 1) * percentage) - 1);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 82 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutCirc; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutCirc extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return 1 * Math.sqrt(1 - (percentage = percentage / 1 - 1) * percentage);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 83 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInOutCirc; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInOutCirc extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+        return (-1 / 2) * (Math.sqrt(1 - percentage * percentage) - 1);
+      return (1 / 2) * (Math.sqrt(1 - (percentage -= 2) * percentage) + 1);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 84 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseInBack; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseInBack extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      const s = 1.70158;
+      return 1 * (percentage /= 1) * percentage * ((s + 1) * percentage - s);
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 85 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseOutBack; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseOutBack extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      const s = 1.70158;
+      return (
+        1 *
+        ((percentage = percentage / 1 - 1) *
+          percentage *
+          ((s + 1) * percentage + s) +
+          1)
+      );
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 86 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EaseLinear; });
+/* harmony import */ var _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(56);
+
+
+class EaseLinear extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    const func = (percentage) => {
+      return percentage;
+    };
+    super(func);
+  }
+}
+
+
+/***/ }),
+/* 87 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeNormalizer; });
-/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(57);
+/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(88);
 
 
 const filterOutSpaces = child => child.name !== "spaces";
@@ -4454,7 +5241,7 @@ class TreeNormalizer {
 
 
 /***/ }),
-/* 57 */
+/* 88 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4506,13 +5293,13 @@ class Visitor {
 
 
 /***/ }),
-/* 58 */
+/* 89 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeUtility; });
-/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(57);
+/* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(88);
 
 
 const visitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
@@ -4538,7 +5325,7 @@ class TreeUtility {
 
 
 /***/ }),
-/* 59 */
+/* 90 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4561,6 +5348,7 @@ class BlendedEasing {
     this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1, 1, 1, 1, 1]);
   }
 
+  // Use differential calculas to get slope.
   getSlope() {
     const deltaX = 0.0001;
     const rise =
@@ -4588,6 +5376,33 @@ class BlendedEasing {
       throw new Error(
         "Both easingA and easingB need to have a valueAt function."
       );
+    }
+  }
+}
+
+
+/***/ }),
+/* 91 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Easing; });
+/* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
+
+
+class Easing extends _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(points) {
+    super(points);
+  }
+
+  validatePoints() {
+    if (this.points[0] !== 0) {
+      throw new Error("The first point needs to be zero");
+    }
+
+    if (this.points[this.points.length - 1] !== 1) {
+      throw new Error("The last point needs to be one.");
     }
   }
 }

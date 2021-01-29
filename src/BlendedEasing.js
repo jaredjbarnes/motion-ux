@@ -14,6 +14,7 @@ export default class BlendedEasing {
     this.easing = new BezierCurve([0, 0, 1, 1, 1, 1, 1]);
   }
 
+  // Use differential calculas to get slope.
   getSlope() {
     const deltaX = 0.0001;
     const rise =
