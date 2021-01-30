@@ -4545,27 +4545,36 @@ __webpack_require__.r(__webpack_exports__);
 
 class EaseInOutElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor(tension) {
-    const func = (percentage) => {
-      const p = 0.3 / this.tension;
-      const s = p / 4;
-      const a = 1;
+    const func = (t) => {
+      var b = 0;
+      var c = 1;
+      var d = 1;
+      var s = 1.70158;
+      var p = 0;
+      var a = c;
 
-      if (percentage <= 0) return 0;
-      if (percentage / 2 >= 2) return 1;
-
-      if (percentage < 1)
+      if (t == 0) return b;
+      if ((t /= d / 2) == 2) return b + c;
+      if (!p) p = d * (0.3 / this.tension);
+      if (a < Math.abs(c)) {
+        a = c;
+        var s = p / 4;
+      } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+      if (t < 1)
         return (
           -0.5 *
-          (a *
-            Math.pow(2, 10 * (percentage -= 1)) *
-            Math.sin(((percentage - s) * (2 * Math.PI)) / p))
+            (a *
+              Math.pow(2, 10 * (t -= 1)) *
+              Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
+          b
         );
       return (
         a *
-          Math.pow(2, -10 * (percentage -= 1)) *
-          Math.sin(((percentage - s) * (2 * Math.PI)) / p) *
+          Math.pow(2, -10 * (t -= 1)) *
+          Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
           0.5 +
-        1
+        c +
+        b
       );
     };
 

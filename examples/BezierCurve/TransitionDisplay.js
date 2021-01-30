@@ -18,7 +18,6 @@ export default class TransitionDisplay {
     this.createFromDropDown();
     this.createToDropDown();
     this.createOffetRange();
-    this.createBall();
 
     this.build();
     this.update();
@@ -70,45 +69,6 @@ export default class TransitionDisplay {
     });
   }
 
-  createBall() {
-    this.ball = document.createElement("div");
-    this.ball.style.backgroundColor = "blue";
-    this.ball.style.width = "50px";
-    this.ball.style.height = "50px";
-    this.ball.style.borderRadius = "50%";
-  }
-
-  createTimeline() {
-    if (this.timeline != null) {
-      this.timeline.dispose();
-    }
-
-    const timeline = (this.timeline = new Timeline({
-      animations: [
-        {
-          name: "circle",
-          property: "transform",
-          from: "translate(0px, 0px)",
-          to: "translate(400px,0px)",
-          startAt: 0,
-          endAt: 1,
-          easing: this.blendedEasing,
-        },
-      ],
-      duration: 2000,
-    }));
-
-    timeline.repeat = Infinity;
-
-    timeline.observe("RENDER", ({ animations }) => {
-      Object.keys(animations.circle).forEach((key) => {
-        this.ball.style[key] = animations.circle[key];
-      });
-    });
-
-    timeline.play();
-  }
-
   build() {
     this.document.body.appendChild(this.fromEasingInput);
     this.document.body.appendChild(this.document.createElement("br"));
@@ -120,8 +80,6 @@ export default class TransitionDisplay {
     this.document.body.appendChild(this.toCanvas.getCanvas());
     this.document.body.appendChild(this.document.createElement("br"));
     this.document.body.appendChild(this.blendCanvas.getCanvas());
-    this.document.body.appendChild(this.document.createElement("br"));
-    this.document.body.appendChild(this.ball);
   }
 
   getFromEasing() {
@@ -148,8 +106,6 @@ export default class TransitionDisplay {
     this.updateFromCanvas();
     this.updateToCanvas();
     this.updateBlendCanvas();
-
-    //this.createTimeline();
   }
 
   updateFromCanvas() {
