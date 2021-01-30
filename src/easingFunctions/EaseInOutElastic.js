@@ -7,8 +7,8 @@ export default class EaseInOutElastic extends FunctionEasing {
       const s = p / 4;
       const a = 1;
 
-      if (percentage === 0) return 0;
-      if ((percentage /= 1 / 2) === 2) return 1;
+      if (percentage <= 0) return 0;
+      if (percentage / 2 >= 2) return 1;
 
       if (percentage < 1)
         return (

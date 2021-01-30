@@ -42,7 +42,7 @@ const easings = {
   easeInOutQuart: new EaseInOutQuart(),
   easeInQuint: new EaseInQuint(),
   easeOutQuint: new EaseOutQuint(),
-  easeInOutQuint: EaseInOutQuint(),
+  easeInOutQuint: new EaseInOutQuint(),
   easeInSine: new EaseInSine(),
   easeOutSine: new EaseOutSine(),
   easeInOutSine: new EaseInOutSine(),

@@ -4389,7 +4389,7 @@ const easings = {
   easeInOutQuart: new _easingFunctions_EaseInOutQuart_js__WEBPACK_IMPORTED_MODULE_15__["default"](),
   easeInQuint: new _easingFunctions_EaseInQuint_js__WEBPACK_IMPORTED_MODULE_16__["default"](),
   easeOutQuint: new _easingFunctions_EaseOutQuint_js__WEBPACK_IMPORTED_MODULE_17__["default"](),
-  easeInOutQuint: Object(_easingFunctions_EaseInOutQuint_js__WEBPACK_IMPORTED_MODULE_18__["default"])(),
+  easeInOutQuint: new _easingFunctions_EaseInOutQuint_js__WEBPACK_IMPORTED_MODULE_18__["default"](),
   easeInSine: new _easingFunctions_EaseInSine_js__WEBPACK_IMPORTED_MODULE_19__["default"](),
   easeOutSine: new _easingFunctions_EaseOutSine_js__WEBPACK_IMPORTED_MODULE_20__["default"](),
   easeInOutSine: new _easingFunctions_EaseInOutSine_js__WEBPACK_IMPORTED_MODULE_21__["default"](),
@@ -4517,8 +4517,8 @@ class EaseInElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["def
       const s = p / 4;
       const a = 1;
 
-      if (percentage === 0) return 0;
-      if ((percentage /= 1) === 1) return 1;
+      if (percentage <= 0) return 0;
+      if (percentage >= 1) return 1;
 
       return -(
         a *
@@ -4550,8 +4550,8 @@ class EaseInOutElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["
       const s = p / 4;
       const a = 1;
 
-      if (percentage === 0) return 0;
-      if ((percentage /= 1 / 2) === 2) return 1;
+      if (percentage <= 0) return 0;
+      if (percentage / 2 >= 2) return 1;
 
       if (percentage < 1)
         return (
@@ -4592,8 +4592,8 @@ class EaseOutElastic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["de
       const s = p / 4;
       const a = 1;
 
-      if (percentage === 0) return 0;
-      if ((percentage /= 1) == 1) return 1;
+      if (percentage <= 0) return 0;
+      if (percentage >= 1) return 1;
 
       return (
         a *
@@ -4783,7 +4783,7 @@ class EaseInOutCubic extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["de
     const func = (percentage) => {
       if ((percentage /= 1 / 2) < 1)
         return (1 / 2) * percentage * percentage * percentage;
-      return (1 / 2) * ((t -= 2) * percentage * percentage + 2);
+      return (1 / 2) * ((percentage -= 2) * percentage * percentage + 2);
     };
     super(func);
   }
@@ -4963,7 +4963,7 @@ __webpack_require__.r(__webpack_exports__);
 class EaseInSine extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor() {
     const func = (percentage) => {
-      return -1 * Math.cos((percentage / 1) * (Math.PI / 2)) + percentage;
+      return -Math.cos(percentage * (Math.PI / 2)) + 1;
     };
     super(func);
   }
@@ -5345,15 +5345,23 @@ class BlendedEasing {
 
     const slope = this.getSlope();
     this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
-    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 0, 1, 1, 1, 1, 1]);
+    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1, 1, 1, 1]);
   }
 
   // Use differential calculas to get slope.
   getSlope() {
-    const deltaX = 0.0001;
-    const rise =
-      this.easingA.valueAt(deltaX + this.offset) -
-      this.easingA.valueAt(this.offset);
+    const deltaX = 0.01;
+
+    let rise;
+
+    if (this.offset < 1) {
+      rise =
+        this.easingA.valueAt(deltaX + this.offset) -
+        this.easingA.valueAt(this.offset);
+    } else {
+      rise = this.easingA.valueAt(1) - this.easingA.valueAt(1 - deltaX);
+    }
+
     const run = deltaX;
 
     return rise / run;

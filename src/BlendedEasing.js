@@ -11,15 +11,23 @@ export default class BlendedEasing {
 
     const slope = this.getSlope();
     this.from = new BezierCurve([0, slope]);
-    this.easing = new BezierCurve([0, 0, 1, 1, 1, 1, 1]);
+    this.easing = new BezierCurve([0, 1, 1, 1, 1, 1, 1, 1]);
   }
 
   // Use differential calculas to get slope.
   getSlope() {
-    const deltaX = 0.0001;
-    const rise =
-      this.easingA.valueAt(deltaX + this.offset) -
-      this.easingA.valueAt(this.offset);
+    const deltaX = 0.01;
+
+    let rise;
+
+    if (this.offset < 1) {
+      rise =
+        this.easingA.valueAt(deltaX + this.offset) -
+        this.easingA.valueAt(this.offset);
+    } else {
+      rise = this.easingA.valueAt(1) - this.easingA.valueAt(1 - deltaX);
+    }
+
     const run = deltaX;
 
     return rise / run;
