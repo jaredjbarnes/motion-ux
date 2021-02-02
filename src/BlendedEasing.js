@@ -12,7 +12,7 @@ export default class BlendedEasing {
 
     this.slope = this.getSlope();
     this.from = new BezierCurve([0, this.slope]);
-    this.easing = new Easing([0, 0, 1, 1, 1, 1, 1, 1, 1, 1]);
+    this.easing = new Easing([0, 0, 0, 1, 1, 1, 1, 1]);
   }
 
   // Use differential calculas to get slope.
@@ -34,13 +34,11 @@ export default class BlendedEasing {
     return rise / run;
   }
 
-  valueAt(percentage) {
+  getFromValue(percentage) {
     const fromPercentage = this.offset + percentage;
-    const adjustedPercentage = this.easing.valueAt(percentage);
-    const toValue = this.to.valueAt(percentage);
-
     let fromValue;
 
+    // Get the value from the easing until it finishes then use the slope easing.
     if (fromPercentage <= 1) {
       fromValue =
         this.easingA.valueAt(fromPercentage) -
@@ -52,7 +50,19 @@ export default class BlendedEasing {
         this.easingA.valueAt(this.offset);
     }
 
-    return fromValue + (toValue - fromValue) * adjustedPercentage;
+    return fromValue;
+  }
+
+  valueAt(percentage) {
+    const adjustedPercentage = this.easing.valueAt(percentage / 0.25);
+    const toValue = this.to.valueAt(percentage);
+    const fromValue = this.getFromValue(percentage);
+
+    if (percentage < 0.25) {
+      return fromValue + (toValue - fromValue) * adjustedPercentage;
+    } else {
+      return toValue;
+    }
   }
 
   validateOptions() {
