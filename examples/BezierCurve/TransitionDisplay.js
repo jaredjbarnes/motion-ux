@@ -137,7 +137,7 @@ export default class TransitionDisplay {
     const xOffset = offset * size;
     const yOffset = fromEasing.valueAt(offset) * size;
 
-    this.blendCanvas.setSize(100 + yOffset);
+    this.blendCanvas.setSize(100 + Math.max(xOffset, yOffset));
     this.blendCanvas.draw(fromEasing, 0, 0, 100, offset);
     this.blendCanvas.draw(toEasing, xOffset, yOffset, 100, 0);
     this.blendCanvas.draw(blendedEasing, xOffset, yOffset, 100, 1);

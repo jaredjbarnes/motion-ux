@@ -5341,6 +5341,8 @@ class TreeUtility {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BlendedEasing; });
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(91);
+
 
 
 class BlendedEasing {
@@ -5352,9 +5354,23 @@ class BlendedEasing {
 
     this.validateOptions();
 
-    const slope = this.getSlope();
-    this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, slope]);
-    this.easing = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, 1, 1, 1, 1, 1, 1, 1]);
+    this.slope = this.getSlope();
+    this.from = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([0, this.slope]);
+    this.easing = new _Easing_js__WEBPACK_IMPORTED_MODULE_1__["default"]([
+      0,
+      0,
+      2,
+      2,
+      -1,
+      1.5,
+      1.5,
+      0.75,
+      1.25,
+      0.85,
+      1,
+      1,
+      1,
+    ]);
   }
 
   // Use differential calculas to get slope.
@@ -5378,9 +5394,10 @@ class BlendedEasing {
 
   valueAt(percentage) {
     const adjustedPercentage = this.easing.valueAt(percentage);
-
     const toValue = this.to.valueAt(percentage);
-    const fromValue = this.from.valueAt(percentage);
+    const fromValue = this.easingA.valueAt(
+      Math.min(1, this.offset + percentage)
+    ) - this.easingA.valueAt(this.offset);
 
     return fromValue + (toValue - fromValue) * adjustedPercentage;
   }
