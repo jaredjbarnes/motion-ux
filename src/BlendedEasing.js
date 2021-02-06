@@ -4,14 +4,18 @@ import Easing from "./Easing.js";
 export default class BlendedEasing {
   constructor(options) {
     options = options || {};
-    this.easingA = options.easingA;
+    this.fromEasing = options.from;
     this.offset = options.offset;
-    this.to = options.easingB;
+    this.toEasing = options.to;
+    this.transitionSpan =
+      typeof options.transitionSpan === "number"
+        ? options.transitionSpan
+        : 0.25;
 
     this.validateOptions();
 
     this.slope = this.getSlope();
-    this.from = new BezierCurve([0, this.slope]);
+    this.continuedSlopeEasing = new BezierCurve([0, this.slope]);
     this.easing = new Easing([0, 0, 0, 1, 1, 1, 1, 1]);
   }
 
@@ -23,10 +27,10 @@ export default class BlendedEasing {
 
     if (this.offset < 1) {
       rise =
-        this.easingA.valueAt(deltaX + this.offset) -
-        this.easingA.valueAt(this.offset);
+        this.fromEasing.valueAt(deltaX + this.offset) -
+        this.fromEasing.valueAt(this.offset);
     } else {
-      rise = this.easingA.valueAt(1) - this.easingA.valueAt(1 - deltaX);
+      rise = this.fromEasing.valueAt(1) - this.fromEasing.valueAt(1 - deltaX);
     }
 
     const run = deltaX;
@@ -41,24 +45,24 @@ export default class BlendedEasing {
     // Get the value from the easing until it finishes then use the slope easing.
     if (fromPercentage <= 1) {
       fromValue =
-        this.easingA.valueAt(fromPercentage) -
-        this.easingA.valueAt(this.offset);
+        this.fromEasing.valueAt(fromPercentage) -
+        this.fromEasing.valueAt(this.offset);
     } else {
       fromValue =
-        this.from.valueAt(fromPercentage - 1) +
-        this.easingA.valueAt(1) -
-        this.easingA.valueAt(this.offset);
+        this.continuedSlopeEasing.valueAt(fromPercentage - 1) +
+        this.fromEasing.valueAt(1) -
+        this.fromEasing.valueAt(this.offset);
     }
 
     return fromValue;
   }
 
   valueAt(percentage) {
-    const adjustedPercentage = this.easing.valueAt(percentage / 0.25);
-    const toValue = this.to.valueAt(percentage);
+    const adjustedPercentage = this.easing.valueAt(percentage / this.transitionSpan);
+    const toValue = this.toEasing.valueAt(percentage);
     const fromValue = this.getFromValue(percentage);
 
-    if (percentage < 0.25) {
+    if (percentage < this.transitionSpan) {
       return fromValue + (toValue - fromValue) * adjustedPercentage;
     } else {
       return toValue;
@@ -67,11 +71,11 @@ export default class BlendedEasing {
 
   validateOptions() {
     if (
-      typeof this.easingA.valueAt !== "function" ||
-      typeof this.to.valueAt !== "function"
+      typeof this.fromEasing.valueAt !== "function" ||
+      typeof this.toEasing.valueAt !== "function"
     ) {
       throw new Error(
-        "Both easingA and easingB need to have a valueAt function."
+        "Both fromEasing and toEasing need to have a valueAt function."
       );
     }
   }

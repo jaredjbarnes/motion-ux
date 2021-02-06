@@ -8,6 +8,7 @@ export default class TransitionDisplay {
     this.fromEasingInput = null;
     this.toEasingInput = null;
     this.offsetInput = null;
+    this.transitionSpanInput = null;
     this.ball = null;
     this.fromCanvas = new EasingCanvas(document);
     this.toCanvas = new EasingCanvas(document);
@@ -18,6 +19,7 @@ export default class TransitionDisplay {
     this.createFromDropDown();
     this.createToDropDown();
     this.createOffetRange();
+    this.createTransitionSpanRange();
 
     this.build();
     this.update();
@@ -69,12 +71,26 @@ export default class TransitionDisplay {
     });
   }
 
+  createTransitionSpanRange() {
+    this.transitionSpanInput = document.createElement("input");
+    this.transitionSpanInput.type = "range";
+    this.transitionSpanInput.min = 0;
+    this.transitionSpanInput.max = 1;
+    this.transitionSpanInput.step = 0.01;
+
+    this.transitionSpanInput.addEventListener("input", () => {
+      this.update();
+    });
+  }
+
   build() {
     this.document.body.appendChild(this.fromEasingInput);
     this.document.body.appendChild(this.document.createElement("br"));
     this.document.body.appendChild(this.toEasingInput);
     this.document.body.appendChild(this.document.createElement("br"));
     this.document.body.appendChild(this.offsetInput);
+    this.document.body.appendChild(this.document.createElement("br"));
+    this.document.body.appendChild(this.transitionSpanInput);
     this.document.body.appendChild(this.document.createElement("br"));
     this.document.body.appendChild(this.fromCanvas.getCanvas());
     this.document.body.appendChild(this.toCanvas.getCanvas());
@@ -100,6 +116,10 @@ export default class TransitionDisplay {
 
   getOffset() {
     return Number(this.offsetInput.value);
+  }
+
+  getTransitionSpan() {
+    return Number(this.transitionSpanInput.value);
   }
 
   update() {
@@ -128,10 +148,12 @@ export default class TransitionDisplay {
 
     const fromEasing = this.getFromEasing();
     const toEasing = this.getToEasing();
+    const transitionSpan = this.getTransitionSpan();
     const blendedEasing = (this.blendedEasing = new BlendedEasing({
-      easingA: fromEasing,
-      easingB: toEasing,
+      from: fromEasing,
+      to: toEasing,
       offset,
+      transitionSpan,
     }));
 
     const xOffset = offset * size;
