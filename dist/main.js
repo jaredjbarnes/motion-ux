@@ -5351,9 +5351,9 @@ class BlendedEasing {
     this.fromEasing = options.from;
     this.offset = options.offset;
     this.toEasing = options.to;
-    this.transitionSpan =
-      typeof options.transitionSpan === "number"
-        ? options.transitionSpan
+    this.transitionDuration =
+      typeof options.transitionDuration === "number"
+        ? options.transitionDuration
         : 0.25;
 
     this.validateOptions();
@@ -5402,11 +5402,11 @@ class BlendedEasing {
   }
 
   valueAt(percentage) {
-    const adjustedPercentage = this.easing.valueAt(percentage / this.transitionSpan);
+    const adjustedPercentage = this.easing.valueAt(percentage / this.transitionDuration);
     const toValue = this.toEasing.valueAt(percentage);
     const fromValue = this.getFromValue(percentage);
 
-    if (percentage < this.transitionSpan) {
+    if (percentage < this.transitionDuration) {
       return fromValue + (toValue - fromValue) * adjustedPercentage;
     } else {
       return toValue;

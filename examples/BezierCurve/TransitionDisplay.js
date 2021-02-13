@@ -148,12 +148,12 @@ export default class TransitionDisplay {
 
     const fromEasing = this.getFromEasing();
     const toEasing = this.getToEasing();
-    const transitionSpan = this.getTransitionSpan();
+    const transitionDuration = this.getTransitionSpan();
     const blendedEasing = (this.blendedEasing = new BlendedEasing({
       from: fromEasing,
       to: toEasing,
       offset,
-      transitionSpan,
+      transitionDuration,
     }));
 
     const xOffset = offset * size;
