@@ -108,7 +108,7 @@ export default class Animation {
       throw new Error(
         `Invalid Animation: The value types that are being animated do not match. From: ${JSON.stringify(
           this.from
-        )}, To:${JSON.stringify(options.to)}, Controls: ${JSON.stringify(
+        )}, To:${JSON.stringify(this.to)}, Controls: ${JSON.stringify(
           this.controls
         )}`
       );

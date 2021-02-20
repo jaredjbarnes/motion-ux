@@ -18,9 +18,9 @@ const timeline = new Timeline({
     {
       name: "circle",
       property: "transform",
-      from: "translate(150px,0px)",
-      controls: ["translate(300px,0px)", "translate(300px,150px)"],
-      to: "translate(150px,300px)",
+      from: "translate(150px,   0px)",
+      controls: ["translate(300px , 0px)", "translate(300px   ,     150px)"],
+      to: "translate(150px , 300px)",
       startAt: 0,
       endAt: 1,
       easing: easings.easeOutExpo
@@ -28,9 +28,9 @@ const timeline = new Timeline({
     {
       name: "circle",
       property: "background",
-      from: "linear-gradient(0deg, rgba(255,0,0,0.8), rgba(255,0,0,0))",
+      from: "linear-gradient(0deg, rgba(255,    0,0,0.8), rgba(255,0,0,0))",
       //controls: ["rgba(0,0,0,0.5)"],
-      to: "linear-gradient(720deg, rgba(0,255,0,0.8), rgba(0,255,0,0))",
+      to: "linear-gradient(720deg, rgba(0,255,0,    0.8), rgba(0, 255 ,0,0))",
       startAt: 0,
       endAt: 1,
       easing: easings.easeOutExpo
