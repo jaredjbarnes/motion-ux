@@ -1,4 +1,4 @@
-import { RepeatComposite, OrComposite } from "clarity-pattern-parser";
+import { RepeatComposite } from "clarity-pattern-parser";
 import value from "./value.js";
 import spaces from "./spaces.js";
 

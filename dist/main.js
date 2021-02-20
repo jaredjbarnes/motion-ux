@@ -116,10 +116,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BezierCurve", function() { return _BezierCurve_js__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(90);
+/* harmony import */ var _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(91);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BlendedEasing", function() { return _BlendedEasing_js__WEBPACK_IMPORTED_MODULE_3__["default"]; });
 
-/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(91);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(92);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Easing", function() { return _Easing_js__WEBPACK_IMPORTED_MODULE_4__["default"]; });
 
 
@@ -154,7 +154,6 @@ class Timeline {
 
   constructor({ animations, duration, clock = defaultClock }) {
     this.clock = clock;
-    this.adjustmentAnimators = [];
     this.render = this.render.bind(this);
     this.scrubber = new _Scrubber_js__WEBPACK_IMPORTED_MODULE_1__["default"]({
       clock,
@@ -701,9 +700,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(18);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(19);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _TimelineOption_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
+/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
 /* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(87);
-/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(89);
+/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(90);
 
 
 
@@ -719,8 +718,8 @@ class AnimatorCreator {
     this.animationOptions = animationOptions;
 
     this._assertAnimationOptions();
-    this._convertAnimationsToTimelineOptions();
-    this._sortTimelineOptions();
+    this._convertAnimationsToAnimations();
+    this._sortAnimations();
     this._createAnimators();
   }
 
@@ -730,13 +729,13 @@ class AnimatorCreator {
     }
   }
 
-  _convertAnimationsToTimelineOptions() {
+  _convertAnimationsToAnimations() {
     this.timelineOptions = this.animationOptions.map(
-      animationOption => new _TimelineOption_js__WEBPACK_IMPORTED_MODULE_3__["default"](animationOption)
+      animationOption => new _Animation_js__WEBPACK_IMPORTED_MODULE_3__["default"](animationOption)
     );
   }
 
-  _sortTimelineOptions() {
+  _sortAnimations() {
     this.timelineOptions.sort((a, b) => {
       return a.startAt - b.startAt;
     });
@@ -825,6 +824,10 @@ class CssValueNodeAnimator {
 
   render(progress) {
     return this.animators.map(animator => animator.render(progress)).join(", ");
+  }
+
+  renderNode(progress){
+    
   }
 }
 
@@ -4205,11 +4208,12 @@ const name = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RegexValue
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(19);
 /* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _spaces_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(52);
 
 
 
-const optionalSpaces = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OptionalValue"](_spaces_js__WEBPACK_IMPORTED_MODULE_1__["default"]);
+const space = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["Literal"]("optional-space", " ");
+const spaces = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RepeatValue"]("optional-spaces", space);
+const optionalSpaces = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["OptionalValue"](spaces);
 
 /* harmony default export */ __webpack_exports__["default"] = (optionalSpaces);
 
@@ -4236,32 +4240,65 @@ const spaces = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["RepeatVa
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TimelineOption; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Animation; });
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
+/* harmony import */ var _patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(18);
+/* harmony import */ var _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(87);
+/* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(90);
+/* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(19);
+/* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4__);
 
 
-class TimelineOption {
-  constructor(animation) {
-    this.name = animation.name;
-    this.property = animation.property;
-    this.to = animation.to;
-    this.from = animation.from;
-    this.startAt = animation.startAt;
-    this.endAt = animation.endAt;
-    this.easing = animation.easing;
-    this.controls = animation.controls;
 
-    if (typeof easing === "string") {
-      this.easing = _easings_js__WEBPACK_IMPORTED_MODULE_0__["default"][easing];
-    }
 
-    if (!Array.isArray(this.controls)) {
-      this.controls = [];
-    }
 
-    this.easing = this.easing || _easings_js__WEBPACK_IMPORTED_MODULE_0__["default"].linear;
 
+const treeUtility = new _TreeUtility_js__WEBPACK_IMPORTED_MODULE_3__["default"]();
+const treeNormalizer = new _TreeNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
+
+class Animation {
+  constructor(config) {
+    this.config = config;
+    this.name = config.name;
+    this.property = config.property;
+    this.to = config.to;
+    this.from = config.from;
+    this.startAt = config.startAt;
+    this.endAt = config.endAt;
+    this.controls = Array.isArray(config.controls)
+      ? config.controls
+      : [];
+    this.value = this.from;
+
+    this.normalizeEasing();
+    this.createNodeTrees();
     this.validate();
+  }
+
+  normalizeEasing() {
+    const config = this.config;
+
+    this.easing =
+      typeof config.easing === "string"
+        ? _easings_js__WEBPACK_IMPORTED_MODULE_0__["default"][config.easing]
+        : config.easing;
+    this.easing = config.easing || _easings_js__WEBPACK_IMPORTED_MODULE_0__["default"].linear;
+  }
+
+  createNodeTrees() {
+    this.controlNodes = this.controls.map((c) =>
+      treeNormalizer.normalize(_patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4__["Cursor"](c)))
+    );
+
+    this.toNode = treeNormalizer.normalize(
+      _patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4__["Cursor"](this.to))
+    );
+
+    this.fromNode = treeNormalizer.normalize(
+      _patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4__["Cursor"](this.from))
+    );
+
+    this.resultNode = this.fromNode.clone();
   }
 
   validate() {
@@ -4303,6 +4340,27 @@ class TimelineOption {
 
     if (this.easing == null || typeof this.easing.valueAt !== "function") {
       throw new Error(`The "easing" property must be an instance of Easing.`);
+    }
+
+    this.validateNodes();
+  }
+
+  validateNodes() {
+    const allTrees = [this.fromNode, ...this.controlNodes, this.toNode];
+    const fromNode = this.fromNode;
+
+    const allStructuresAreEqual = allTrees.every((node) => {
+      return treeUtility.areTreeStructuresEqual(fromNode, node);
+    });
+
+    if (!allStructuresAreEqual) {
+      throw new Error(
+        `Invalid Animation: The value types that are being animated do not match. From: ${JSON.stringify(
+          this.from
+        )}, To:${JSON.stringify(options.to)}, Controls: ${JSON.stringify(
+          this.controls
+        )}`
+      );
     }
   }
 }
@@ -5223,28 +5281,55 @@ class EaseLinear extends _FunctionEasing_js__WEBPACK_IMPORTED_MODULE_0__["defaul
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeNormalizer; });
 /* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(88);
+/* harmony import */ var _HexColor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(89);
 
 
-const filterOutSpaces = child => child.name !== "spaces";
-const filterOutDividers = child => child.name !== "divider";
+
+const filterOutSpaces = (child) => child.name !== "optional-spaces";
 
 class TreeNormalizer {
   constructor() {
-    this.removeSpacesVisitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.visitNode);
+    this.visitNode = this.visitNode.bind(this);
+    this.visitor = new _Visitor_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.visitNode);
   }
 
   visitNode(node) {
     if (Array.isArray(node.children)) {
-      node.children = node.children.filter(filterOutSpaces);
+      this.removeOptionalSpaces(node);
+      this.replaceHex(node);
+      this.removeUnnecessaryDividers(node);
     }
 
-    if (node.name === "css-value") {
-      node.children = node.children.filter(filterOutDividers);
+  }
+
+  removeUnnecessaryDividers(node) {
+    const children = node.children;
+
+    while (
+      children.length > 0 &&
+      children[children.length - 1].type === "divider"
+    ) {
+      children.pop();
     }
   }
 
+  removeOptionalSpaces(node) {
+    node.children = node.children.filter(filterOutSpaces);
+  }
+
+  replaceHex(node) {
+    node.children = node.children.map((child) => {
+      if (child.name === "hex") {
+        const hexColor = new _HexColor_js__WEBPACK_IMPORTED_MODULE_1__["default"](child.value);
+        return hexColor.toComplexNode();
+      }
+      return child;
+    });
+  }
+
   normalize(node) {
-    this.removeSpacesVisitor.visitDown(node);
+    this.visitor.visitDown(node);
+    return node;
   }
 }
 
@@ -5307,6 +5392,97 @@ class Visitor {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HexColor; });
+/* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(19);
+/* harmony import */ var clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _patterns_hex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(48);
+
+
+
+
+const hexRegEx = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})|([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i;
+
+class HexColor {
+  constructor(hexString) {
+    this.setHex(hexString);
+  }
+
+  setHex(hexString) {
+    this.hexString = hexString;
+    this.normalizeHex();
+    this.saveRgb();
+  }
+
+  saveRgb() {
+    hex = this.hexString;
+    hexRegEx.lastIndex = 0;
+    const result = hexRegEx.exec(hex);
+    this.rgb = result
+      ? [
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
+      : [0, 0, 0];
+  }
+
+  toComplexNode() {
+    const children = this.rgb.map((number) => {
+      new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["ValueNode"]("number", number.toString());
+    });
+
+    const node = new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["CompositeNode"]("hex");
+    node.children = children;
+  }
+
+  toValueNode() {
+    return new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_0__["ValueNode"]("hex", this.hexString);
+  }
+
+  toRgbString() {
+    return `rgb(${this.rgb[0]},${this.rgb[1]},${this.rgb[2]})`;
+  }
+
+  normalizeHex() {
+    if (this.hexString.length === 4) {
+      this.hexString = this.hexString + this.hexString.substring(1);
+    }
+  }
+
+  numberToHex(number) {
+    if (number > 255) {
+      number = 255;
+    }
+
+    if (number < 0) {
+      number = 0;
+    }
+
+    let hex = number.toString(16);
+    if (hex.length < 2) {
+      hex = "0" + hex;
+    }
+
+    return hex;
+  }
+
+  toHexString() {
+    const rgbArray = this.rgb;
+    const red = this.numberToHex(rgbArray[0]);
+    const green = this.numberToHex(rgbArray[1]);
+    const blue = this.numberToHex(rgbArray[2]);
+
+    return `#${red}${green}${blue}`;
+  }
+}
+
+
+/***/ }),
+/* 90 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TreeUtility; });
 /* harmony import */ var _Visitor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(88);
 
@@ -5334,14 +5510,14 @@ class TreeUtility {
 
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BlendedEasing; });
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
-/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(91);
+/* harmony import */ var _Easing_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(92);
 
 
 
@@ -5427,7 +5603,7 @@ class BlendedEasing {
 
 
 /***/ }),
-/* 91 */
+/* 92 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

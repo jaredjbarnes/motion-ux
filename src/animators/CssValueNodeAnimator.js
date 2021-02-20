@@ -27,4 +27,8 @@ export default class CssValueNodeAnimator {
   render(progress) {
     return this.animators.map(animator => animator.render(progress)).join(", ");
   }
+
+  renderNode(progress){
+    
+  }
 }

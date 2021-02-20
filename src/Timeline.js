@@ -11,7 +11,6 @@ export default class Timeline {
 
   constructor({ animations, duration, clock = defaultClock }) {
     this.clock = clock;
-    this.adjustmentAnimators = [];
     this.render = this.render.bind(this);
     this.scrubber = new Scrubber({
       clock,

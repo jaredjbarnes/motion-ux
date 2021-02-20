@@ -1,7 +1,7 @@
 import CssValueNodeAnimator from "./animators/CssValueNodeAnimator.js";
 import cssValue from "./patterns/cssValue.js";
 import { Cursor } from "clarity-pattern-parser";
-import TimelineOption from "./TimelineOption.js";
+import Animation from "./Animation.js";
 import TreeNormalizer from "./TreeNormalizer.js";
 import TreeUtility from "./TreeUtility.js";
 
@@ -13,8 +13,8 @@ export default class AnimatorCreator {
     this.animationOptions = animationOptions;
 
     this._assertAnimationOptions();
-    this._convertAnimationsToTimelineOptions();
-    this._sortTimelineOptions();
+    this._convertAnimationsToAnimations();
+    this._sortAnimations();
     this._createAnimators();
   }
 
@@ -24,13 +24,13 @@ export default class AnimatorCreator {
     }
   }
 
-  _convertAnimationsToTimelineOptions() {
+  _convertAnimationsToAnimations() {
     this.timelineOptions = this.animationOptions.map(
-      animationOption => new TimelineOption(animationOption)
+      animationOption => new Animation(animationOption)
     );
   }
 
-  _sortTimelineOptions() {
+  _sortAnimations() {
     this.timelineOptions.sort((a, b) => {
       return a.startAt - b.startAt;
     });
