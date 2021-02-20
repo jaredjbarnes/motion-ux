@@ -5,6 +5,10 @@ const circleWithBezier = document.createElement("div");
 
 circleWithBezier.style.borderRadius = "50% 50%";
 circleWithBezier.style.boxShadow = "0 5px 5px rgba(0,0,0,0.5)";
+circleWithBezier.style.display = "flex";
+circleWithBezier.style.alignItems = "center";
+circleWithBezier.style.justifyContent = "center";
+circleWithBezier.innerHTML = "8"
 
 const referenceCircle = document.createElement("div");
 referenceCircle.style.backgroundColor = "blue";
@@ -18,8 +22,8 @@ const timeline = new Timeline({
     {
       name: "circle",
       property: "transform",
-      from: "translate(150px,   0px)",
-      controls: ["translate(300px , 0px)", "translate(300px   ,     150px)"],
+      from: "translate(     150px,   0px )",
+      controls: ["translate(    300px , 0px)", "translate(300px   ,     150px)"],
       to: "translate(150px , 300px)",
       startAt: 0,
       endAt: 1,
@@ -28,9 +32,18 @@ const timeline = new Timeline({
     {
       name: "circle",
       property: "background",
-      from: "linear-gradient(0deg, rgba(255,    0,0,0.8), rgba(255,0,0,0))",
+      from: "linear-gradient(0deg, rgba(255,    0,0,0.8), rgba(  255,0,0,0))",
       //controls: ["rgba(0,0,0,0.5)"],
       to: "linear-gradient(720deg, rgba(0,255,0,    0.8), rgba(0, 255 ,0,0))",
+      startAt: 0,
+      endAt: 1,
+      easing: easings.easeOutExpo
+    },
+    {
+      name: "circle",
+      property: "color",
+      from: "#fff",
+      to: "#000",
       startAt: 0,
       endAt: 1,
       easing: easings.easeOutExpo

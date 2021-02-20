@@ -12,29 +12,48 @@ export default class HexColor {
   setHex(hexString) {
     this.hexString = hexString;
     this.normalizeHex();
-    this.saveRgb();
+    this.saveRgba();
   }
 
-  saveRgb() {
-    hex = this.hexString;
+  saveRgba() {
+    const hex = this.hexString;
     hexRegEx.lastIndex = 0;
     const result = hexRegEx.exec(hex);
-    this.rgb = result
+    this.rgba = result
       ? [
           parseInt(result[1], 16),
           parseInt(result[2], 16),
           parseInt(result[3], 16),
+          1
         ]
-      : [0, 0, 0];
+      : [0, 0, 0, 1];
   }
 
   toComplexNode() {
-    const children = this.rgb.map((number) => {
-      new ValueNode("number", number.toString());
-    });
+    const children = this.rgba
+      .map((number) => {
+        const valuesNode = new CompositeNode("repeat-composite", "values");
+        valuesNode.children.push(new ValueNode("regex-value", "number", number.toString()));
 
-    const node = new CompositeNode("hex");
-    node.children = children;
+        return valuesNode;
+      })
+      .reduce((acc, valueNode) => {
+        acc.push(valueNode);
+        acc.push(new ValueNode("regex-value", "divider", ", "));
+        return acc;
+      }, []);
+
+    const node = new CompositeNode("and-composite", "method");
+    const name = new ValueNode("regex-value", "name", "rgba");
+    const openParen = new ValueNode("literal", "open-paren", "(");
+    const args = new CompositeNode("repeat-composite", "arguments");
+    const closeParen = new ValueNode("literal", "close-paren", ")");
+
+    args.children = children;
+
+    node.children.push(name, openParen, args, closeParen);
+
+    return node;
   }
 
   toValueNode() {
@@ -42,7 +61,7 @@ export default class HexColor {
   }
 
   toRgbString() {
-    return `rgb(${this.rgb[0]},${this.rgb[1]},${this.rgb[2]})`;
+    return `rgb(${this.rgba[0]},${this.rgba[1]},${this.rgba[2]})`;
   }
 
   normalizeHex() {
@@ -69,7 +88,7 @@ export default class HexColor {
   }
 
   toHexString() {
-    const rgbArray = this.rgb;
+    const rgbArray = this.rgba;
     const red = this.numberToHex(rgbArray[0]);
     const green = this.numberToHex(rgbArray[1]);
     const blue = this.numberToHex(rgbArray[2]);
