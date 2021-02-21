@@ -14,14 +14,21 @@ export default class TreeNormalizer {
       this.removeOptionalSpaces(node);
       this.replaceHex(node);
       this.removeUnnecessaryDividers(node);
-      this.removeUnnecessarySpaces(node);
+      this.removeUnnecessaryValuesSpaces(node);
     }
-
+    
+    this.collapseWhiteSpace(node);
     this.removeSpacesAroundDividers(node);
   }
 
+  collapseWhiteSpace(node) {
+    if (node.name === "spaces") {
+      node.value = " ";
+    }
+  }
+
   removeSpacesAroundDividers(node) {
-    if (node.name === "divider"){
+    if (node.name === "divider") {
       node.value = node.value.trim() + " ";
     }
   }
@@ -37,7 +44,7 @@ export default class TreeNormalizer {
     }
   }
 
-  removeUnnecessarySpaces(node) {
+  removeUnnecessaryValuesSpaces(node) {
     const children = node.children;
 
     while (

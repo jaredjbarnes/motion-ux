@@ -14,7 +14,8 @@ export default class ValuesNodeAnimator {
       method: MethodNodeAnimator,
       name: NameNodeAnimator,
       hex: HexNodeAnimator,
-      values: ValuesNodeAnimator
+      values: ValuesNodeAnimator,
+      spaces: NameNodeAnimator
     };
 
     this.createAnimators();
@@ -39,6 +40,6 @@ export default class ValuesNodeAnimator {
   }
 
   render(progress) {
-    return this.animators.map(animator => animator.render(progress)).join(" ");
+    return this.animators.map(animator => animator.render(progress)).join("");
   }
 }

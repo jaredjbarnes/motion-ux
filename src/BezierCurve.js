@@ -1,13 +1,13 @@
 export default class BezierCurve {
   constructor(points) {
+    this.setPoints(points);
+  }
+
+  setPoints(points) {
     this.points = points;
     this.reducedPoints = new Array(points.length);
 
     Object.freeze(this.points);
-  }
-
-  clone() {
-    return new BezierCurve(this.points.slice());
   }
 
   valueAt(percentage) {
@@ -33,19 +33,7 @@ export default class BezierCurve {
     return reducedPoints[0];
   }
 
-  validatePoints() {
-    if (this.points.length < 2) {
-      throw new Error("Invalid Points: The points need to be at least two.");
-    }
-
-    const controlPoints = this.points.slice(1, this.points.length - 2);
-
-    controlPoints.forEach((point) => this.assertValidPoint(point));
-  }
-
-  assertValidPoint(point) {
-    if (typeof point !== "number") {
-      throw new Error("Invalid point: Points need to be numbers.");
-    }
+  clone() {
+    return new BezierCurve(this.points.slice());
   }
 }

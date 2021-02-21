@@ -139,7 +139,7 @@ exports["Timeline: Curved Path."] = () => {
   assert.equal(value, to);
 };
 
-exports["Timeline: Mutliple startAts on same property."] = () => {
+exports["Timeline: Multiple startAts on same property."] = () => {
   const name = "my-animation";
   const clock = new MockClock();
 

@@ -1,6 +1,7 @@
 import DefaultClock from "./DefaultClock.js";
 import Scrubber from "./Scrubber.js";
-import AnimatorCreator from "./AnimatorCreator.js";
+import Animator from "./Animator.js";
+import Animation from "./Animation.js";
 
 const defaultClock = new DefaultClock();
 
@@ -15,10 +16,12 @@ export default class Timeline {
     this.scrubber = new Scrubber({
       clock,
       duration,
-      render: this.render
+      render: this.render,
     });
     this.duration = duration;
-    this.animators = new AnimatorCreator(animations).getAnimators();
+    this.animators = animations.map(
+      (animation) => new Animator(new Animation(animation))
+    );
   }
 
   get duration() {
@@ -87,40 +90,34 @@ export default class Timeline {
     const results = {};
 
     this.animators
-      .filter(animator => {
-        let animation = results[animator.options.name];
+      .filter((animator) => {
+        let animation = results[animator.animation.name];
 
         if (animation == null) {
-          animation = results[animator.options.name] = {};
+          animation = results[animator.animation.name] = {};
         }
 
-        if (animation[animator.options.property] == null) {
-          animation[animator.options.property] = animator.options.from;
+        if (animation[animator.animation.property] == null) {
+          animation[animator.animation.property] = animator.animation.from;
         }
 
-        return animator.options.startAt <= progress;
+        return animator.animation.startAt <= progress;
       })
-      .forEach(animator => {
-        const animation = results[animator.options.name];
-        animation[animator.options.property] = animator.render(
-          progress,
-          this.duration
-        );
+      .forEach((animator) => {
+        const animation = results[animator.animation.name];
+        animation[animator.animation.property] = animator.render(progress);
       });
 
     this.animators
-      .filter(animator => {
-        const min = Math.max(animator.options.startAt, progress);
-        const max = Math.min(animator.options.endAt, progress);
+      .filter((animator) => {
+        const min = Math.max(animator.animation.startAt, progress);
+        const max = Math.min(animator.animation.endAt, progress);
 
         return min <= max;
       })
-      .forEach(animator => {
-        const animation = results[animator.options.name];
-        animation[animator.options.property] = animator.render(
-          progress,
-          this.duration
-        );
+      .forEach((animator) => {
+        const animation = results[animator.animation.name];
+        animation[animator.animation.property] = animator.render(progress);
       });
 
     return results;
