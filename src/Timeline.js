@@ -1,89 +1,236 @@
+import Observable from "./Observable.js";
 import DefaultClock from "./DefaultClock.js";
-import Scrubber from "./Scrubber.js";
 import Animator from "./Animator.js";
 import Animation from "./Animation.js";
 
 const defaultClock = new DefaultClock();
 
-export default class Timeline {
+const repeatDirections = {
+  DEFAULT: 0,
+  ALTERNATE: 1,
+};
+
+const states = {
+  FORWARD: 1,
+  REVERSE: -1,
+  STOPPED: 0,
+};
+
+export default class Scrubber extends Observable {
   static get repeatDirections() {
-    return Scrubber.repeatDirections;
+    return repeatDirections;
   }
 
-  constructor({ animations, duration, clock = defaultClock }) {
-    this.clock = clock;
-    this.render = this.render.bind(this);
-    this.scrubber = new Scrubber({
-      clock,
-      duration,
-      render: this.render,
-    });
+  static get states() {
+    return states;
+  }
+
+  constructor({
+    animations,
+    clock,
+    duration,
+    timeScale,
+    repeatDirection = Scrubber.repeatDirections.DEFAULT,
+  }) {
+    super();
+    this._timeScale = 1;
+    this._progress = 0;
+    this._duration = 0;
+    this._lastTimestamp = 0;
+    this._animationFrame = null;
+    this._iterations = 0;
+    this._repeat = 1;
+    this._repeatDirection = repeatDirection;
+    this.tick = this.tick.bind(this);
+
+    this.clock = clock || defaultClock;
+    this.state = Scrubber.states.STOPPED;
+    this.timeScale = timeScale;
     this.duration = duration;
+
     this.animators = animations.map(
       (animation) => new Animator(new Animation(animation))
     );
   }
 
-  get duration() {
-    return this.scrubber.duration;
-  }
-
-  set duration(value) {
-    this.scrubber.duration = value;
+  get progress() {
+    return this._progress;
   }
 
   get timeScale() {
-    return this.scrubber.timeScale;
+    return this._timeScale;
   }
 
   set timeScale(value) {
-    this.scrubber.timeScale = value;
+    if (value > 0) {
+      this._timeScale = value;
+    }
+  }
+
+  get duration() {
+    return this._duration;
+  }
+
+  set duration(value) {
+    if (typeof value !== "number") {
+      value = 0;
+    }
+
+    // Virtually Nothing. All Math blows up if the duration is "0".
+    if (value <= 0) {
+      value = 0.00001;
+    }
+
+    this._duration = value;
   }
 
   get repeat() {
-    return this.scrubber.repeat;
+    return this._repeat;
   }
 
   set repeat(value) {
-    this.scrubber.repeat = value;
+    if (typeof value !== "number" && value > 0) {
+      return;
+    }
+
+    this._repeat = value;
   }
 
   get repeatDirection() {
-    return this.scrubber.repeatDirection;
+    return this._repeatDirection;
   }
 
   set repeatDirection(value) {
-    this.scrubber.repeatDirection = value;
-  }
+    if ((value !== 0) & (value !== 1)) {
+      return;
+    }
 
-  get progress() {
-    return this.scrubber.progress;
+    this._repeatDirection = value;
   }
 
   play() {
-    this.scrubber.play();
+    if (this.state !== Scrubber.states.FORWARD) {
+      this.notify({
+        type: "PLAYED",
+      });
+
+      this._lastTimestamp = this.clock.now();
+      this.state = Scrubber.states.FORWARD;
+      this.clock.register(this.tick);
+    }
   }
 
-  reverse() {
-    this.scrubber.reverse();
+  tick() {
+    const timestamp = this.clock.now();
+    const deltaTime = timestamp - this._lastTimestamp;
+    let step = (deltaTime / this.duration) * this._timeScale;
+
+    if (step > 1) {
+      step = 1;
+    }
+
+    if (deltaTime === 0) {
+      return;
+    }
+
+    if (this.state === Scrubber.states.REVERSE) {
+      let progress = this._progress - step;
+      const repeatDirection = this.repeatDirection;
+      const ALTERNATE = Scrubber.repeatDirections.ALTERNATE;
+
+      if (progress <= 0) {
+        this._iterations++;
+
+        if (this._iterations >= this._repeat) {
+          this.seek(0);
+          this.stop();
+          return;
+        }
+
+        if (repeatDirection === ALTERNATE) {
+          progress = progress * -1;
+          this.seek(progress);
+          this.state = Scrubber.states.FORWARD;
+        } else {
+          progress = 1 + progress;
+          this.seek(progress);
+          this.state = Scrubber.states.REVERSE;
+        }
+      } else {
+        this.seek(progress);
+      }
+    } else if (this.state === Scrubber.states.FORWARD) {
+      let progress = this._progress + step;
+      const repeatDirection = this.repeatDirection;
+      const ALTERNATE = Scrubber.repeatDirections.ALTERNATE;
+
+      if (progress >= 1) {
+        this._iterations++;
+
+        if (this._iterations >= this._repeat) {
+          this.seek(1);
+          this.stop();
+          return;
+        }
+
+        if (repeatDirection === ALTERNATE) {
+          progress = 1 - (progress - 1);
+          this.seek(progress);
+          this.state = Scrubber.states.REVERSE;
+        } else {
+          progress = progress - 1;
+          this.seek(progress);
+          this.state = Scrubber.states.FORWARD;
+        }
+      } else {
+        this.seek(progress);
+      }
+    }
+
+    this._lastTimestamp = timestamp;
   }
 
   stop() {
-    this.scrubber.stop();
+    if (this.state !== Scrubber.states.STOPPED) {
+      this.notify({
+        type: "STOPPED",
+      });
+
+      this.state = Scrubber.states.STOPPED;
+      this.clock.unregister(this.tick);
+    }
+  }
+
+  reverse() {
+    if (this.state !== Scrubber.states.REVERSE) {
+      this.notify({
+        type: "REVERSED",
+      });
+
+      this._lastTimestamp = this.clock.now();
+      this.state = Scrubber.states.REVERSE;
+      this.clock.register(this.tick);
+    }
   }
 
   seek(progress) {
-    this.scrubber.seek(progress);
+    const lastProgress = this._progress;
+    this._progress = progress;
+
+    const animations = this.render();
+
+    this.notify({
+      type: "RENDER",
+      progress: progress,
+      lastProgress: lastProgress,
+      animations,
+    });
   }
 
   render() {
     const progress = this.progress;
     const values = this.getValuesAt(progress);
     return values;
-  }
-
-  getCurrentValues() {
-    return this.getValuesAt(this.progress);
   }
 
   getValuesAt(progress) {
@@ -123,15 +270,12 @@ export default class Timeline {
     return results;
   }
 
+  getCurrentValues() {
+    return this.getValuesAt(this.progress);
+  }
+
   dispose() {
-    this.scrubber.dispose();
-  }
-
-  observeTime() {
-    return this.scrubber.observeTime.apply(this.scrubber, arguments);
-  }
-
-  observe() {
-    return this.scrubber.observe.apply(this.scrubber, arguments);
+    this.stop();
+    super.dispose();
   }
 }
