@@ -3,20 +3,20 @@ import TreeUtility from "./TreeUtility.js";
 const emptyFn = () => {};
 const treeUtility = new TreeUtility();
 
-export default class SideBySideVisitor {
+export default class GraphsVisitor {
   constructor(callback) {
     this.setCallback(callback);
     this.visitDown = this.visitDown.bind(this);
     this.visitUp = this.visitUp.bind(this);
   }
 
-  visitUp(nodes) {
-    if (!Array.isArray(nodes)) {
+  visitUp(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    const siblings = nodes.slice(1);
-    const node = nodes[0];
+    const siblings = graphs.slice(1);
+    const node = graphs[0];
 
     const areEqual = siblings.every((sibling) =>
       treeUtility.areTreeStructuresEqual(node, sibling)
@@ -26,35 +26,35 @@ export default class SideBySideVisitor {
       throw new Error("The nodes structures need to be the same.");
     }
 
-    this.walkUp(nodes);
+    this.walkUp(graphs);
   }
 
-  walkUp(nodes) {
-    if (!Array.isArray(nodes)) {
+  walkUp(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    const node = nodes[0];
+    const node = graphs[0];
 
     if (Array.isArray(node.children)) {
       for (let index = 0; index < node.children.length; index++) {
-        const childNodes = nodes.map((node) => {
+        const childNodes = graphs.map((node) => {
           return node.children[index];
         });
         this.walkUp(childNodes);
       }
     }
 
-    this.callback(...nodes);
+    this.callback(...graphs);
   }
 
-  visitDown(nodes) {
-    if (!Array.isArray(nodes)) {
+  visitDown(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    const siblings = nodes.slice(1);
-    const node = nodes[0];
+    const siblings = graphs.slice(1);
+    const node = graphs[0];
 
     const areEqual = siblings.every((sibling) =>
       treeUtility.areTreeStructuresEqual(node, sibling)
@@ -64,20 +64,20 @@ export default class SideBySideVisitor {
       throw new Error("The nodes structures need to be the same.");
     }
 
-    this.walkDown(nodes);
+    this.walkDown(graphs);
   }
 
-  walkDown(nodes) {
-    if (!Array.isArray(nodes)) {
+  walkDown(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    this.callback(...nodes);
+    this.callback(...graphs);
 
-    const node = nodes[0];
+    const node = graphs[0];
     if (Array.isArray(node.children)) {
       for (let index = 0; index < node.children.length; index++) {
-        const childNodes = nodes.map((node) => {
+        const childNodes = graphs.map((node) => {
           return node.children[index];
         });
         this.walkDown(childNodes);

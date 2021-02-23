@@ -53,7 +53,7 @@ export default class Animation {
     // result in the to value. The non number nodes would be words,
     // Like display: none and display: block. It changes on the first
     // tick.
-    this.resultNode = this.toNode.clone();
+    this.resultNode = this.fromNode.clone();
   }
 
   validate() {

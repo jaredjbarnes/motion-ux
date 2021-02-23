@@ -1,7 +1,7 @@
 import BezierCurve from "./BezierCurve.js";
-import SideBySideVisitor from "./SideBySideVisitor.js";
+import GraphsVisitor from "./GraphsVisitor.js";
 
-const visitor = new SideBySideVisitor();
+const visitor = new GraphsVisitor();
 
 export default class Animator {
   constructor(animation) {
@@ -30,10 +30,10 @@ export default class Animator {
   }
 
   visit(...nodes) {
-    if (nodes[0].name === "number") {
-      const resultNode = nodes.pop();
-      const progress = this.progress;
+    const resultNode = nodes.pop();
+    const progress = this.progress;
 
+    if (nodes[0].name === "number") {
       const relativeProgress = progress - this.animation.startAt;
       const duration = this.animation.endAt - this.animation.startAt;
       const progressWithEasing =
@@ -44,6 +44,14 @@ export default class Animator {
       resultNode.value = this.bezierCurve
         .valueAt(progressWithEasing)
         .toString();
+    } else {
+      if (!Array.isArray(resultNode.children)) {
+        if (progress <= this.animation.startAt) {
+          resultNode.value = nodes[0].value;
+        } else if (progress > this.animation.startAt) {
+          resultNode.value = nodes[nodes.length - 1].value;
+        }
+      }
     }
   }
 

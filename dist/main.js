@@ -137,7 +137,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Scrubber; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Timeline; });
 /* harmony import */ var _Observable_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
 /* harmony import */ var _DefaultClock_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6);
 /* harmony import */ var _Animator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
@@ -160,7 +160,15 @@ const states = {
   STOPPED: 0,
 };
 
-class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+const sortDesc = (animatorA, animatorB) => {
+  return animatorB.animation.startAt - animatorA.animation.startAt;
+};
+
+const sortAsc = (animatorA, animatorB) => {
+  return animatorA.animation.startAt - animatorB.animation.startAt;
+};
+
+class Timeline extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   static get repeatDirections() {
     return repeatDirections;
   }
@@ -174,7 +182,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     clock,
     duration,
     timeScale,
-    repeatDirection = Scrubber.repeatDirections.DEFAULT,
+    repeatDirection = Timeline.repeatDirections.DEFAULT,
   }) {
     super();
     this._timeScale = 1;
@@ -187,9 +195,10 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._repeatDirection = repeatDirection;
     this.tick = this.tick.bind(this);
     this.currentValues = {};
+    this.initialValues = {};
 
     this.clock = clock || defaultClock;
-    this.state = Scrubber.states.STOPPED;
+    this.state = Timeline.states.STOPPED;
     this.timeScale = timeScale;
     this.duration = duration;
 
@@ -198,6 +207,10 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     );
 
     this.createCurrentValues();
+    this.createInitialValues();
+
+    // Sort by time.
+    this.animators.sort(sortAsc);
   }
 
   get progress() {
@@ -271,10 +284,36 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     }, {});
   }
 
+  createInitialValues() {
+    this.animators.sort(sortDesc);
+
+    this.initialValues = this.animators.reduce((results, animator) => {
+      let animation = results[animator.animation.name];
+
+      if (animation == null) {
+        animation = results[animator.animation.name] = {};
+      }
+
+      animation[animator.animation.property] = animator.animation.from;
+
+      return results;
+    }, {});
+  }
+
+  applyInitialValues() {
+    Object.keys(this.currentValues).forEach((animationName) => {
+      Object.keys(this.currentValues[animationName]).forEach((property) => {
+        this.currentValues[animationName][property] = this.initialValues[
+          animationName
+        ][property];
+      });
+    });
+  }
+
   play() {
-    if (this.state !== Scrubber.states.FORWARD) {
+    if (this.state !== Timeline.states.FORWARD) {
       this._lastTimestamp = this.clock.now();
-      this.state = Scrubber.states.FORWARD;
+      this.state = Timeline.states.FORWARD;
       this.clock.register(this.tick);
 
       this.notify({
@@ -296,10 +335,10 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
       return;
     }
 
-    if (this.state === Scrubber.states.REVERSE) {
+    if (this.state === Timeline.states.REVERSE) {
       let progress = this._progress - step;
       const repeatDirection = this.repeatDirection;
-      const ALTERNATE = Scrubber.repeatDirections.ALTERNATE;
+      const ALTERNATE = Timeline.repeatDirections.ALTERNATE;
 
       if (progress <= 0) {
         this._iterations++;
@@ -313,19 +352,19 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
         if (repeatDirection === ALTERNATE) {
           progress = progress * -1;
           this.seek(progress);
-          this.state = Scrubber.states.FORWARD;
+          this.state = Timeline.states.FORWARD;
         } else {
           progress = 1 + progress;
           this.seek(progress);
-          this.state = Scrubber.states.REVERSE;
+          this.state = Timeline.states.REVERSE;
         }
       } else {
         this.seek(progress);
       }
-    } else if (this.state === Scrubber.states.FORWARD) {
+    } else if (this.state === Timeline.states.FORWARD) {
       let progress = this._progress + step;
       const repeatDirection = this.repeatDirection;
-      const ALTERNATE = Scrubber.repeatDirections.ALTERNATE;
+      const ALTERNATE = Timeline.repeatDirections.ALTERNATE;
 
       if (progress >= 1) {
         this._iterations++;
@@ -339,11 +378,11 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
         if (repeatDirection === ALTERNATE) {
           progress = 1 - (progress - 1);
           this.seek(progress);
-          this.state = Scrubber.states.REVERSE;
+          this.state = Timeline.states.REVERSE;
         } else {
           progress = progress - 1;
           this.seek(progress);
-          this.state = Scrubber.states.FORWARD;
+          this.state = Timeline.states.FORWARD;
         }
       } else {
         this.seek(progress);
@@ -354,8 +393,8 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   }
 
   stop() {
-    if (this.state !== Scrubber.states.STOPPED) {
-      this.state = Scrubber.states.STOPPED;
+    if (this.state !== Timeline.states.STOPPED) {
+      this.state = Timeline.states.STOPPED;
       this.clock.unregister(this.tick);
 
       this.notify({
@@ -365,9 +404,9 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   }
 
   reverse() {
-    if (this.state !== Scrubber.states.REVERSE) {
+    if (this.state !== Timeline.states.REVERSE) {
       this._lastTimestamp = this.clock.now();
-      this.state = Scrubber.states.REVERSE;
+      this.state = Timeline.states.REVERSE;
       this.clock.register(this.tick);
 
       this.notify({
@@ -391,9 +430,10 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   }
 
   getValuesAt(time) {
+    this.applyInitialValues();
     const results = this.currentValues;
 
-    // Animate the values that are less than the current time
+    // Animate the values that are less than the current time.
     this.animators
       .filter((animator) => {
         return animator.animation.startAt <= time;
@@ -607,11 +647,11 @@ class DefaultClock {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Animator; });
 /* harmony import */ var _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8);
-/* harmony import */ var _SideBySideVisitor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
+/* harmony import */ var _GraphsVisitor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 
 
 
-const visitor = new _SideBySideVisitor_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
+const visitor = new _GraphsVisitor_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
 class Animator {
   constructor(animation) {
@@ -640,10 +680,10 @@ class Animator {
   }
 
   visit(...nodes) {
-    if (nodes[0].name === "number") {
-      const resultNode = nodes.pop();
-      const progress = this.progress;
+    const resultNode = nodes.pop();
+    const progress = this.progress;
 
+    if (nodes[0].name === "number") {
       const relativeProgress = progress - this.animation.startAt;
       const duration = this.animation.endAt - this.animation.startAt;
       const progressWithEasing =
@@ -654,6 +694,14 @@ class Animator {
       resultNode.value = this.bezierCurve
         .valueAt(progressWithEasing)
         .toString();
+    } else {
+      if (!Array.isArray(resultNode.children)) {
+        if (progress <= this.animation.startAt) {
+          resultNode.value = nodes[0].value;
+        } else if (progress > this.animation.startAt) {
+          resultNode.value = nodes[nodes.length - 1].value;
+        }
+      }
     }
   }
 
@@ -730,27 +778,27 @@ class BezierCurve {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SideBySideVisitor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return GraphsVisitor; });
 /* harmony import */ var _TreeUtility_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
 
 
 const emptyFn = () => {};
 const treeUtility = new _TreeUtility_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
 
-class SideBySideVisitor {
+class GraphsVisitor {
   constructor(callback) {
     this.setCallback(callback);
     this.visitDown = this.visitDown.bind(this);
     this.visitUp = this.visitUp.bind(this);
   }
 
-  visitUp(nodes) {
-    if (!Array.isArray(nodes)) {
+  visitUp(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    const siblings = nodes.slice(1);
-    const node = nodes[0];
+    const siblings = graphs.slice(1);
+    const node = graphs[0];
 
     const areEqual = siblings.every((sibling) =>
       treeUtility.areTreeStructuresEqual(node, sibling)
@@ -760,35 +808,35 @@ class SideBySideVisitor {
       throw new Error("The nodes structures need to be the same.");
     }
 
-    this.walkUp(nodes);
+    this.walkUp(graphs);
   }
 
-  walkUp(nodes) {
-    if (!Array.isArray(nodes)) {
+  walkUp(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    const node = nodes[0];
+    const node = graphs[0];
 
     if (Array.isArray(node.children)) {
       for (let index = 0; index < node.children.length; index++) {
-        const childNodes = nodes.map((node) => {
+        const childNodes = graphs.map((node) => {
           return node.children[index];
         });
         this.walkUp(childNodes);
       }
     }
 
-    this.callback(...nodes);
+    this.callback(...graphs);
   }
 
-  visitDown(nodes) {
-    if (!Array.isArray(nodes)) {
+  visitDown(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    const siblings = nodes.slice(1);
-    const node = nodes[0];
+    const siblings = graphs.slice(1);
+    const node = graphs[0];
 
     const areEqual = siblings.every((sibling) =>
       treeUtility.areTreeStructuresEqual(node, sibling)
@@ -798,20 +846,20 @@ class SideBySideVisitor {
       throw new Error("The nodes structures need to be the same.");
     }
 
-    this.walkDown(nodes);
+    this.walkDown(graphs);
   }
 
-  walkDown(nodes) {
-    if (!Array.isArray(nodes)) {
+  walkDown(graphs) {
+    if (!Array.isArray(graphs)) {
       return;
     }
 
-    this.callback(...nodes);
+    this.callback(...graphs);
 
-    const node = nodes[0];
+    const node = graphs[0];
     if (Array.isArray(node.children)) {
       for (let index = 0; index < node.children.length; index++) {
-        const childNodes = nodes.map((node) => {
+        const childNodes = graphs.map((node) => {
           return node.children[index];
         });
         this.walkDown(childNodes);
@@ -983,7 +1031,7 @@ class Animation {
     // result in the to value. The non number nodes would be words,
     // Like display: none and display: block. It changes on the first
     // tick.
-    this.resultNode = this.toNode.clone();
+    this.resultNode = this.fromNode.clone();
   }
 
   validate() {

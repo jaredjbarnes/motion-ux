@@ -16,7 +16,15 @@ const states = {
   STOPPED: 0,
 };
 
-export default class Scrubber extends Observable {
+const sortDesc = (animatorA, animatorB) => {
+  return animatorB.animation.startAt - animatorA.animation.startAt;
+};
+
+const sortAsc = (animatorA, animatorB) => {
+  return animatorA.animation.startAt - animatorB.animation.startAt;
+};
+
+export default class Timeline extends Observable {
   static get repeatDirections() {
     return repeatDirections;
   }
@@ -30,7 +38,7 @@ export default class Scrubber extends Observable {
     clock,
     duration,
     timeScale,
-    repeatDirection = Scrubber.repeatDirections.DEFAULT,
+    repeatDirection = Timeline.repeatDirections.DEFAULT,
   }) {
     super();
     this._timeScale = 1;
@@ -43,9 +51,10 @@ export default class Scrubber extends Observable {
     this._repeatDirection = repeatDirection;
     this.tick = this.tick.bind(this);
     this.currentValues = {};
+    this.initialValues = {};
 
     this.clock = clock || defaultClock;
-    this.state = Scrubber.states.STOPPED;
+    this.state = Timeline.states.STOPPED;
     this.timeScale = timeScale;
     this.duration = duration;
 
@@ -54,6 +63,10 @@ export default class Scrubber extends Observable {
     );
 
     this.createCurrentValues();
+    this.createInitialValues();
+
+    // Sort by time.
+    this.animators.sort(sortAsc);
   }
 
   get progress() {
@@ -127,10 +140,36 @@ export default class Scrubber extends Observable {
     }, {});
   }
 
+  createInitialValues() {
+    this.animators.sort(sortDesc);
+
+    this.initialValues = this.animators.reduce((results, animator) => {
+      let animation = results[animator.animation.name];
+
+      if (animation == null) {
+        animation = results[animator.animation.name] = {};
+      }
+
+      animation[animator.animation.property] = animator.animation.from;
+
+      return results;
+    }, {});
+  }
+
+  applyInitialValues() {
+    Object.keys(this.currentValues).forEach((animationName) => {
+      Object.keys(this.currentValues[animationName]).forEach((property) => {
+        this.currentValues[animationName][property] = this.initialValues[
+          animationName
+        ][property];
+      });
+    });
+  }
+
   play() {
-    if (this.state !== Scrubber.states.FORWARD) {
+    if (this.state !== Timeline.states.FORWARD) {
       this._lastTimestamp = this.clock.now();
-      this.state = Scrubber.states.FORWARD;
+      this.state = Timeline.states.FORWARD;
       this.clock.register(this.tick);
 
       this.notify({
@@ -152,10 +191,10 @@ export default class Scrubber extends Observable {
       return;
     }
 
-    if (this.state === Scrubber.states.REVERSE) {
+    if (this.state === Timeline.states.REVERSE) {
       let progress = this._progress - step;
       const repeatDirection = this.repeatDirection;
-      const ALTERNATE = Scrubber.repeatDirections.ALTERNATE;
+      const ALTERNATE = Timeline.repeatDirections.ALTERNATE;
 
       if (progress <= 0) {
         this._iterations++;
@@ -169,19 +208,19 @@ export default class Scrubber extends Observable {
         if (repeatDirection === ALTERNATE) {
           progress = progress * -1;
           this.seek(progress);
-          this.state = Scrubber.states.FORWARD;
+          this.state = Timeline.states.FORWARD;
         } else {
           progress = 1 + progress;
           this.seek(progress);
-          this.state = Scrubber.states.REVERSE;
+          this.state = Timeline.states.REVERSE;
         }
       } else {
         this.seek(progress);
       }
-    } else if (this.state === Scrubber.states.FORWARD) {
+    } else if (this.state === Timeline.states.FORWARD) {
       let progress = this._progress + step;
       const repeatDirection = this.repeatDirection;
-      const ALTERNATE = Scrubber.repeatDirections.ALTERNATE;
+      const ALTERNATE = Timeline.repeatDirections.ALTERNATE;
 
       if (progress >= 1) {
         this._iterations++;
@@ -195,11 +234,11 @@ export default class Scrubber extends Observable {
         if (repeatDirection === ALTERNATE) {
           progress = 1 - (progress - 1);
           this.seek(progress);
-          this.state = Scrubber.states.REVERSE;
+          this.state = Timeline.states.REVERSE;
         } else {
           progress = progress - 1;
           this.seek(progress);
-          this.state = Scrubber.states.FORWARD;
+          this.state = Timeline.states.FORWARD;
         }
       } else {
         this.seek(progress);
@@ -210,8 +249,8 @@ export default class Scrubber extends Observable {
   }
 
   stop() {
-    if (this.state !== Scrubber.states.STOPPED) {
-      this.state = Scrubber.states.STOPPED;
+    if (this.state !== Timeline.states.STOPPED) {
+      this.state = Timeline.states.STOPPED;
       this.clock.unregister(this.tick);
 
       this.notify({
@@ -221,9 +260,9 @@ export default class Scrubber extends Observable {
   }
 
   reverse() {
-    if (this.state !== Scrubber.states.REVERSE) {
+    if (this.state !== Timeline.states.REVERSE) {
       this._lastTimestamp = this.clock.now();
-      this.state = Scrubber.states.REVERSE;
+      this.state = Timeline.states.REVERSE;
       this.clock.register(this.tick);
 
       this.notify({
@@ -247,9 +286,10 @@ export default class Scrubber extends Observable {
   }
 
   getValuesAt(time) {
+    this.applyInitialValues();
     const results = this.currentValues;
 
-    // Animate the values that are less than the current time
+    // Animate the values that are less than the current time.
     this.animators
       .filter((animator) => {
         return animator.animation.startAt <= time;

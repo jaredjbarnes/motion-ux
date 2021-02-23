@@ -1,13 +1,13 @@
 import assert from "assert";
-import SideBySideVisitor from "../SideBySideVisitor.js";
+import GraphsVisitor from "../GraphsVisitor.js";
 import { CompositeNode, ValueNode } from "clarity-pattern-parser";
 import { node } from "webpack";
 
-exports["SideBySideVisitor: Two nodes."] = () => {
+exports["GraphsVisitor: Two nodes."] = () => {
   const nodeAVisits = [];
   const nodeBVisits = [];
 
-  const visitor = new SideBySideVisitor((node1, node2) => {
+  const visitor = new GraphsVisitor((node1, node2) => {
     if (!Array.isArray(node1.children)) {
       nodeAVisits.push(node1.value);
     }
@@ -31,12 +31,12 @@ exports["SideBySideVisitor: Two nodes."] = () => {
   assert.equal(nodeBVisits.join("|"), "Kendi|Aydri");
 };
 
-exports["SideBySideVisitor: Three nodes."] = () => {
+exports["GraphsVisitor: Three nodes."] = () => {
   const nodeAVisits = [];
   const nodeBVisits = [];
   const nodeCVisits = [];
 
-  const visitor = new SideBySideVisitor((node1, node2, node3) => {
+  const visitor = new GraphsVisitor((node1, node2, node3) => {
     if (!Array.isArray(node1.children)) {
       nodeAVisits.push(node1.value);
     }
@@ -66,8 +66,8 @@ exports["SideBySideVisitor: Three nodes."] = () => {
   assert.equal(nodeCVisits.join("|"), "Kendi|Aydri");
 };
 
-exports["SideBySideVisitor: Without callback."] = () => {
-  const visitor = new SideBySideVisitor();
+exports["GraphsVisitor: Without callback."] = () => {
+  const visitor = new GraphsVisitor();
   const composite = new CompositeNode("and-composite", "parent");
   const child1 = new ValueNode("value", "child", "Kendi");
   const child2 = new ValueNode("value", "child", "Aydri");
