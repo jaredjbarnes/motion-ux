@@ -42,6 +42,7 @@ export default class Scrubber extends Observable {
     this._repeat = 1;
     this._repeatDirection = repeatDirection;
     this.tick = this.tick.bind(this);
+    this.currentValues = {};
 
     this.clock = clock || defaultClock;
     this.state = Scrubber.states.STOPPED;
@@ -51,6 +52,8 @@ export default class Scrubber extends Observable {
     this.animators = animations.map(
       (animation) => new Animator(new Animation(animation))
     );
+
+    this.createCurrentValues();
   }
 
   get progress() {
@@ -108,15 +111,31 @@ export default class Scrubber extends Observable {
     this._repeatDirection = value;
   }
 
+  createCurrentValues() {
+    this.currentValues = this.animators.reduce((results, animator) => {
+      let animation = results[animator.animation.name];
+
+      if (animation == null) {
+        animation = results[animator.animation.name] = {};
+      }
+
+      if (animation[animator.animation.property] == null) {
+        animation[animator.animation.property] = animator.animation.from;
+      }
+
+      return results;
+    }, {});
+  }
+
   play() {
     if (this.state !== Scrubber.states.FORWARD) {
-      this.notify({
-        type: "PLAYED",
-      });
-
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.FORWARD;
       this.clock.register(this.tick);
+
+      this.notify({
+        type: "PLAYED",
+      });
     }
   }
 
@@ -192,24 +211,24 @@ export default class Scrubber extends Observable {
 
   stop() {
     if (this.state !== Scrubber.states.STOPPED) {
+      this.state = Scrubber.states.STOPPED;
+      this.clock.unregister(this.tick);
+
       this.notify({
         type: "STOPPED",
       });
-
-      this.state = Scrubber.states.STOPPED;
-      this.clock.unregister(this.tick);
     }
   }
 
   reverse() {
     if (this.state !== Scrubber.states.REVERSE) {
-      this.notify({
-        type: "REVERSED",
-      });
-
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.REVERSE;
       this.clock.register(this.tick);
+
+      this.notify({
+        type: "REVERSED",
+      });
     }
   }
 
@@ -217,7 +236,7 @@ export default class Scrubber extends Observable {
     const lastProgress = this._progress;
     this._progress = progress;
 
-    const animations = this.render();
+    const animations = this.getValuesAt(progress);
 
     this.notify({
       type: "RENDER",
@@ -227,51 +246,36 @@ export default class Scrubber extends Observable {
     });
   }
 
-  render() {
-    const progress = this.progress;
-    const values = this.getValuesAt(progress);
-    return values;
-  }
+  getValuesAt(time) {
+    const results = this.currentValues;
 
-  getValuesAt(progress) {
-    const results = {};
-
+    // Animate the values that are less than the current time
     this.animators
       .filter((animator) => {
-        let animation = results[animator.animation.name];
-
-        if (animation == null) {
-          animation = results[animator.animation.name] = {};
-        }
-
-        if (animation[animator.animation.property] == null) {
-          animation[animator.animation.property] = animator.animation.from;
-        }
-
-        return animator.animation.startAt <= progress;
+        return animator.animation.startAt <= time;
       })
       .forEach((animator) => {
         const animation = results[animator.animation.name];
-        animation[animator.animation.property] = animator.render(progress);
+        animation[animator.animation.property] = animator.render(time);
       });
 
     this.animators
       .filter((animator) => {
-        const min = Math.max(animator.animation.startAt, progress);
-        const max = Math.min(animator.animation.endAt, progress);
+        const min = Math.max(animator.animation.startAt, time);
+        const max = Math.min(animator.animation.endAt, time);
 
         return min <= max;
       })
       .forEach((animator) => {
         const animation = results[animator.animation.name];
-        animation[animator.animation.property] = animator.render(progress);
+        animation[animator.animation.property] = animator.render(time);
       });
 
     return results;
   }
 
   getCurrentValues() {
-    return this.getValuesAt(this.progress);
+    return this.currentValues;
   }
 
   dispose() {

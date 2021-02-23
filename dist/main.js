@@ -186,6 +186,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._repeat = 1;
     this._repeatDirection = repeatDirection;
     this.tick = this.tick.bind(this);
+    this.currentValues = {};
 
     this.clock = clock || defaultClock;
     this.state = Scrubber.states.STOPPED;
@@ -195,6 +196,8 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this.animators = animations.map(
       (animation) => new _Animator_js__WEBPACK_IMPORTED_MODULE_2__["default"](new _Animation_js__WEBPACK_IMPORTED_MODULE_3__["default"](animation))
     );
+
+    this.createCurrentValues();
   }
 
   get progress() {
@@ -252,15 +255,31 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._repeatDirection = value;
   }
 
+  createCurrentValues() {
+    this.currentValues = this.animators.reduce((results, animator) => {
+      let animation = results[animator.animation.name];
+
+      if (animation == null) {
+        animation = results[animator.animation.name] = {};
+      }
+
+      if (animation[animator.animation.property] == null) {
+        animation[animator.animation.property] = animator.animation.from;
+      }
+
+      return results;
+    }, {});
+  }
+
   play() {
     if (this.state !== Scrubber.states.FORWARD) {
-      this.notify({
-        type: "PLAYED",
-      });
-
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.FORWARD;
       this.clock.register(this.tick);
+
+      this.notify({
+        type: "PLAYED",
+      });
     }
   }
 
@@ -336,24 +355,24 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
   stop() {
     if (this.state !== Scrubber.states.STOPPED) {
+      this.state = Scrubber.states.STOPPED;
+      this.clock.unregister(this.tick);
+
       this.notify({
         type: "STOPPED",
       });
-
-      this.state = Scrubber.states.STOPPED;
-      this.clock.unregister(this.tick);
     }
   }
 
   reverse() {
     if (this.state !== Scrubber.states.REVERSE) {
-      this.notify({
-        type: "REVERSED",
-      });
-
       this._lastTimestamp = this.clock.now();
       this.state = Scrubber.states.REVERSE;
       this.clock.register(this.tick);
+
+      this.notify({
+        type: "REVERSED",
+      });
     }
   }
 
@@ -361,7 +380,7 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     const lastProgress = this._progress;
     this._progress = progress;
 
-    const animations = this.render();
+    const animations = this.getValuesAt(progress);
 
     this.notify({
       type: "RENDER",
@@ -371,51 +390,36 @@ class Scrubber extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     });
   }
 
-  render() {
-    const progress = this.progress;
-    const values = this.getValuesAt(progress);
-    return values;
-  }
+  getValuesAt(time) {
+    const results = this.currentValues;
 
-  getValuesAt(progress) {
-    const results = {};
-
+    // Animate the values that are less than the current time
     this.animators
       .filter((animator) => {
-        let animation = results[animator.animation.name];
-
-        if (animation == null) {
-          animation = results[animator.animation.name] = {};
-        }
-
-        if (animation[animator.animation.property] == null) {
-          animation[animator.animation.property] = animator.animation.from;
-        }
-
-        return animator.animation.startAt <= progress;
+        return animator.animation.startAt <= time;
       })
       .forEach((animator) => {
         const animation = results[animator.animation.name];
-        animation[animator.animation.property] = animator.render(progress);
+        animation[animator.animation.property] = animator.render(time);
       });
 
     this.animators
       .filter((animator) => {
-        const min = Math.max(animator.animation.startAt, progress);
-        const max = Math.min(animator.animation.endAt, progress);
+        const min = Math.max(animator.animation.startAt, time);
+        const max = Math.min(animator.animation.endAt, time);
 
         return min <= max;
       })
       .forEach((animator) => {
         const animation = results[animator.animation.name];
-        animation[animator.animation.property] = animator.render(progress);
+        animation[animator.animation.property] = animator.render(time);
       });
 
     return results;
   }
 
   getCurrentValues() {
-    return this.getValuesAt(this.progress);
+    return this.currentValues;
   }
 
   dispose() {
@@ -975,7 +979,11 @@ class Animation {
       _patterns_cssValue_js__WEBPACK_IMPORTED_MODULE_1__["default"].parse(new clarity_pattern_parser__WEBPACK_IMPORTED_MODULE_4__["Cursor"](this.from))
     );
 
-    this.resultNode = this.fromNode.clone();
+    // This needs to be the to node so that all non number nodes
+    // result in the to value. The non number nodes would be words,
+    // Like display: none and display: block. It changes on the first
+    // tick.
+    this.resultNode = this.toNode.clone();
   }
 
   validate() {

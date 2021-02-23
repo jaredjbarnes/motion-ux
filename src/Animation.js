@@ -49,7 +49,11 @@ export default class Animation {
       cssValue.parse(new Cursor(this.from))
     );
 
-    this.resultNode = this.fromNode.clone();
+    // This needs to be the to node so that all non number nodes
+    // result in the to value. The non number nodes would be words,
+    // Like display: none and display: block. It changes on the first
+    // tick.
+    this.resultNode = this.toNode.clone();
   }
 
   validate() {
