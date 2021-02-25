@@ -1,6 +1,5 @@
 import { ValueNode } from "clarity-pattern-parser";
 import { CompositeNode } from "clarity-pattern-parser";
-import hex from "./patterns/hex";
 
 const hexRegEx = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})|([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i;
 
@@ -24,7 +23,7 @@ export default class HexColor {
           parseInt(result[1], 16),
           parseInt(result[2], 16),
           parseInt(result[3], 16),
-          1
+          1,
         ]
       : [0, 0, 0, 1];
   }
@@ -33,7 +32,9 @@ export default class HexColor {
     const children = this.rgba
       .map((number) => {
         const valuesNode = new CompositeNode("repeat-composite", "values");
-        valuesNode.children.push(new ValueNode("regex-value", "number", number.toString()));
+        valuesNode.children.push(
+          new ValueNode("regex-value", "number", number.toString())
+        );
 
         return valuesNode;
       })

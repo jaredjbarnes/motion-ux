@@ -1,6 +1,6 @@
 {
   "name": "motion-ux",
-  "version": "3.0.9",
+  "version": "4.0.9",
   "description": "UI Animation Framework",
   "main": "lib/index.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node ./.clarity/test.js",
-    "build": "npx babel src --out-dir lib --source-maps && npx webpack --mode=none --config webpack.config.js",
+    "build": "npx babel src --out-dir lib --source-maps && npx webpack -p --config webpack.config.js",
     "coverage": "nyc npm run test"
   },
   "repository": {

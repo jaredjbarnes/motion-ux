@@ -16,9 +16,7 @@ export default class Animation {
     this.from = config.from;
     this.startAt = config.startAt;
     this.endAt = config.endAt;
-    this.controls = Array.isArray(config.controls)
-      ? config.controls
-      : [];
+    this.controls = Array.isArray(config.controls) ? config.controls : [];
     this.value = this.from;
 
     this.normalizeEasing();
@@ -33,6 +31,7 @@ export default class Animation {
       typeof config.easing === "string"
         ? easings[config.easing]
         : config.easing;
+        
     this.easing = config.easing || easings.linear;
   }
 
@@ -41,9 +40,7 @@ export default class Animation {
       treeNormalizer.normalize(cssValue.parse(new Cursor(c)))
     );
 
-    this.toNode = treeNormalizer.normalize(
-      cssValue.parse(new Cursor(this.to))
-    );
+    this.toNode = treeNormalizer.normalize(cssValue.parse(new Cursor(this.to)));
 
     this.fromNode = treeNormalizer.normalize(
       cssValue.parse(new Cursor(this.from))
@@ -93,8 +90,8 @@ export default class Animation {
       throw new Error(`The "endAt" property must be a number between 0 and 1.`);
     }
 
-    if (this.easing == null || typeof this.easing.valueAt !== "function") {
-      throw new Error(`The "easing" property must be an instance of Easing.`);
+    if (typeof this.easing !== "function") {
+      throw new Error(`The "easing" property must be a function.`);
     }
 
     this.validateNodes();

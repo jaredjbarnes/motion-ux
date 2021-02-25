@@ -35,9 +35,9 @@ export default class Animator {
 
     if (nodes[0].name === "number") {
       const relativeProgress = progress - this.animation.startAt;
-      const duration = this.animation.endAt - this.animation.startAt;
+      const animationDuration = this.animation.endAt - this.animation.startAt;
       const progressWithEasing =
-        this.animation.easing.valueAt(relativeProgress) * duration;
+        this.animation.easing(relativeProgress) * animationDuration;
 
       const points = nodes.map((node) => node.value);
       this.bezierCurve.setPoints(points);

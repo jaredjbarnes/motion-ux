@@ -3,19 +3,17 @@ import Animator from "../Animator.js";
 import Animation from "../Animation.js";
 
 exports["Animator: "] = () => {
-  const from = "rgba(0,0,0,0)";
-  const to = "rgba(255,255,255,1)";
-
   const animation = new Animation({
     name: "test",
     property: "color",
     startAt: 0,
     endAt: 1,
-    from: from,
-    to: to,
+    from: "rgba(0,0,0,0)",
+    to: "rgba(255,255,255,1)",
   });
 
   const animator = new Animator(animation);
   const value = animator.render(0.5);
 
+  assert.strictEqual("rgba(127.5, 127.5, 127.5, 0.5)", value);
 };
