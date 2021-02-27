@@ -38,14 +38,14 @@ export default class GraphsVisitor {
 
     if (Array.isArray(node.children)) {
       for (let index = 0; index < node.children.length; index++) {
-        const childNodes = graphs.map((node) => {
+        const childGraphs = graphs.map((node) => {
           return node.children[index];
         });
-        this.walkUp(childNodes);
+        this.walkUp(childGraphs);
       }
     }
 
-    this.callback(...graphs);
+    this.callback(graphs);
   }
 
   visitDown(graphs) {
@@ -72,15 +72,15 @@ export default class GraphsVisitor {
       return;
     }
 
-    this.callback(...graphs);
+    this.callback(graphs);
 
     const node = graphs[0];
     if (Array.isArray(node.children)) {
       for (let index = 0; index < node.children.length; index++) {
-        const childNodes = graphs.map((node) => {
+        const childGraphs = graphs.map((node) => {
           return node.children[index];
         });
-        this.walkDown(childNodes);
+        this.walkDown(childGraphs);
       }
     }
   }

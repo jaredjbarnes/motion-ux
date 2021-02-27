@@ -7,68 +7,60 @@ export default class Animator {
   constructor(animation) {
     this.animation = animation;
     this.visit = this.visit.bind(this);
-    this.convertNumberNodes = this.convertNumberNodes.bind(this);
     this.progress = 0;
     this.bezierCurve = new BezierCurve([]);
-    this.nodes = [
-      this.animation.fromNode,
-      ...this.animation.controlNodes,
-      this.animation.toNode,
-      this.animation.resultNode,
-    ];
-
-    visitor.setCallback(this.convertNumberNodes);
-    visitor.visitDown(this.nodes.slice(0, this.nodes.length - 1));
+    this.animationGraphs = [];
+    this.createAnimationGraphs();
   }
 
-  convertNumberNodes(...nodes) {
-    if (nodes[0].name === "number") {
-      nodes.forEach((node) => {
-        node.value = Number(node.value);
-      });
+  createAnimationGraphs() {
+    this.animationGraphs.length = 0;
+
+    this.animationGraphs.push(this.animation.from.graph);
+
+    for (let x = 0; x < this.animation.controls.length; x++) {
+      this.animationGraphs.push(this.animation.controls[x]);
     }
+
+    this.animationGraphs.push(this.animation.to.graph);
+    this.animationGraphs.push(this.animation.result.graph);
   }
 
-  visit(...nodes) {
-    const resultNode = nodes.pop();
+  visit(nodes) {
+    const cloneNodes = nodes.slice();
+    const resultNode = cloneNodes.pop();
     const progress = this.progress;
 
-    if (nodes[0].name === "number") {
+    if (cloneNodes[0].name === "number") {
       const relativeProgress = progress - this.animation.startAt;
       const animationDuration = this.animation.endAt - this.animation.startAt;
       const progressWithEasing =
         this.animation.easing(relativeProgress) * animationDuration;
 
-      const points = nodes.map((node) => node.value);
+      const points = cloneNodes.map((node) => node.value);
+
       this.bezierCurve.setPoints(points);
-      resultNode.value = this.bezierCurve
-        .valueAt(progressWithEasing)
-        .toString();
+      resultNode.value = this.bezierCurve.valueAt(progressWithEasing);
     } else {
       if (!Array.isArray(resultNode.children)) {
-        if (progress <= this.animation.startAt) {
-          resultNode.value = nodes[0].value;
-        } else if (progress > this.animation.startAt) {
-          resultNode.value = nodes[nodes.length - 1].value;
+        if (progress >= this.animation.startAt) {
+          resultNode.value = cloneNodes[cloneNodes.length - 1].value;
+        } else {
+          resultNode.value = cloneNodes[0].value;
         }
       }
     }
   }
 
   render(progress) {
-    if (progress <= this.animation.startAt) {
-      return this.animation.from;
-    }
-
-    if (progress >= this.animation.endAt) {
-      return this.animation.to;
-    }
-
     this.progress = progress;
 
     visitor.setCallback(this.visit);
-    visitor.visitDown(this.nodes);
+    visitor.visitDown(this.animationGraphs);
 
-    return this.animation.resultNode.toString();
+    const value = this.animation.result.graph.toString();
+    this.animation.result.value = value;
+
+    return this.animation.result;
   }
 }

@@ -1,5 +1,3 @@
-import FunctionEasing from "../FunctionEasing.js";
-
 export default (t) => {
   var b = 0;
   var c = 1;

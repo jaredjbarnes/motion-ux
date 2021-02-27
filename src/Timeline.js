@@ -11,22 +11,26 @@ const sortAsc = (animatorA, animatorB) => {
 
 export default class Timeline {
   constructor(animations) {
-    this._currentValues = {};
-    this._initialValues = {};
+    this.animators = new Map();
+    this._time = 0;
 
-    this.setAnimations(animations);
+    this.initialize(animations);
   }
 
-  setAnimations(animations) {
+  initialize(animations) {
     this._currentValues = {};
-    this._initialValues = {};
 
-    this.animators = animations.map(
-      (animation) => new Animator(new Animation(animation))
-    );
+    this.animators = animations
+      .map((animation) => {
+        if (animation instanceof Animation) {
+          return animation;
+        } else {
+          return new Animation(animation);
+        }
+      })
+      .map((animation) => new Animator(animation));
 
     this.createCurrentValues();
-    this.createInitialValues();
 
     // Sort by time.
     this.animators.sort(sortAsc);
@@ -34,72 +38,69 @@ export default class Timeline {
 
   createCurrentValues() {
     this._currentValues = this.animators.reduce((results, animator) => {
-      let animation = results[animator.animation.name];
+      const name = animator.animation.name;
+      const property = animator.animation.property;
+
+      let animation = results[name];
 
       if (animation == null) {
-        animation = results[animator.animation.name] = {};
+        animation = results[name] = {};
       }
 
-      if (animation[animator.animation.property] == null) {
-        animation[animator.animation.property] = animator.animation.from;
+      if (animation[property] == null) {
+        animation[property] = animator.animation.result.clone();
       }
 
       return results;
     }, {});
   }
 
-  createInitialValues() {
-    this.animators.sort(sortDesc);
+  assignValue(animation) {
+    const currentValue = this._currentValues[animation.name][
+      animation.property
+    ];
 
-    this._initialValues = this.animators.reduce((results, animator) => {
-      let animation = results[animator.animation.name];
-
-      if (animation == null) {
-        animation = results[animator.animation.name] = {};
-      }
-
-      animation[animator.animation.property] = animator.animation.from;
-
-      return results;
-    }, {});
+    currentValue.value = animation.result.value;
+    currentValue.graph = animation.result.graph;
+    currentValue.graphHash = animation.result.graphHash;
   }
 
-  applyInitialValues() {
-    Object.keys(this._currentValues).forEach((animationName) => {
-      Object.keys(this._currentValues[animationName]).forEach((property) => {
-        const currentValues = this._currentValues[animationName];
-        const initialValues = this._initialValues[animationName];
+  saveCurrentValues() {
+    const visitedMap = new Map();
+    const animators = this.animators;
+    const length = animators.length;
 
-        currentValues[property] = initialValues[property];
-      });
-    });
+    // Assign all values at least once.
+    // This initials values beyond the time we are at.
+    for (let x = 0; x < length; x++) {
+      const animation = animators[x].animation;
+      const key = `${animation.name}|${animation.property}`;
+
+      if (!visitedMap.has(key)) {
+        visitedMap.set(key, true);
+        this.assignValue(animation);
+      }
+    }
+
+    // Assign if the value if the start at was before the time now. 
+    // Since we have it sorted, the most current will win. 
+    for (let x = 0; x < length; x++) {
+      const animation = animators[x].animation;
+
+      if (animation.startAt <= this._time) {
+        this.assignValue(animation);
+      }
+    }
   }
 
   render(time) {
-    this.applyInitialValues();
-    const currentValues = this._currentValues;
+    this._time = time;
+    // Render all animations
+    this.animators.forEach((animator) => {
+      animator.render(time);
+    });
 
-    // Animate the values that are less than the current time.
-    this.animators
-      .filter((animator) => {
-        return animator.animation.startAt <= time;
-      })
-      .forEach((animator) => {
-        const animation = currentValues[animator.animation.name];
-        animation[animator.animation.property] = animator.render(time);
-      });
-
-    this.animators
-      .filter((animator) => {
-        const min = Math.max(animator.animation.startAt, time);
-        const max = Math.min(animator.animation.endAt, time);
-
-        return min <= max;
-      })
-      .forEach((animator) => {
-        const animation = currentValues[animator.animation.name];
-        animation[animator.animation.property] = animator.render(time);
-      });
+    this.saveCurrentValues();
 
     return this;
   }

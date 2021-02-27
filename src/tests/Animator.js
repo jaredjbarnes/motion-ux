@@ -13,7 +13,7 @@ exports["Animator: "] = () => {
   });
 
   const animator = new Animator(animation);
-  const value = animator.render(0.5);
+  const value = animator.render(0.5).value;
 
   assert.strictEqual("rgba(127.5, 127.5, 127.5, 0.5)", value);
 };

@@ -5,18 +5,15 @@ export default class TimelineTransition {
     this.player = player;
   }
 
-  transitionTo(timeline, duration, easing) {}
+  transitionTo(name) {
+    
+  }
 }
 
-const timeline = new TimelineTransition({
-  player, // The player you are currently running.
-  timeline, // The timeline you want to ease into.
-  duration, // The duration of the new timeline.
-  easing, // An easing while transitioning, not the animation easing.
-});
+const timeline = new TimelineTransition(player);
 
 // Stateful motion.
-const useTransition = createStatefulTransition({
+const useTransition = makeStyledTransition({
   off: {
     animations: [
       {
@@ -29,9 +26,10 @@ const useTransition = createStatefulTransition({
         endAt: 1, // Default 1
       },
     ],
+    initial: true,
     duration: 300,
     repeat: Infinity,
-    repeatDirection: Timeline.repeatDirection.ALTERNATE
+    repeatDirection: Player.repeatDirections.ALTERNATE
   },
   on: {
     animations: [

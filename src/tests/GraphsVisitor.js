@@ -7,7 +7,7 @@ exports["GraphsVisitor: Two nodes."] = () => {
   const nodeAVisits = [];
   const nodeBVisits = [];
 
-  const visitor = new GraphsVisitor((node1, node2) => {
+  const visitor = new GraphsVisitor(([node1, node2]) => {
     if (!Array.isArray(node1.children)) {
       nodeAVisits.push(node1.value);
     }
@@ -36,7 +36,7 @@ exports["GraphsVisitor: Three nodes."] = () => {
   const nodeBVisits = [];
   const nodeCVisits = [];
 
-  const visitor = new GraphsVisitor((node1, node2, node3) => {
+  const visitor = new GraphsVisitor(([node1, node2, node3]) => {
     if (!Array.isArray(node1.children)) {
       nodeAVisits.push(node1.value);
     }
