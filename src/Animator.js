@@ -19,7 +19,7 @@ export default class Animator {
     this.animationGraphs.push(this.animation.from.graph);
 
     for (let x = 0; x < this.animation.controls.length; x++) {
-      this.animationGraphs.push(this.animation.controls[x]);
+      this.animationGraphs.push(this.animation.controls[x].graph);
     }
 
     this.animationGraphs.push(this.animation.to.graph);

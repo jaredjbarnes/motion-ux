@@ -52,7 +52,7 @@ export default class AnimationUtility {
 
     if (validator.hasValidControlsAsStrings()) {
       this.result.controls = this.config.controls.map((control) =>
-        ParsedValue(control)
+        new ParsedValue(control)
       );
     } else {
       validator.validateControlsAsStrings();

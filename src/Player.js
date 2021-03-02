@@ -192,7 +192,7 @@ export default class Player extends Observable {
     }
   }
 
-  setBackward() {
+  stepBackward() {
     let time = this._time - this._step;
     let lastTime = this._time;
 
