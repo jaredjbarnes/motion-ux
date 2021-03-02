@@ -3,7 +3,7 @@ import Animator from "../Animator.js";
 import Animation from "../Animation.js";
 
 exports["Animator: "] = () => {
-  const animation = new Animation({
+  const animation = Animation.fromSimpleConfig({
     name: "test",
     property: "color",
     startAt: 0,

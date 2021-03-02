@@ -9,6 +9,10 @@ export default class AnimationConfigValidator {
     this.config = config;
   }
 
+  isSimpleConfig() {
+    return this.hasValidToAsString();
+  }
+
   validateConfig() {
     if (this.config == null) {
       throw new Error(
@@ -17,37 +21,8 @@ export default class AnimationConfigValidator {
     }
   }
 
-  validateSimple(config) {
-    this.setConfig(config);
-    this.validateName();
-    this.validateProperty();
-    this.validateToAsString();
-    this.validateFromAsString();
-    this.validateStartAt();
-    this.validateEndAt();
-    this.validateEasingString();
-  }
-
   validate(config) {
     this.setConfig(config);
-    this.validateName();
-    this.validateProperty();
-    this.validateToAsString();
-    this.validateControlsAsString();
-    this.validateFromAsString();
-    this.validateStartAt();
-    this.validateEndAt();
-    this.validateEasingString();
-    this.validateNodes();
-  }
-
-  validateAnimationConfig() {
-    if (config == null) {
-      throw new Error(
-        `Invalid Arguments: The "config" cannot be null or undefined.`
-      );
-    }
-
     this.validateName();
     this.validateProperty();
     this.validateToAsParsedValue();
@@ -56,6 +31,7 @@ export default class AnimationConfigValidator {
     this.validateStartAt();
     this.validateEndAt();
     this.validateEasingFunction();
+    this.validateNodes();
   }
 
   validateName() {
@@ -140,7 +116,7 @@ export default class AnimationConfigValidator {
     return this.config.from instanceof ParsedValue;
   }
 
-  validateControlsAsString() {
+  validateControlsAsStrings() {
     this.validateConfig();
 
     if (!this.hasValidControlsAsStrings()) {
@@ -151,7 +127,10 @@ export default class AnimationConfigValidator {
   }
 
   hasValidControlsAsStrings() {
-    return this.config.controls.every((control) => typeof control === "string");
+    return (
+      Array.isArray(this.config.controls) &&
+      this.config.controls.every((control) => typeof control === "string")
+    );
   }
 
   validateControlsAsParsedValues() {
@@ -259,5 +238,7 @@ export default class AnimationConfigValidator {
         break;
       }
     }
+
+    return allStructuresAreEqual;
   }
 }
