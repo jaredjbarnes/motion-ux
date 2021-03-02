@@ -1,10 +1,6 @@
 import Animator from "./Animator.js";
 import Animation from "./Animation.js";
 
-const sortDesc = (animatorA, animatorB) => {
-  return animatorB.animation.startAt - animatorA.animation.startAt;
-};
-
 const sortAsc = (animatorA, animatorB) => {
   return animatorA.animation.startAt - animatorB.animation.startAt;
 };
