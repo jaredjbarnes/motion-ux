@@ -147,6 +147,8 @@ export default class Player extends Observable {
 
   stepForward() {
     let time = this._time + this._step;
+    let lastTime = this._time;
+
     const repeatDirection = this._repeatDirection;
 
     if (time >= 1) {
@@ -159,15 +161,32 @@ export default class Player extends Observable {
       }
 
       if (repeatDirection === ALTERNATE) {
-        time = 1 - (time - 1);
-        this.seek(time);
+        const adjustedTime = 1 - (time - 1);
+
+        this.notify({
+          type: "REPEAT",
+          time: 1,
+          lastTime,
+          timeline: this._timeline,
+        });
+
+        this._time = 1;
+        this.seek(adjustedTime);
         this._state = REVERSE;
       } else {
-        time = time - 1;
-        this.seek(time);
+        const adjustedTime = time - 1;
+
+        this.notify({
+          type: "REPEAT",
+          time: 1,
+          lastTime,
+          timeline: this._timeline,
+        });
+
+        this._time = 0;
+        this.seek(adjustedTime);
         this._state = FORWARD;
       }
-
     } else {
       this.seek(time);
     }
@@ -175,6 +194,8 @@ export default class Player extends Observable {
 
   setBackward() {
     let time = this._time - this._step;
+    let lastTime = this._time;
+
     const repeatDirection = this._repeatDirection;
 
     if (time <= 0) {
@@ -187,12 +208,30 @@ export default class Player extends Observable {
       }
 
       if (repeatDirection === ALTERNATE) {
-        time = time * -1;
-        this.seek(time);
+        const adjustedTime = time * -1;
+
+        this.notify({
+          type: "REPEAT",
+          time: 0,
+          lastTime,
+          timeline: this._timeline,
+        });
+
+        this._time = 0;
+        this.seek(adjustedTime);
         this._state = FORWARD;
       } else {
-        time = 1 + time;
-        this.seek(time);
+        const adjustedTime = 1 + time;
+
+        this.notify({
+          type: "REPEAT",
+          time: 1,
+          lastTime,
+          timeline: this._timeline,
+        });
+
+        this._time = 1;
+        this.seek(adjustedTime);
         this._state = REVERSE;
       }
     } else {

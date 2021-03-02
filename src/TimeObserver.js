@@ -7,9 +7,9 @@ export default class TimeObserver extends Observer {
     }
 
     notify(event){
-        if (typeof event.lastProgress === "number" && typeof event.progress === "number"){
-            const high = Math.max(event.progress, event.lastProgress);
-            const low = Math.min(event.progress, event.lastProgress);
+        if (typeof event.lastTime === "number" && typeof event.time === "number"){
+            const high = Math.max(event.time, event.lastTime);
+            const low = Math.min(event.time, event.lastTime);
 
             if (this.time >= low && this.time <= high){
                 this.callback(event);
