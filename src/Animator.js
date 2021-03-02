@@ -56,7 +56,7 @@ export default class Animator {
     this.progress = progress;
 
     visitor.setCallback(this.visit);
-    visitor.visitDown(this.animationGraphs);
+    visitor.visitDown(this.animationGraphs, true);
 
     const value = this.animation.result.graph.toString();
     this.animation.result.value = value;

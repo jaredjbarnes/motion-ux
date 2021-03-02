@@ -51,8 +51,8 @@ export default class AnimationUtility {
     }
 
     if (validator.hasValidControlsAsStrings()) {
-      this.result.controls = this.config.controls.map((control) =>
-        new ParsedValue(control)
+      this.result.controls = this.config.controls.map(
+        (control) => new ParsedValue(control)
       );
     } else {
       validator.validateControlsAsStrings();
@@ -93,6 +93,6 @@ export default class AnimationUtility {
       this.result.easing = easings[this.config.easing] || easings.linear;
     } else if (validator.hasValidEasingFunction()) {
       this.result.easing = this.config.easing;
-    } 
+    }
   }
 }

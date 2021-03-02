@@ -50,19 +50,19 @@ const timeline = new Timeline([
 ]);
 
 const player = new Player(timeline, { duration: 1500 });
-player.repeat = 2;
+player.repeat = Infinity;
 player.repeatDirection = Player.repeatDirections.ALTERNATE;
 
 player.observeTime(0.99, () => {
-  console.log("99");
+  //console.log("99");
 });
 
 player.observeTime(0.03, () => {
-  console.log("3");
+  //console.log("3");
 });
 
 player.observeTime(0.5, () => {
-  console.log("5");
+  //console.log("5");
 });
 
 player.observe("RENDER", ({ timeline }) => {

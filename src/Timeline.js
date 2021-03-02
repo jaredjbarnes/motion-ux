@@ -104,4 +104,11 @@ export default class Timeline {
   getCurrentValues() {
     return this._currentValues;
   }
+
+  merge(timeline) {
+    const oldAnimations = this.animators.map((a) => a.animation);
+    const newAnimations = timeline.animators.map((a) => a.animation);
+
+    this.initialize([...oldAnimations, ...newAnimations]);
+  }
 }

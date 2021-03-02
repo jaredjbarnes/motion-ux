@@ -10,7 +10,7 @@ export default class GraphsVisitor {
     this.visitUp = this.visitUp.bind(this);
   }
 
-  visitUp(graphs) {
+  visitUp(graphs, optimized = false) {
     if (!Array.isArray(graphs)) {
       return;
     }
@@ -18,12 +18,14 @@ export default class GraphsVisitor {
     const siblings = graphs.slice(1);
     const node = graphs[0];
 
-    const areEqual = siblings.every((sibling) =>
-      treeUtility.areTreeStructuresEqual(node, sibling)
-    );
+    if (!optimized) {
+      const areEqual = siblings.every((sibling) =>
+        treeUtility.areTreeStructuresEqual(node, sibling)
+      );
 
-    if (!areEqual) {
-      throw new Error("The nodes structures need to be the same.");
+      if (!areEqual) {
+        throw new Error("The nodes structures need to be the same.");
+      }
     }
 
     this.walkUp(graphs);
@@ -48,7 +50,7 @@ export default class GraphsVisitor {
     this.callback(graphs);
   }
 
-  visitDown(graphs) {
+  visitDown(graphs, optimized = false) {
     if (!Array.isArray(graphs)) {
       return;
     }
@@ -56,12 +58,14 @@ export default class GraphsVisitor {
     const siblings = graphs.slice(1);
     const node = graphs[0];
 
-    const areEqual = siblings.every((sibling) =>
-      treeUtility.areTreeStructuresEqual(node, sibling)
-    );
+    if (!optimized) {
+      const areEqual = siblings.every((sibling) =>
+        treeUtility.areTreeStructuresEqual(node, sibling)
+      );
 
-    if (!areEqual) {
-      throw new Error("The nodes structures need to be the same.");
+      if (!areEqual) {
+        throw new Error("The nodes structures need to be the same.");
+      }
     }
 
     this.walkDown(graphs);
