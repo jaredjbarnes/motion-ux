@@ -1,8 +1,8 @@
 {
   "name": "motion-ux",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "UI Animation Framework",
-  "main": "lib/index.js",
+  "main": "dist/main.js",
   "directories": {
     "example": "examples"
   },
