@@ -1,5 +1,7 @@
 import Observable from "./Observable.js";
 import DefaultClock from "./DefaultClock.js";
+import SlopeTimelineBuilder from "./SlopeTimelineBuilder.js";
+import BlendedTimeline from "./BlendedTimeline.js";
 
 const defaultClock = new DefaultClock();
 
@@ -21,8 +23,13 @@ const states = {
   STOPPED,
 };
 
+function defaultRender() {}
+
 export default class Player extends Observable {
-  constructor(timeline, { clock, duration, timeScale, repeatDirection }) {
+  constructor(
+    timeline,
+    { clock, duration, timeScale, repeatDirection, render }
+  ) {
     super();
     this._timeScale = typeof timeScale === "number" ? timeScale : 1;
     this._time = 0;
@@ -37,6 +44,8 @@ export default class Player extends Observable {
     this._timeline = timeline;
     this._clock = clock || defaultClock;
     this._state = STOPPED;
+    this._render = typeof render === "function" ? render : defaultRender;
+    this._slopeTimelineBuilder = new SlopeTimelineBuilder();
 
     this.tick = this.tick.bind(this);
   }
@@ -110,6 +119,10 @@ export default class Player extends Observable {
     }
   }
 
+  get iterations() {
+    return this._iterations;
+  }
+
   play() {
     if (this._state !== FORWARD) {
       this._lastTimestamp = this._clock.now();
@@ -164,7 +177,7 @@ export default class Player extends Observable {
         const adjustedTime = 1 - (time - 1);
 
         this.notify({
-          type: "REPEAT",
+          type: "TICK",
           time: 1,
           lastTime,
           timeline: this._timeline,
@@ -177,7 +190,7 @@ export default class Player extends Observable {
         const adjustedTime = time - 1;
 
         this.notify({
-          type: "REPEAT",
+          type: "TICK",
           time: 1,
           lastTime,
           timeline: this._timeline,
@@ -211,7 +224,7 @@ export default class Player extends Observable {
         const adjustedTime = time * -1;
 
         this.notify({
-          type: "REPEAT",
+          type: "TICK",
           time: 0,
           lastTime,
           timeline: this._timeline,
@@ -224,7 +237,7 @@ export default class Player extends Observable {
         const adjustedTime = 1 + time;
 
         this.notify({
-          type: "REPEAT",
+          type: "TICK",
           time: 1,
           lastTime,
           timeline: this._timeline,
@@ -243,10 +256,11 @@ export default class Player extends Observable {
     const lastTime = this._time;
     this._time = time;
 
-    this._timeline.render(this._time);
+    this._timeline.update(this._time);
+    this._render(this._timeline);
 
     this.notify({
-      type: "RENDER",
+      type: "TICK",
       time,
       lastTime,
       timeline: this._timeline,
@@ -276,6 +290,33 @@ export default class Player extends Observable {
         timeline: this._timeline,
       });
     }
+  }
+
+  transitionToTimeline(timeline, duration, easing) {
+    const slopeTimeline = this._slopeTimelineBuilder.build(
+      this._timeline,
+      this._time,
+      this._duration,
+      duration,
+      this._state
+    );
+
+    const blendedTimeline = new BlendedTimeline(
+      slopeTimeline,
+      timeline,
+      easing
+    );
+
+    this._timeline = blendedTimeline;
+    this._time = 0;
+    this._duration = duration;
+
+    this.notify({
+      type: "TRANSITIONED",
+      timeline: this._timeline,
+    });
+
+    return this;
   }
 
   dispose() {

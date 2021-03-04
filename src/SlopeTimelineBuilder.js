@@ -51,12 +51,11 @@ export default class SlopeTimelineBuilder {
   }
 
   cacheValues() {
-    this.timeline.render(this.offset);
-    this.nowValues = this.timeline.getCurrentValues();
+    this.timeline.update(this.offset);
+    this.nowValues = this.cloneValues(this.timeline.getCurrentValues());
 
     this.deltaStepValues = this.cloneValues(this.nowValues);
     this.scaleValues = this.cloneValues(this.nowValues);
-    this.nowValues = this.cloneValues(this.timeline.getCurrentValues());
     this.diffValues = this.cloneValues(this.nowValues);
     this.derivativeValues = this.cloneValues(this.nowValues);
     this.scaledValues = this.cloneValues(this.nowValues);
@@ -98,17 +97,17 @@ export default class SlopeTimelineBuilder {
   }
 
   cacheDeltaValueForward() {
-    this.timeline.render(this.offset + this.delta);
+    this.timeline.update(this.offset + this.delta);
     this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
   }
 
   cacheDeltaValueBackward() {
-    this.timeline.render(this.offset - this.delta);
+    this.timeline.update(this.offset - this.delta);
     this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
   }
 
   cacheDeltaValueStopped() {
-    this.timeline.render(this.offset);
+    this.timeline.update(this.offset);
     this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
   }
 

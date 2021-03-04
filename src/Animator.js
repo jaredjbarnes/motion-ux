@@ -7,7 +7,7 @@ export default class Animator {
   constructor(animation) {
     this.animation = animation;
     this.visit = this.visit.bind(this);
-    this.progress = 0;
+    this.time = 0;
     this.bezierCurve = new BezierCurve([]);
     this.animationGraphs = [];
     this.createAnimationGraphs();
@@ -29,21 +29,21 @@ export default class Animator {
   visit(nodes) {
     const cloneNodes = nodes.slice();
     const resultNode = cloneNodes.pop();
-    const progress = this.progress;
+    const time = this.time;
 
     if (cloneNodes[0].name === "number") {
-      const relativeProgress = progress - this.animation.startAt;
+      const relativeProgress = time - this.animation.startAt;
       const animationDuration = this.animation.endAt - this.animation.startAt;
-      const progressWithEasing =
+      const timeWithEasing =
         this.animation.easing(relativeProgress) * animationDuration;
 
       const points = cloneNodes.map((node) => node.value);
 
       this.bezierCurve.setPoints(points);
-      resultNode.value = this.bezierCurve.valueAt(progressWithEasing);
+      resultNode.value = this.bezierCurve.valueAt(timeWithEasing);
     } else {
       if (!Array.isArray(resultNode.children)) {
-        if (progress >= this.animation.startAt) {
+        if (time >= this.animation.startAt) {
           resultNode.value = cloneNodes[cloneNodes.length - 1].value;
         } else {
           resultNode.value = cloneNodes[0].value;
@@ -52,8 +52,8 @@ export default class Animator {
     }
   }
 
-  render(progress) {
-    this.progress = progress;
+  update(time) {
+    this.time = time;
 
     visitor.setCallback(this.visit);
     visitor.visitDown(this.animationGraphs, true);

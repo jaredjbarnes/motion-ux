@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node ./.clarity/test.js",
-    "build": "npx babel src --out-dir lib --source-maps && npx webpack --config webpack.config.js",
+    "build": "npx babel src --out-dir lib --source-maps && npx webpack --mode=none --config webpack.config.js",
     "coverage": "nyc npm run test"
   },
   "repository": {

@@ -1,5 +1,4 @@
 import Timeline from "../Timeline.js";
-import MockClock from "../MockClock.js";
 import assert from "assert";
 
 exports["Timeline: Get current values as 0."] = () => {
@@ -15,7 +14,7 @@ exports["Timeline: Get current values as 0."] = () => {
     },
   ]);
 
-  const values = timeline.render(0).getCurrentValues();
+  const values = timeline.update(0).getCurrentValues();
 
   assert.strictEqual(values[name].opacity.value, "0");
 };
@@ -60,7 +59,7 @@ exports["Timeline: Valid Path."] = () => {
     },
   ]);
 
-  timeline.render(1);
+  timeline.update(1);
   const value = timeline.getCurrentValues()[name].path.value;
 
   assert.strictEqual(value, to);
@@ -82,7 +81,7 @@ exports["Timeline: Curved Path."] = () => {
     },
   ]);
 
-  timeline.render(1);
+  timeline.update(1);
   const value = timeline.getCurrentValues()[name].path.value;
 
   assert.strictEqual(value, to);
@@ -133,7 +132,7 @@ exports["Timeline: Multiple startAts on same property."] = () => {
     },
   ]);
 
-  timeline.render(1);
+  timeline.update(1);
 
   let values = timeline.getCurrentValues()[name];
   let opacity = values.opacity.value;
@@ -142,7 +141,7 @@ exports["Timeline: Multiple startAts on same property."] = () => {
   assert.strictEqual(display, "none");
   assert.strictEqual(opacity, "0");
 
-  timeline.render(0.3);
+  timeline.update(0.3);
   values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity.value;
@@ -151,7 +150,7 @@ exports["Timeline: Multiple startAts on same property."] = () => {
   assert.strictEqual(display, "none");
   assert.strictEqual(opacity, "0.7");
 
-  timeline.render(0.49);
+  timeline.update(0.49);
   values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity.value;
@@ -160,7 +159,7 @@ exports["Timeline: Multiple startAts on same property."] = () => {
   assert.strictEqual(display, "none");
   assert.strictEqual(opacity, "0.51");
 
-  timeline.render(0.75);
+  timeline.update(0.75);
   values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity.value;
@@ -169,7 +168,7 @@ exports["Timeline: Multiple startAts on same property."] = () => {
   assert.strictEqual(display, "block");
   assert.strictEqual(opacity, "0.25");
 
-  timeline.render(0);
+  timeline.update(0);
   values = timeline.getCurrentValues()[name];
 
   opacity = values.opacity.value;

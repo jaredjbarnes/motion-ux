@@ -26,13 +26,13 @@ export default class Timeline {
       })
       .map((animation) => new Animator(animation));
 
-    this.createCurrentValues();
+    this._createCurrentValues();
 
     // Sort by time.
     this.animators.sort(sortAsc);
   }
 
-  createCurrentValues() {
+  _createCurrentValues() {
     this._currentValues = this.animators.reduce((results, animator) => {
       const name = animator.animation.name;
       const property = animator.animation.property;
@@ -51,7 +51,7 @@ export default class Timeline {
     }, {});
   }
 
-  assignValue(animation) {
+  _assignValue(animation) {
     const currentValue = this._currentValues[animation.name][
       animation.property
     ];
@@ -61,7 +61,7 @@ export default class Timeline {
     currentValue.graphHash = animation.result.graphHash;
   }
 
-  saveCurrentValues() {
+  _saveCurrentValues() {
     const visitedMap = new Map();
     const animators = this.animators;
     const length = animators.length;
@@ -74,7 +74,7 @@ export default class Timeline {
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this.assignValue(animation);
+        this._assignValue(animation);
       }
     }
 
@@ -84,19 +84,19 @@ export default class Timeline {
       const animation = animators[x].animation;
 
       if (animation.startAt <= this._time) {
-        this.assignValue(animation);
+        this._assignValue(animation);
       }
     }
   }
 
-  render(time) {
+  update(time) {
     this._time = time;
-    // Render all animations
+    // Update all animations
     this.animators.forEach((animator) => {
-      animator.render(time);
+      animator.update(time);
     });
 
-    this.saveCurrentValues();
+    this._saveCurrentValues();
 
     return this;
   }
@@ -110,5 +110,7 @@ export default class Timeline {
     const newAnimations = timeline.animators.map((a) => a.animation);
 
     this.initialize([...oldAnimations, ...newAnimations]);
+
+    return this;
   }
 }
