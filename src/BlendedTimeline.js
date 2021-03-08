@@ -7,8 +7,6 @@ export default class BlendedTimeline extends Timeline {
     const fromAnimations = fromTimeline.getCurrentValues();
     const toAnimations = toTimeline.getCurrentValues();
 
-    // TODO: transform the to animations using controls.
-
     const animations = Object.keys(fromAnimations)
       .map((name) => {
         const fromAnimation = fromAnimations[name];

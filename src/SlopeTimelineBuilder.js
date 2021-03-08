@@ -86,6 +86,7 @@ export default class SlopeTimelineBuilder {
 
   cacheScaleValues() {
     const scale = this.newDuration / this.duration;
+
     Object.keys(this.scaleValues).forEach((name) => {
       Object.keys(this.scaleValues[name]).forEach((property) => {
         this.graphOperator.assign(

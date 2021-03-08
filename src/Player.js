@@ -316,6 +316,11 @@ export default class Player extends Observable {
       timeline: this._timeline,
     });
 
+    const observer = this.observeTime(1, ()=>{
+      this._timeline = timeline;
+      observer.dispose();
+    });
+
     return this;
   }
 

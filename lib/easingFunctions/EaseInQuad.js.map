@@ -1,1 +1,1 @@
-{"version":3,"sources":["../../src/easingFunctions/easeInQuad.js"],"names":["percentage"],"mappings":";;;;;;;eAAe,kBAACA,UAAD,EAAgB;AAC7B,SAAOA,UAAU,GAAGA,UAApB;AACD,C","sourcesContent":["export default (percentage) => {\n  return percentage * percentage;\n};\n"],"file":"easeInQuad.js"}
+{"version":3,"sources":["../../src/easingFunctions/EaseInQuad.js"],"names":["percentage"],"mappings":";;;;;;;eAAe,kBAACA,UAAD,EAAgB;AAC7B,SAAOA,UAAU,GAAGA,UAApB;AACD,C","sourcesContent":["export default (percentage) => {\n  return percentage * percentage;\n};\n"],"file":"EaseInQuad.js"}

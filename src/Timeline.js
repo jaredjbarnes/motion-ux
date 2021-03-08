@@ -78,7 +78,7 @@ export default class Timeline {
       }
     }
 
-    // Assign if the value if the start at was before the time now.
+    // Assign if the value of the start at was before the time now.
     // Since we have it sorted, the most current will win.
     for (let x = 0; x < length; x++) {
       const animation = animators[x].animation;

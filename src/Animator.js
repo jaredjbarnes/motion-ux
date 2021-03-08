@@ -10,12 +10,11 @@ export default class Animator {
     this.time = 0;
     this.bezierCurve = new BezierCurve([]);
     this.animationGraphs = [];
-    this.createAnimationGraphs();
+    this.updateAnimationGraphs();
   }
 
-  createAnimationGraphs() {
+  updateAnimationGraphs() {
     this.animationGraphs.length = 0;
-
     this.animationGraphs.push(this.animation.from.graph);
 
     for (let x = 0; x < this.animation.controls.length; x++) {
@@ -32,10 +31,11 @@ export default class Animator {
     const time = this.time;
 
     if (cloneNodes[0].name === "number") {
-      const relativeProgress = time - this.animation.startAt;
+      const elapsedTime = time - this.animation.startAt;
       const animationDuration = this.animation.endAt - this.animation.startAt;
-      const timeWithEasing =
-        this.animation.easing(relativeProgress) * animationDuration;
+      const timeWithEasing = this.animation.easing(
+        elapsedTime / animationDuration
+      );
 
       const points = cloneNodes.map((node) => node.value);
 
@@ -53,6 +53,7 @@ export default class Animator {
   }
 
   update(time) {
+    this.updateAnimationGraphs();
     this.time = time;
 
     visitor.setCallback(this.visit);
