@@ -37,16 +37,15 @@ const secondTimeline = new Timeline([
     startAt: 0.5,
     endAt: 1,
   },
-  // {
-  //   name: "circle",
-  //   property: "background",
-  //   from: "linear-gradient(0deg, rgba(255,    0,0,0.8), rgba(  255,0,0,0))",
-  //   //controls: ["rgba(0,0,0,0.5)"],
-  //   to: "linear-gradient(720deg, rgba(0,255,0,    0.8), rgba(0, 255 ,0,0))",
-  //   startAt: 0,
-  //   endAt: 1,
-  //   easing: "easeOutExpo",
-  // },
+  {
+    name: "circle",
+    property: "background",
+    to: "rgba(255,0,0)",
+    from: "rgba(255,0,0)",
+    startAt: 0,
+    endAt: 1,
+    easing: "easeOutExpo",
+  },
   // {
   //   name: "circle",
   //   property: "color",
@@ -65,18 +64,27 @@ const timeline = new Timeline([
     from: "translate(0px, 0px)",
     to: "translate(150px , 150px)",
     startAt: 0,
+    endAt: 0.5,
+    easing: "easeInOutQuad",
+  },
+  {
+    name: "circle",
+    property: "transform",
+    from: "translate(150px, 150px)",
+    to: "translate(0px , 0px)",
+    startAt: 0.5,
+    endAt: 1,
+    easing: "easeInOutQuad",
+  },
+  {
+    name: "circle",
+    property: "background",
+    from: "rgba(80,80,255)",
+    to: "rgba(80,80,255)",
+    startAt: 0,
     endAt: 1,
     easing: "easeOutExpo",
   },
-  // {
-  //   name: "circle",
-  //   property: "background",
-  //   from: "linear-gradient(0deg, rgba(255,    0,0,0.8), rgba(  255,0,0,0))",
-  //   to: "linear-gradient(-360deg, rgba(0,255,0,    0.8), rgba(0, 255 ,0,0))",
-  //   startAt: 0,
-  //   endAt: 1,
-  //   easing: "easeOutExpo",
-  // },
   // {
   //   name: "circle",
   //   property: "color",
@@ -95,7 +103,7 @@ function render(timeline) {
   });
 }
 
-let switched = false;
+let animation = 0;
 
 const player = new Player(timeline, { render, duration: 1500 });
 player.repeat = Infinity;
@@ -108,12 +116,24 @@ player.observeTime(0, () => {
   circleWithBezier.innerHTML = player.iterations;
 });
 
-player.observeTime(0.25, () => {
-  if (!switched) {
-    switched = true;
+function callback() {
+  observer.dispose();
+
+  if (animation === 0) {
+    animation = 1;
     player.transitionToTimeline(secondTimeline, 750);
+  } else {
+    animation = 0;
+    player.transitionToTimeline(timeline, 750);
   }
-});
+
+  const innerObserver = player.observeTime(1, () => {
+    observer = player.observeTime(0.5, callback);
+    innerObserver.dispose();
+  });
+}
+
+let observer = player.observeTime(0.5, callback);
 
 player.play();
 
