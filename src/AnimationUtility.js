@@ -19,6 +19,7 @@ export default class AnimationUtility {
     this._setConfig(config);
     this._normalizeName();
     this._normalizeProperty();
+    this._normalizeValue();
     this._normalizeFrom();
     this._normalizeControls();
     this._normalizeTo();
@@ -35,6 +36,13 @@ export default class AnimationUtility {
 
   _normalizeProperty() {
     this.result.property = this.config.property;
+  }
+
+  _normalizeValue() {
+    if (this.config.value != null) {
+      this.config.to = this.config.value;
+      this.config.from = this.config.value;
+    }
   }
 
   _normalizeFrom() {

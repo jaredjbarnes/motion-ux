@@ -4361,6 +4361,7 @@ class AnimationUtility {
     this._setConfig(config);
     this._normalizeName();
     this._normalizeProperty();
+    this._normalizeValue();
     this._normalizeFrom();
     this._normalizeControls();
     this._normalizeTo();
@@ -4377,6 +4378,14 @@ class AnimationUtility {
 
   _normalizeProperty() {
     this.result.property = this.config.property;
+  }
+
+  _normalizeValue() {
+    if (this.config.value != null) {
+      this.config.to = this.config.value;
+      this.config.from = this.config.value;
+      this.config.controls = [];
+    }
   }
 
   _normalizeFrom() {
@@ -5336,13 +5345,19 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._duration = duration;
 
     this.notify({
-      type: "TRANSITIONED",
+      type: "TRANSITION",
       timeline: this._timeline,
     });
 
     const observer = this.observeTime(1, ()=>{
       this._timeline = timeline;
       observer.dispose();
+      transitionObserver.dispose();
+    });
+
+    const transitionObserver = this.observe("TRANSITION", () => {
+      observer.dispose();
+      transitionObserver.dispose();
     });
 
     return this;

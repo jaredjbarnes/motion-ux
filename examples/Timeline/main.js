@@ -121,10 +121,10 @@ function callback() {
 
   if (animation === 0) {
     animation = 1;
-    player.transitionToTimeline(secondTimeline, 750);
+    player.transitionToTimeline(secondTimeline, 750, easings.easeOutBack);
   } else {
     animation = 0;
-    player.transitionToTimeline(timeline, 750);
+    player.transitionToTimeline(timeline, 750, easings.easeOutBack);
   }
 
   const innerObserver = player.observeTime(1, () => {
