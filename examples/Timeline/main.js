@@ -1,7 +1,7 @@
 import "../../dist/main.js";
 import easeInExpo from "../../src/easingFunctions/easeInExpo.js";
 
-const { easings, Timeline, Player } = motionUX;
+const { easings, Animation, Player } = motionUX;
 const circleWithBezier = document.createElement("div");
 
 circleWithBezier.style.borderRadius = "50% 50%";
@@ -18,7 +18,7 @@ referenceCircle.style.height = "300px";
 
 document.body.appendChild(circleWithBezier);
 
-const secondTimeline = new Timeline([
+const secondAnimation = new Animation([
   {
     name: "circle",
     property: "transform",
@@ -57,7 +57,7 @@ const secondTimeline = new Timeline([
   // },
 ]);
 
-const timeline = new Timeline([
+const animation = new Animation([
   {
     name: "circle",
     property: "transform",
@@ -96,16 +96,16 @@ const timeline = new Timeline([
   // },
 ]);
 
-function render(timeline) {
-  const animations = timeline.getCurrentValues();
-  Object.keys(animations.circle).forEach((key) => {
-    circleWithBezier.style[key] = animations.circle[key].value;
+function render(animation) {
+  const values = animation.getCurrentValues();
+  Object.keys(values.circle).forEach((key) => {
+    circleWithBezier.style[key] = values.circle[key].value;
   });
 }
 
-let animation = 0;
+let onAnimation = 0
 
-const player = new Player(timeline, { render, duration: 1500 });
+const player = new Player(animation, { render, duration: 1500 });
 player.repeat = Infinity;
 
 player.observeTime(1, () => {
@@ -119,12 +119,12 @@ player.observeTime(0, () => {
 function callback() {
   observer.dispose();
 
-  if (animation === 0) {
-    animation = 1;
-    player.transitionToTimeline(secondTimeline, 750, easings.easeOutBack);
+  if (onAnimation === 0) {
+    onAnimation = 1;
+    player.transitionToTimeline(secondAnimation, 750, easings.easeOutBack);
   } else {
-    animation = 0;
-    player.transitionToTimeline(timeline, 750, easings.easeOutBack);
+    onAnimation = 0;
+    player.transitionToTimeline(animation, 750, easings.easeOutBack);
   }
 
   const innerObserver = player.observeTime(1, () => {
@@ -137,6 +137,6 @@ let observer = player.observeTime(0.5, callback);
 
 player.play();
 
-window.timeline = timeline;
-window.secondTimeline = secondTimeline;
+window.animation = animation;
+window.secondAnimation = secondAnimation;
 window.player = player;

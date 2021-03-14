@@ -1,6 +1,6 @@
 import ParsedValue from "./ParsedValue";
 
-export default class AnimationConfigValidator {
+export default class KeyframeConfigValidator {
   constructor() {
     this.config = null;
   }
@@ -213,7 +213,7 @@ export default class AnimationConfigValidator {
 
     if (!this.areGraphStructuresEqual()) {
       throw new Error(
-        `Invalid Animation: The value types that are being animated do not match. From: ${JSON.stringify(
+        `Invalid Keyframe: The value types that are being animated do not match. From: ${JSON.stringify(
           config.from.value
         )}, To:${JSON.stringify(config.to.value)}, Controls: ${JSON.stringify(
           config.controls.map((v) => v.value)

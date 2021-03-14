@@ -107,8 +107,8 @@ module.exports = __webpack_require__(1);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Timeline_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Timeline", function() { return _Timeline_js__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animation", function() { return _Animation_js__WEBPACK_IMPORTED_MODULE_0__["default"]; });
 
 /* harmony import */ var _Player_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(58);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Player", function() { return _Player_js__WEBPACK_IMPORTED_MODULE_1__["default"]; });
@@ -116,8 +116,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Animator_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animator", function() { return _Animator_js__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(8);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Animation", function() { return _Animation_js__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+/* harmony import */ var _Keyframe_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(8);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Keyframe", function() { return _Keyframe_js__WEBPACK_IMPORTED_MODULE_3__["default"]; });
 
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(26);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "easings", function() { return _easings_js__WEBPACK_IMPORTED_MODULE_4__["default"]; });
@@ -141,36 +141,36 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Timeline; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Animation; });
 /* harmony import */ var _Animator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
-/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
+/* harmony import */ var _Keyframe_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
 
 
 
 const sortAsc = (animatorA, animatorB) => {
-  return animatorA.animation.startAt - animatorB.animation.startAt;
+  return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 
-class Timeline {
-  constructor(animations) {
+class Animation {
+  constructor(keyframes) {
     this.animators = new Map();
     this._time = 0;
 
-    this.initialize(animations);
+    this.initialize(keyframes);
   }
 
-  initialize(animations) {
+  initialize(keyframes) {
     this._currentValues = {};
 
-    this.animators = animations
-      .map((animation) => {
-        if (animation instanceof _Animation_js__WEBPACK_IMPORTED_MODULE_1__["default"]) {
-          return animation;
+    this.animators = keyframes
+      .map((keyframe) => {
+        if (keyframe instanceof _Keyframe_js__WEBPACK_IMPORTED_MODULE_1__["default"]) {
+          return keyframe;
         } else {
-          return _Animation_js__WEBPACK_IMPORTED_MODULE_1__["default"].fromSimpleConfig(animation);
+          return _Keyframe_js__WEBPACK_IMPORTED_MODULE_1__["default"].fromSimpleConfig(keyframe);
         }
       })
-      .map((animation) => new _Animator_js__WEBPACK_IMPORTED_MODULE_0__["default"](animation));
+      .map((keyframe) => new _Animator_js__WEBPACK_IMPORTED_MODULE_0__["default"](keyframe));
 
     this._createCurrentValues();
 
@@ -180,31 +180,31 @@ class Timeline {
 
   _createCurrentValues() {
     this._currentValues = this.animators.reduce((results, animator) => {
-      const name = animator.animation.name;
-      const property = animator.animation.property;
+      const name = animator.keyframe.name;
+      const property = animator.keyframe.property;
 
-      let animation = results[name];
+      let keyframe = results[name];
 
-      if (animation == null) {
-        animation = results[name] = {};
+      if (keyframe == null) {
+        keyframe = results[name] = {};
       }
 
-      if (animation[property] == null) {
-        animation[property] = animator.animation.result.clone();
+      if (keyframe[property] == null) {
+        keyframe[property] = animator.keyframe.result.clone();
       }
 
       return results;
     }, {});
   }
 
-  _assignValue(animation) {
-    const currentValue = this._currentValues[animation.name][
-      animation.property
+  _assignValue(keyframe) {
+    const currentValue = this._currentValues[keyframe.name][
+      keyframe.property
     ];
 
-    currentValue.value = animation.result.value;
-    currentValue.graph = animation.result.graph;
-    currentValue.graphHash = animation.result.graphHash;
+    currentValue.value = keyframe.result.value;
+    currentValue.graph = keyframe.result.graph;
+    currentValue.graphHash = keyframe.result.graphHash;
   }
 
   _saveCurrentValues() {
@@ -215,29 +215,29 @@ class Timeline {
     // Assign all values at least once.
     // This initials values beyond the time we are at.
     for (let x = 0; x < length; x++) {
-      const animation = animators[x].animation;
-      const key = `${animation.name}|${animation.property}`;
+      const keyframe = animators[x].keyframe;
+      const key = `${keyframe.name}|${keyframe.property}`;
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this._assignValue(animation);
+        this._assignValue(keyframe);
       }
     }
 
     // Assign if the value of the start at was before the time now.
     // Since we have it sorted, the most current will win.
     for (let x = 0; x < length; x++) {
-      const animation = animators[x].animation;
+      const keyframe = animators[x].keyframe;
 
-      if (animation.startAt <= this._time) {
-        this._assignValue(animation);
+      if (keyframe.startAt <= this._time) {
+        this._assignValue(keyframe);
       }
     }
   }
 
   update(time) {
     this._time = time;
-    // Update all animations
+    // Update all keyframes
     this.animators.forEach((animator) => {
       animator.update(time);
     });
@@ -252,10 +252,10 @@ class Timeline {
   }
 
   merge(timeline) {
-    const oldAnimations = this.animators.map((a) => a.animation);
-    const newAnimations = timeline.animators.map((a) => a.animation);
+    const oldKeyframes = this.animators.map((a) => a.keyframe);
+    const newKeyframes = timeline.animators.map((a) => a.keyframe);
 
-    this.initialize([...oldAnimations, ...newAnimations]);
+    this.initialize([...oldKeyframes, ...newKeyframes]);
 
     return this;
   }
@@ -277,25 +277,25 @@ __webpack_require__.r(__webpack_exports__);
 const visitor = new _GraphsVisitor_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
 class Animator {
-  constructor(animation) {
-    this.animation = animation;
+  constructor(keyframe) {
+    this.keyframe = keyframe;
     this.visit = this.visit.bind(this);
     this.time = 0;
     this.bezierCurve = new _BezierCurve_js__WEBPACK_IMPORTED_MODULE_0__["default"]([]);
-    this.animationGraphs = [];
-    this.updateAnimationGraphs();
+    this.keyframeGraphs = [];
+    this.updateKeyframeGraphs();
   }
 
-  updateAnimationGraphs() {
-    this.animationGraphs.length = 0;
-    this.animationGraphs.push(this.animation.from.graph);
+  updateKeyframeGraphs() {
+    this.keyframeGraphs.length = 0;
+    this.keyframeGraphs.push(this.keyframe.from.graph);
 
-    for (let x = 0; x < this.animation.controls.length; x++) {
-      this.animationGraphs.push(this.animation.controls[x].graph);
+    for (let x = 0; x < this.keyframe.controls.length; x++) {
+      this.keyframeGraphs.push(this.keyframe.controls[x].graph);
     }
 
-    this.animationGraphs.push(this.animation.to.graph);
-    this.animationGraphs.push(this.animation.result.graph);
+    this.keyframeGraphs.push(this.keyframe.to.graph);
+    this.keyframeGraphs.push(this.keyframe.result.graph);
   }
 
   visit(nodes) {
@@ -304,9 +304,9 @@ class Animator {
     const time = this.time;
 
     if (cloneNodes[0].name === "number") {
-      const elapsedTime = time - this.animation.startAt;
-      const animationDuration = this.animation.endAt - this.animation.startAt;
-      const timeWithEasing = this.animation.easing(
+      const elapsedTime = time - this.keyframe.startAt;
+      const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
+      const timeWithEasing = this.keyframe.easing(
         elapsedTime / animationDuration
       );
 
@@ -316,7 +316,7 @@ class Animator {
       resultNode.value = this.bezierCurve.valueAt(timeWithEasing);
     } else {
       if (!Array.isArray(resultNode.children)) {
-        if (time >= this.animation.startAt) {
+        if (time >= this.keyframe.startAt) {
           resultNode.value = cloneNodes[cloneNodes.length - 1].value;
         } else {
           resultNode.value = cloneNodes[0].value;
@@ -326,16 +326,16 @@ class Animator {
   }
 
   update(time) {
-    this.updateAnimationGraphs();
+    this.updateKeyframeGraphs();
     this.time = time;
 
     visitor.setCallback(this.visit);
-    visitor.visitDown(this.animationGraphs, true);
+    visitor.visitDown(this.keyframeGraphs, true);
 
-    const value = this.animation.result.graph.toString();
-    this.animation.result.value = value;
+    const value = this.keyframe.result.graph.toString();
+    this.keyframe.result.value = value;
 
-    return this.animation.result;
+    return this.keyframe.result;
   }
 }
 
@@ -622,16 +622,16 @@ class Visitor {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Animation; });
-/* harmony import */ var _AnimationConfigValidator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9);
-/* harmony import */ var _AnimationUtility_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(25);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Keyframe; });
+/* harmony import */ var _KeyframeConfigValidator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9);
+/* harmony import */ var _KeyframeUtility_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(25);
 
 
 
-const validator = new _AnimationConfigValidator_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
-const utility = new _AnimationUtility_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
+const validator = new _KeyframeConfigValidator_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+const utility = new _KeyframeUtility_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
-class Animation {
+class Keyframe {
   constructor(config) {
     validator.setConfig(config);
     validator.validate(config);
@@ -648,7 +648,7 @@ class Animation {
   }
 
   static fromSimpleConfig(config) {
-    return new Animation(utility.normalizeConfig(config));
+    return new Keyframe(utility.normalizeConfig(config));
   }
 }
 
@@ -659,11 +659,11 @@ class Animation {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return AnimationConfigValidator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return KeyframeConfigValidator; });
 /* harmony import */ var _ParsedValue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
 
 
-class AnimationConfigValidator {
+class KeyframeConfigValidator {
   constructor() {
     this.config = null;
   }
@@ -876,7 +876,7 @@ class AnimationConfigValidator {
 
     if (!this.areGraphStructuresEqual()) {
       throw new Error(
-        `Invalid Animation: The value types that are being animated do not match. From: ${JSON.stringify(
+        `Invalid Keyframe: The value types that are being animated do not match. From: ${JSON.stringify(
           config.from.value
         )}, To:${JSON.stringify(config.to.value)}, Controls: ${JSON.stringify(
           config.controls.map((v) => v.value)
@@ -4336,17 +4336,17 @@ class HexColor {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return AnimationUtility; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return KeyframeUtility; });
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(26);
-/* harmony import */ var _AnimationConfigValidator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
+/* harmony import */ var _KeyframeConfigValidator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /* harmony import */ var _ParsedValue_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(10);
 
 
 
 
-const validator = new _AnimationConfigValidator_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
+const validator = new _KeyframeConfigValidator_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
-class AnimationUtility {
+class KeyframeUtility {
   constructor() {
     this.config = null;
   }
@@ -4384,7 +4384,6 @@ class AnimationUtility {
     if (this.config.value != null) {
       this.config.to = this.config.value;
       this.config.from = this.config.value;
-      this.config.controls = [];
     }
   }
 
@@ -5029,8 +5028,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Player; });
 /* harmony import */ var _Observable_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(59);
 /* harmony import */ var _DefaultClock_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(62);
-/* harmony import */ var _SlopeTimelineBuilder_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(63);
-/* harmony import */ var _BlendedTimeline_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(66);
+/* harmony import */ var _SlopeAnimationBuilder_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(63);
+/* harmony import */ var _BlendedAnimation_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(66);
 
 
 
@@ -5060,7 +5059,7 @@ function defaultRender() {}
 
 class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor(
-    timeline,
+    animation,
     { clock, duration, timeScale, repeatDirection, render }
   ) {
     super();
@@ -5074,11 +5073,11 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     this._repeat = 1;
     this._repeatDirection =
       typeof repeatDirection === "number" ? repeatDirection : DEFAULT;
-    this._timeline = timeline;
+    this._animation = animation;
     this._clock = clock || defaultClock;
     this._state = STOPPED;
     this._render = typeof render === "function" ? render : defaultRender;
-    this._slopeTimelineBuilder = new _SlopeTimelineBuilder_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
+    this._slopeAnimationBuilder = new _SlopeAnimationBuilder_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
 
     this.tick = this.tick.bind(this);
   }
@@ -5142,13 +5141,13 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     return this._state;
   }
 
-  get timeline() {
-    return this._timeline;
+  get animation() {
+    return this._animation;
   }
 
-  set timeline(timeline) {
-    if (typeof timeline.render === "function") {
-      this._timeline = timeline;
+  set animation(animation) {
+    if (typeof animation.render === "function") {
+      this._animation = animation;
     }
   }
 
@@ -5164,7 +5163,7 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
       this.notify({
         type: "PLAYED",
-        timeline: this._timeline,
+        animation: this._animation,
       });
     }
   }
@@ -5213,7 +5212,7 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
           type: "TICK",
           time: 1,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 1;
@@ -5226,7 +5225,7 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
           type: "TICK",
           time: 1,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 0;
@@ -5260,7 +5259,7 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
           type: "TICK",
           time: 0,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 0;
@@ -5273,7 +5272,7 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
           type: "TICK",
           time: 1,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 1;
@@ -5289,14 +5288,14 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
     const lastTime = this._time;
     this._time = time;
 
-    this._timeline.update(this._time);
-    this._render(this._timeline);
+    this._animation.update(this._time);
+    this._render(this._animation);
 
     this.notify({
       type: "TICK",
       time,
       lastTime,
-      timeline: this._timeline,
+      animation: this._animation,
     });
   }
 
@@ -5307,7 +5306,7 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
       this.notify({
         type: "STOPPED",
-        timeline: this._timeline,
+        animation: this._animation,
       });
     }
   }
@@ -5320,37 +5319,37 @@ class Player extends _Observable_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
       this.notify({
         type: "REVERSED",
-        timeline: this._timeline,
+        animation: this._animation,
       });
     }
   }
 
-  transitionToTimeline(timeline, duration, easing) {
-    const slopeTimeline = this._slopeTimelineBuilder.build(
-      this._timeline,
+  transitionToTimeline(animation, duration, easing) {
+    const slopeAnimation = this._slopeAnimationBuilder.build(
+      this._animation,
       this._time,
       this._duration,
       duration,
       this._state
     );
 
-    const blendedTimeline = new _BlendedTimeline_js__WEBPACK_IMPORTED_MODULE_3__["default"](
-      slopeTimeline,
-      timeline,
+    const blendedAnimation = new _BlendedAnimation_js__WEBPACK_IMPORTED_MODULE_3__["default"](
+      slopeAnimation,
+      animation,
       easing
     );
 
-    this._timeline = blendedTimeline;
+    this._animation = blendedAnimation;
     this._time = 0;
     this._duration = duration;
 
     this.notify({
       type: "TRANSITION",
-      timeline: this._timeline,
+      animation: this._animation,
     });
 
-    const observer = this.observeTime(1, ()=>{
-      this._timeline = timeline;
+    const observer = this.observeTime(1, () => {
+      this._animation = animation;
       observer.dispose();
       transitionObserver.dispose();
     });
@@ -5554,11 +5553,11 @@ class DefaultClock {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SlopeTimelineBuilder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SlopeAnimationBuilder; });
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(26);
 /* harmony import */ var _GraphOperator_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(64);
-/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8);
-/* harmony import */ var _Timeline_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(2);
+/* harmony import */ var _Keyframe_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8);
+/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(2);
 
 
 
@@ -5567,10 +5566,10 @@ __webpack_require__.r(__webpack_exports__);
 const FORWARD = 1;
 const BACKWARD = -1;
 
-class SlopeTimelineBuilder {
+class SlopeAnimationBuilder {
   constructor() {
-    this.timeline = null;
-    this.slopeTimeline = null;
+    this.animation = null;
+    this.slopeAnimation = null;
     this.direction = 0;
     this.newDuration = 0;
     this.duration = 0;
@@ -5597,8 +5596,8 @@ class SlopeTimelineBuilder {
     }, {});
   }
 
-  build(timeline, offset, duration, newDuration, direction) {
-    this.timeline = timeline;
+  build(animation, offset, duration, newDuration, direction) {
+    this.animation = animation;
     this.offset = offset;
     this.duration = duration;
     this.newDuration = newDuration;
@@ -5608,12 +5607,12 @@ class SlopeTimelineBuilder {
     this.calculate();
     this.createSlopeTimeline();
 
-    return this.slopeTimeline;
+    return this.slopeAnimation;
   }
 
   cacheValues() {
-    this.timeline.update(this.offset);
-    this.nowValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset);
+    this.nowValues = this.cloneValues(this.animation.getCurrentValues());
 
     this.deltaStepValues = this.cloneValues(this.nowValues);
     this.scaleValues = this.cloneValues(this.nowValues);
@@ -5659,18 +5658,18 @@ class SlopeTimelineBuilder {
   }
 
   cacheDeltaValueForward() {
-    this.timeline.update(this.offset + this.delta);
-    this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset + this.delta);
+    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 
   cacheDeltaValueBackward() {
-    this.timeline.update(this.offset - this.delta);
-    this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset - this.delta);
+    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 
   cacheDeltaValueStopped() {
-    this.timeline.update(this.offset);
-    this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset);
+    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 
   calculate() {
@@ -5698,10 +5697,10 @@ class SlopeTimelineBuilder {
   }
 
   createSlopeTimeline() {
-    const animations = Object.keys(this.nowValues)
+    const keyframes = Object.keys(this.nowValues)
       .map((name) => {
         return Object.keys(this.nowValues[name]).map((property) => {
-          return new _Animation_js__WEBPACK_IMPORTED_MODULE_2__["default"]({
+          return new _Keyframe_js__WEBPACK_IMPORTED_MODULE_2__["default"]({
             name,
             property,
             from: this.nowValues[name][property],
@@ -5715,7 +5714,7 @@ class SlopeTimelineBuilder {
       })
       .flat();
 
-    this.slopeTimeline = new _Timeline_js__WEBPACK_IMPORTED_MODULE_3__["default"](animations);
+    this.slopeAnimation = new _Animation_js__WEBPACK_IMPORTED_MODULE_3__["default"](keyframes);
   }
 }
 
@@ -5844,29 +5843,29 @@ class GraphOperations {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BlendedTimeline; });
-/* harmony import */ var _Timeline_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return BlendedAnimation; });
+/* harmony import */ var _Animation_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var _Keyframe_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8);
 /* harmony import */ var _easings_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(26);
 
 
 
 
-class BlendedTimeline extends _Timeline_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  constructor(fromTimeline, toTimeline, easing) {
-    const fromAnimations = fromTimeline.getCurrentValues();
-    const toAnimations = toTimeline.getCurrentValues();
+class BlendedAnimation extends _Animation_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor(fromAnimation, toAnimation, easing) {
+    const fromValues = fromAnimation.getCurrentValues();
+    const toValues = toAnimation.getCurrentValues();
 
-    const animations = Object.keys(fromAnimations)
+    const animations = Object.keys(fromValues)
       .map((name) => {
-        const fromAnimation = fromAnimations[name];
-        const toAnimation = toAnimations[name];
+        const fromValue = fromValues[name];
+        const toValue = toValues[name];
 
-        return Object.keys(fromAnimation).map((property) => {
-          const from = fromAnimation[property];
-          const to = toAnimation[property];
+        return Object.keys(fromValue).map((property) => {
+          const from = fromValue[property];
+          const to = toValue[property];
 
-          return new _Animation_js__WEBPACK_IMPORTED_MODULE_1__["default"]({
+          return new _Keyframe_js__WEBPACK_IMPORTED_MODULE_1__["default"]({
             name,
             property,
             startAt: 0,
@@ -5882,13 +5881,13 @@ class BlendedTimeline extends _Timeline_js__WEBPACK_IMPORTED_MODULE_0__["default
 
     super(animations);
 
-    this.fromTimeline = fromTimeline;
-    this.toTimeline = toTimeline;
+    this.fromAnimation = fromAnimation;
+    this.toAnimation = toAnimation;
   }
 
   update(time) {
-    this.fromTimeline.update(time);
-    this.toTimeline.update(time);
+    this.fromAnimation.update(time);
+    this.toAnimation.update(time);
 
     super.update(time);
 

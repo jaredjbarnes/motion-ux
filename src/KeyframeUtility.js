@@ -1,10 +1,10 @@
 import easings from "./easings.js";
-import AnimationConfigValidator from "./AnimationConfigValidator.js";
+import KeyframeConfigValidator from "./KeyframeConfigValidator.js";
 import ParsedValue from "./ParsedValue.js";
 
-const validator = new AnimationConfigValidator();
+const validator = new KeyframeConfigValidator();
 
-export default class AnimationUtility {
+export default class KeyframeUtility {
   constructor() {
     this.config = null;
   }

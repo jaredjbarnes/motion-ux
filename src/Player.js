@@ -1,7 +1,7 @@
 import Observable from "./Observable.js";
 import DefaultClock from "./DefaultClock.js";
-import SlopeTimelineBuilder from "./SlopeTimelineBuilder.js";
-import BlendedTimeline from "./BlendedTimeline.js";
+import SlopeAnimationBuilder from "./SlopeAnimationBuilder.js";
+import BlendedAnimation from "./BlendedAnimation.js";
 
 const defaultClock = new DefaultClock();
 
@@ -27,7 +27,7 @@ function defaultRender() {}
 
 export default class Player extends Observable {
   constructor(
-    timeline,
+    animation,
     { clock, duration, timeScale, repeatDirection, render }
   ) {
     super();
@@ -41,11 +41,11 @@ export default class Player extends Observable {
     this._repeat = 1;
     this._repeatDirection =
       typeof repeatDirection === "number" ? repeatDirection : DEFAULT;
-    this._timeline = timeline;
+    this._animation = animation;
     this._clock = clock || defaultClock;
     this._state = STOPPED;
     this._render = typeof render === "function" ? render : defaultRender;
-    this._slopeTimelineBuilder = new SlopeTimelineBuilder();
+    this._slopeAnimationBuilder = new SlopeAnimationBuilder();
 
     this.tick = this.tick.bind(this);
   }
@@ -109,13 +109,13 @@ export default class Player extends Observable {
     return this._state;
   }
 
-  get timeline() {
-    return this._timeline;
+  get animation() {
+    return this._animation;
   }
 
-  set timeline(timeline) {
-    if (typeof timeline.render === "function") {
-      this._timeline = timeline;
+  set animation(animation) {
+    if (typeof animation.render === "function") {
+      this._animation = animation;
     }
   }
 
@@ -131,7 +131,7 @@ export default class Player extends Observable {
 
       this.notify({
         type: "PLAYED",
-        timeline: this._timeline,
+        animation: this._animation,
       });
     }
   }
@@ -180,7 +180,7 @@ export default class Player extends Observable {
           type: "TICK",
           time: 1,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 1;
@@ -193,7 +193,7 @@ export default class Player extends Observable {
           type: "TICK",
           time: 1,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 0;
@@ -227,7 +227,7 @@ export default class Player extends Observable {
           type: "TICK",
           time: 0,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 0;
@@ -240,7 +240,7 @@ export default class Player extends Observable {
           type: "TICK",
           time: 1,
           lastTime,
-          timeline: this._timeline,
+          animation: this._animation,
         });
 
         this._time = 1;
@@ -256,14 +256,14 @@ export default class Player extends Observable {
     const lastTime = this._time;
     this._time = time;
 
-    this._timeline.update(this._time);
-    this._render(this._timeline);
+    this._animation.update(this._time);
+    this._render(this._animation);
 
     this.notify({
       type: "TICK",
       time,
       lastTime,
-      timeline: this._timeline,
+      animation: this._animation,
     });
   }
 
@@ -274,7 +274,7 @@ export default class Player extends Observable {
 
       this.notify({
         type: "STOPPED",
-        timeline: this._timeline,
+        animation: this._animation,
       });
     }
   }
@@ -287,37 +287,37 @@ export default class Player extends Observable {
 
       this.notify({
         type: "REVERSED",
-        timeline: this._timeline,
+        animation: this._animation,
       });
     }
   }
 
-  transitionToTimeline(timeline, duration, easing) {
-    const slopeTimeline = this._slopeTimelineBuilder.build(
-      this._timeline,
+  transitionToTimeline(animation, duration, easing) {
+    const slopeAnimation = this._slopeAnimationBuilder.build(
+      this._animation,
       this._time,
       this._duration,
       duration,
       this._state
     );
 
-    const blendedTimeline = new BlendedTimeline(
-      slopeTimeline,
-      timeline,
+    const blendedAnimation = new BlendedAnimation(
+      slopeAnimation,
+      animation,
       easing
     );
 
-    this._timeline = blendedTimeline;
+    this._animation = blendedAnimation;
     this._time = 0;
     this._duration = duration;
 
     this.notify({
       type: "TRANSITION",
-      timeline: this._timeline,
+      animation: this._animation,
     });
 
-    const observer = this.observeTime(1, ()=>{
-      this._timeline = timeline;
+    const observer = this.observeTime(1, () => {
+      this._animation = animation;
       observer.dispose();
       transitionObserver.dispose();
     });

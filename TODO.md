@@ -1,11 +1,3 @@
-Rename the Animation class to KeyFrame
-Rename the AnimationUtility class to KeyFrameUtility
-Rename the AnimationValidator class to KeyFrameValidator
-Rename the Timeline class to Animation
-Rename the BlendedTimeline class to BlendedAnimation
-Rename the SlopeTimelineBuilder class to SlopeAnimationBuilder
-
-
 ```ts
 const animation = {
   from: {

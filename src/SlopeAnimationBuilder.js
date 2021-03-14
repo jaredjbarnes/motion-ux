@@ -1,15 +1,15 @@
 import easings from "./easings.js";
 import GraphOperator from "./GraphOperator.js";
+import Keyframe from "./Keyframe.js";
 import Animation from "./Animation.js";
-import Timeline from "./Timeline.js";
 
 const FORWARD = 1;
 const BACKWARD = -1;
 
-export default class SlopeTimelineBuilder {
+export default class SlopeAnimationBuilder {
   constructor() {
-    this.timeline = null;
-    this.slopeTimeline = null;
+    this.animation = null;
+    this.slopeAnimation = null;
     this.direction = 0;
     this.newDuration = 0;
     this.duration = 0;
@@ -36,8 +36,8 @@ export default class SlopeTimelineBuilder {
     }, {});
   }
 
-  build(timeline, offset, duration, newDuration, direction) {
-    this.timeline = timeline;
+  build(animation, offset, duration, newDuration, direction) {
+    this.animation = animation;
     this.offset = offset;
     this.duration = duration;
     this.newDuration = newDuration;
@@ -47,12 +47,12 @@ export default class SlopeTimelineBuilder {
     this.calculate();
     this.createSlopeTimeline();
 
-    return this.slopeTimeline;
+    return this.slopeAnimation;
   }
 
   cacheValues() {
-    this.timeline.update(this.offset);
-    this.nowValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset);
+    this.nowValues = this.cloneValues(this.animation.getCurrentValues());
 
     this.deltaStepValues = this.cloneValues(this.nowValues);
     this.scaleValues = this.cloneValues(this.nowValues);
@@ -98,18 +98,18 @@ export default class SlopeTimelineBuilder {
   }
 
   cacheDeltaValueForward() {
-    this.timeline.update(this.offset + this.delta);
-    this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset + this.delta);
+    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 
   cacheDeltaValueBackward() {
-    this.timeline.update(this.offset - this.delta);
-    this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset - this.delta);
+    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 
   cacheDeltaValueStopped() {
-    this.timeline.update(this.offset);
-    this.deltaValues = this.cloneValues(this.timeline.getCurrentValues());
+    this.animation.update(this.offset);
+    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 
   calculate() {
@@ -137,10 +137,10 @@ export default class SlopeTimelineBuilder {
   }
 
   createSlopeTimeline() {
-    const animations = Object.keys(this.nowValues)
+    const keyframes = Object.keys(this.nowValues)
       .map((name) => {
         return Object.keys(this.nowValues[name]).map((property) => {
-          return new Animation({
+          return new Keyframe({
             name,
             property,
             from: this.nowValues[name][property],
@@ -154,6 +154,6 @@ export default class SlopeTimelineBuilder {
       })
       .flat();
 
-    this.slopeTimeline = new Timeline(animations);
+    this.slopeAnimation = new Animation(keyframes);
   }
 }

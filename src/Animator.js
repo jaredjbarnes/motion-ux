@@ -4,25 +4,25 @@ import GraphsVisitor from "./GraphsVisitor.js";
 const visitor = new GraphsVisitor();
 
 export default class Animator {
-  constructor(animation) {
-    this.animation = animation;
+  constructor(keyframe) {
+    this.keyframe = keyframe;
     this.visit = this.visit.bind(this);
     this.time = 0;
     this.bezierCurve = new BezierCurve([]);
-    this.animationGraphs = [];
-    this.updateAnimationGraphs();
+    this.keyframeGraphs = [];
+    this.updateKeyframeGraphs();
   }
 
-  updateAnimationGraphs() {
-    this.animationGraphs.length = 0;
-    this.animationGraphs.push(this.animation.from.graph);
+  updateKeyframeGraphs() {
+    this.keyframeGraphs.length = 0;
+    this.keyframeGraphs.push(this.keyframe.from.graph);
 
-    for (let x = 0; x < this.animation.controls.length; x++) {
-      this.animationGraphs.push(this.animation.controls[x].graph);
+    for (let x = 0; x < this.keyframe.controls.length; x++) {
+      this.keyframeGraphs.push(this.keyframe.controls[x].graph);
     }
 
-    this.animationGraphs.push(this.animation.to.graph);
-    this.animationGraphs.push(this.animation.result.graph);
+    this.keyframeGraphs.push(this.keyframe.to.graph);
+    this.keyframeGraphs.push(this.keyframe.result.graph);
   }
 
   visit(nodes) {
@@ -31,9 +31,9 @@ export default class Animator {
     const time = this.time;
 
     if (cloneNodes[0].name === "number") {
-      const elapsedTime = time - this.animation.startAt;
-      const animationDuration = this.animation.endAt - this.animation.startAt;
-      const timeWithEasing = this.animation.easing(
+      const elapsedTime = time - this.keyframe.startAt;
+      const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
+      const timeWithEasing = this.keyframe.easing(
         elapsedTime / animationDuration
       );
 
@@ -43,7 +43,7 @@ export default class Animator {
       resultNode.value = this.bezierCurve.valueAt(timeWithEasing);
     } else {
       if (!Array.isArray(resultNode.children)) {
-        if (time >= this.animation.startAt) {
+        if (time >= this.keyframe.startAt) {
           resultNode.value = cloneNodes[cloneNodes.length - 1].value;
         } else {
           resultNode.value = cloneNodes[0].value;
@@ -53,15 +53,15 @@ export default class Animator {
   }
 
   update(time) {
-    this.updateAnimationGraphs();
+    this.updateKeyframeGraphs();
     this.time = time;
 
     visitor.setCallback(this.visit);
-    visitor.visitDown(this.animationGraphs, true);
+    visitor.visitDown(this.keyframeGraphs, true);
 
-    const value = this.animation.result.graph.toString();
-    this.animation.result.value = value;
+    const value = this.keyframe.result.graph.toString();
+    this.keyframe.result.value = value;
 
-    return this.animation.result;
+    return this.keyframe.result;
   }
 }

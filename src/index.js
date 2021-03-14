@@ -1,8 +1,8 @@
-import Timeline from "./Timeline.js";
+import Animation from "./Animation.js";
 import Player from "./Player.js";
 import Animator from "./Animator.js";
-import Animation from "./Animation.js";
+import Keyframe from "./Keyframe.js";
 import easings from "./easings.js";
 import BezierCurve from "./BezierCurve.js";
 
-export { Timeline, Player, Animator, Animation, BezierCurve, easings };
+export { Animation, Player, Animator, Keyframe, BezierCurve, easings };
