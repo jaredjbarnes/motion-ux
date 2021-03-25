@@ -1,5 +1,6 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
+import { SimpleKeyframeConfig } from "./KeyframeUtility";
 import ParsedValue from "./ParsedValue";
 
 const sortAsc = (animatorA: Animator, animatorB: Animator) => {
@@ -7,23 +8,23 @@ const sortAsc = (animatorA: Animator, animatorB: Animator) => {
 };
 
 type AnimationState = {
-  [key: string]: { [key: string]: ParsedValue } 
-}
+  [key: string]: { [key: string]: ParsedValue };
+};
 
 export default class Animation {
   public animators: Animator[] = [];
   public _time: number = 0;
   public _currentValues!: AnimationState;
 
-  constructor(keyframes: Keyframe[]) {
+  constructor(keyframes: Keyframe[] | SimpleKeyframeConfig[]) {
     this.initialize(keyframes);
   }
 
-  initialize(keyframes: Keyframe[]) {
+  initialize(keyframes: Keyframe[] | SimpleKeyframeConfig[]) {
     this._currentValues = {};
 
     this.animators = keyframes
-      .map((keyframe) => {
+      .map((keyframe: any) => {
         if (keyframe instanceof Keyframe) {
           return keyframe;
         } else {
@@ -39,22 +40,25 @@ export default class Animation {
   }
 
   private _createCurrentValues() {
-    this._currentValues = this.animators.reduce((results: AnimationState, animator) => {
-      const name = animator.keyframe.name;
-      const property = animator.keyframe.property;
+    this._currentValues = this.animators.reduce(
+      (results: AnimationState, animator) => {
+        const name = animator.keyframe.name;
+        const property = animator.keyframe.property;
 
-      let keyframe = results[name];
+        let keyframe = results[name];
 
-      if (keyframe == null) {
-        keyframe = results[name] = {};
-      }
+        if (keyframe == null) {
+          keyframe = results[name] = {};
+        }
 
-      if (keyframe[property] == null) {
-        keyframe[property] = animator.keyframe.result.clone();
-      }
+        if (keyframe[property] == null) {
+          keyframe[property] = animator.keyframe.result.clone();
+        }
 
-      return results;
-    }, {});
+        return results;
+      },
+      {}
+    );
   }
 
   private _assignValue(keyframe: Keyframe) {
