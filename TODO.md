@@ -44,6 +44,30 @@ const animation = {
 };
 ```
 
+```ts
+const animation = {
+  from: {
+    fontSize: "10px",
+    width: "100%",
+    height: "100%",
+  },
+  "75%": {
+    fontSize: "15px",
+    width: {
+      value: "80%",
+      controls: ["25%"],
+      easing: "easeOutExpo",
+    },
+    height: "300%",
+  },
+  to: {
+    fontSize: "20px",
+    width: "50%",
+    height: "75%",
+  },
+};
+```
+
 Shortcut to just values
 
 ```ts
@@ -56,19 +80,19 @@ const animation = {
 };
 ```
 
-Stateful Timelines
+Stateful Animation
 
 ```ts
 const animation = {
   off: {
-    timeline,
+    animation,
     duration,
     iterationCount: 1, // Default 1
     direction: "alternate" // Default normal
     easing: "easeOutExpo" // Default linear
   },
   on: {
-    timeline: timeline2,
+    animation: animation2,
     duration
   }
 }
@@ -99,7 +123,7 @@ const animation = {
 ```ts
 animations = [
   {
-    name: "timeline",
+    name: "animation",
     property: "fontSize",
     from: "10px",
     controls: [],
@@ -108,7 +132,7 @@ animations = [
     endAt: 0.75,
   },
   {
-    name: "timeline",
+    name: "animation",
     property: "fontSize",
     from: "15px",
     controls: [],
@@ -117,7 +141,7 @@ animations = [
     endAt: 1,
   },
   {
-    name: "timeline",
+    name: "animation",
     property: "width",
     from: "100%",
     controls: [],
@@ -126,7 +150,7 @@ animations = [
     endAt: 0.75,
   },
   {
-    name: "timeline",
+    name: "animation",
     property: "width",
     from: "300%",
     controls: [],
@@ -135,7 +159,7 @@ animations = [
     endAt: 1,
   },
   {
-    name: "timeline",
+    name: "animation",
     property: "height",
     from: "100%",
     controls: [],
@@ -144,7 +168,7 @@ animations = [
     endAt: 0.75,
   },
   {
-    name: "timeline",
+    name: "animation",
     property: "height",
     from: "300%",
     controls: [],

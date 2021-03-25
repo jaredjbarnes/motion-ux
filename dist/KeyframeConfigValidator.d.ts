@@ -1,0 +1,36 @@
+import { KeyframeConfig } from "./Keyframe";
+import { SimpleKeyframeConfig } from "./KeyframeUtility";
+export default class KeyframeConfigValidator {
+    config: any;
+    constructor();
+    setConfig(config: KeyframeConfig | SimpleKeyframeConfig): void;
+    isSimpleConfig(): boolean;
+    validateConfig(): void;
+    validate(config: KeyframeConfig): void;
+    validateName(): void;
+    hasValidName(): boolean;
+    validateProperty(): void;
+    hasValidProperty(): boolean;
+    validateToAsString(): void;
+    hasValidToAsString(): boolean;
+    validateToAsParsedValue(): void;
+    hasValidToAsParsedValue(): boolean;
+    validateFromAsString(): void;
+    hasValidFromAsString(): boolean;
+    validateFromAsParsedValue(): void;
+    hasValidFromAsParsedValue(): boolean;
+    validateControlsAsStrings(): void;
+    hasValidControlsAsStrings(): any;
+    validateControlsAsParsedValues(): void;
+    hasValidControlsAsParsedValues(): any;
+    validateStartAt(): void;
+    hasValidStartAt(): boolean;
+    validateEndAt(): void;
+    hasValidEndAt(): boolean;
+    validateEasingString(): void;
+    hasValidEasingString(): boolean;
+    validateEasingFunction(): void;
+    hasValidEasingFunction(): boolean;
+    validateNodes(): void;
+    areGraphStructuresEqual(): boolean;
+}

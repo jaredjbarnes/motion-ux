@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/patterns/hex.js"],"names":["hex","RegexValue"],"mappings":";;;;;;;AAAA;;AAEA,IAAMA,GAAG,GAAG,IAAIC,gCAAJ,CAAe,KAAf,EAAsB,iCAAtB,CAAZ;eAEeD,G","sourcesContent":["import { RegexValue } from \"clarity-pattern-parser\";\n\nconst hex = new RegexValue(\"hex\", \"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}\");\n\nexport default hex;\n"],"file":"hex.js"}

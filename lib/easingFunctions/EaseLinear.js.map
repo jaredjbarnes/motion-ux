@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/easingFunctions/EaseLinear.js"],"names":["percentage"],"mappings":";;;;;;;eAAe,kBAACA,UAAD,EAAgB;AAC7B,SAAOA,UAAP;AACD,C","sourcesContent":["export default (percentage) => {\n  return percentage;\n};\n"],"file":"EaseLinear.js"}

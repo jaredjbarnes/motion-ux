@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/easingFunctions/EaseInQuart.js"],"names":["percentage"],"mappings":";;;;;;;eAAe,kBAACA,UAAD,EAAgB;AAC7B,SAAO,KAAKA,UAAU,IAAI,CAAnB,IAAwBA,UAAxB,GAAqCA,UAArC,GAAkDA,UAAzD;AACD,C","sourcesContent":["export default (percentage) => {\n  return 1 * (percentage /= 1) * percentage * percentage * percentage;\n};\n"],"file":"EaseInQuart.js"}

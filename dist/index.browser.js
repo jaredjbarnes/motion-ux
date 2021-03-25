@@ -1,0 +1,1717 @@
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('clarity-pattern-parser')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'clarity-pattern-parser'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.motionUX = {}, global.clarityPatternParser));
+}(this, (function (exports, clarityPatternParser) { 'use strict';
+
+  class BezierCurve {
+      constructor(points) {
+          this.setPoints(points);
+      }
+      setPoints(points) {
+          this.points = points;
+          this.reducedPoints = new Array(points.length);
+          Object.freeze(this.points);
+      }
+      valueAt(percentage) {
+          const points = this.points;
+          const reducedPoints = this.reducedPoints;
+          const length = points.length;
+          for (let x = 0; x < length; x++) {
+              reducedPoints[x] = points[x];
+          }
+          for (let x = 0; x < length; x++) {
+              const innerLength = length - x - 1;
+              for (let y = 0; y < innerLength; y++) {
+                  const nextPoint = reducedPoints[y + 1];
+                  const point = reducedPoints[y];
+                  reducedPoints[y] = (nextPoint - point) * percentage + point;
+              }
+          }
+          return reducedPoints[0];
+      }
+      clone() {
+          return new BezierCurve(this.points.slice());
+      }
+  }
+
+  const emptyFn$1 = () => { };
+  class Visitor {
+      constructor(callback = emptyFn$1) {
+          this.setCallback(callback);
+          this.visitDown = this.visitDown.bind(this);
+          this.visitUp = this.visitUp.bind(this);
+      }
+      walkUp(node) {
+          if (Array.isArray(node.children)) {
+              node.children.forEach(this.visitUp);
+          }
+          this.callback(node);
+      }
+      visitUp(node) {
+          this.walkUp(node);
+      }
+      walkDown(node) {
+          this.callback(node);
+          if (node.isComposite) {
+              node.children.forEach(this.visitDown);
+          }
+      }
+      visitDown(node) {
+          this.walkDown(node);
+      }
+      setCallback(callback) {
+          if (typeof callback === "function") {
+              this.callback = callback;
+          }
+          else {
+              this.callback = emptyFn$1;
+          }
+          this.callback = callback;
+      }
+  }
+
+  const visitor$1 = new Visitor();
+  function convertNumberNode(node) {
+      if (node.name === "number") {
+          node.value = Number(node.value);
+      }
+  }
+  // Hashing function, this may not be the best. So this may need to be replaced.
+  // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+  function hash(str, seed = 0) {
+      let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+      for (let i = 0, ch; i < str.length; i++) {
+          ch = str.charCodeAt(i);
+          h1 = Math.imul(h1 ^ ch, 2654435761);
+          h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 =
+          Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
+              Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 =
+          Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
+              Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  }
+  class TreeUtility {
+      areTreeStructuresEqual(nodeA, nodeB) {
+          const nodeASequence = this.sequence(nodeA);
+          const nodeBSequence = this.sequence(nodeB);
+          return nodeASequence === nodeBSequence;
+      }
+      sequence(node) {
+          const sequence = [];
+          visitor$1.setCallback((node) => {
+              sequence.push(node.name);
+          });
+          visitor$1.visitDown(node);
+          return sequence.join("|");
+      }
+      sequenceHash(node) {
+          return hash(this.sequence(node));
+      }
+      convertNumberNodesToNumberValues(node) {
+          visitor$1.setCallback(convertNumberNode);
+          visitor$1.visitDown(node);
+      }
+  }
+
+  const emptyFn = () => { };
+  const treeUtility$1 = new TreeUtility();
+  class GraphsVisitor {
+      constructor(callback = emptyFn) {
+          this.visitor = emptyFn;
+          this.setCallback(callback);
+          this.visitDown = this.visitDown.bind(this);
+          this.visitUp = this.visitUp.bind(this);
+      }
+      visitUp(graphs, optimized = false) {
+          if (!Array.isArray(graphs)) {
+              return;
+          }
+          const siblings = graphs.slice(1);
+          const node = graphs[0];
+          if (!optimized) {
+              const areEqual = siblings.every((sibling) => treeUtility$1.areTreeStructuresEqual(node, sibling));
+              if (!areEqual) {
+                  throw new Error("The nodes structures need to be the same.");
+              }
+          }
+          this.walkUp(graphs);
+      }
+      walkUp(graphs) {
+          if (!Array.isArray(graphs)) {
+              return;
+          }
+          const node = graphs[0];
+          if (node.isComposite) {
+              for (let index = 0; index < node.children.length; index++) {
+                  const childGraphs = graphs.map((node) => {
+                      return node.children[index];
+                  });
+                  this.walkUp(childGraphs);
+              }
+          }
+          this.visitor(graphs);
+      }
+      visitDown(graphs, optimized = false) {
+          if (!Array.isArray(graphs)) {
+              return;
+          }
+          const siblings = graphs.slice(1);
+          const node = graphs[0];
+          if (!optimized) {
+              const areEqual = siblings.every((sibling) => treeUtility$1.areTreeStructuresEqual(node, sibling));
+              if (!areEqual) {
+                  throw new Error("The nodes structures need to be the same.");
+              }
+          }
+          this.walkDown(graphs);
+      }
+      walkDown(graphs) {
+          if (!Array.isArray(graphs)) {
+              return;
+          }
+          this.visitor(graphs);
+          const node = graphs[0];
+          if (Array.isArray(node.children)) {
+              for (let index = 0; index < node.children.length; index++) {
+                  const childGraphs = graphs.map((node) => {
+                      return node.children[index];
+                  });
+                  this.walkDown(childGraphs);
+              }
+          }
+      }
+      setCallback(visitor) {
+          if (typeof visitor === "function") {
+              this.visitor = visitor;
+          }
+          else {
+              this.visitor = emptyFn;
+          }
+          this.visitor = visitor;
+      }
+  }
+
+  const visitor = new GraphsVisitor();
+  class Animator {
+      constructor(keyframe) {
+          this.keyframe = keyframe;
+          this.visit = this.visit.bind(this);
+          this.time = 0;
+          this.bezierCurve = new BezierCurve([]);
+          this.keyframeGraphs = [];
+          this.updateKeyframeGraphs();
+      }
+      updateKeyframeGraphs() {
+          this.keyframeGraphs.length = 0;
+          this.keyframeGraphs.push(this.keyframe.from.graph);
+          for (let x = 0; x < this.keyframe.controls.length; x++) {
+              this.keyframeGraphs.push(this.keyframe.controls[x].graph);
+          }
+          this.keyframeGraphs.push(this.keyframe.to.graph);
+          this.keyframeGraphs.push(this.keyframe.result.graph);
+      }
+      visit(nodes) {
+          const cloneNodes = nodes.slice();
+          const resultNode = cloneNodes.pop();
+          const time = this.time;
+          if (resultNode == null) {
+              return;
+          }
+          if (cloneNodes[0].name === "number") {
+              const elapsedTime = time - this.keyframe.startAt;
+              const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
+              const timeWithEasing = this.keyframe.easing(elapsedTime / animationDuration);
+              const points = cloneNodes.map((node) => Number(node.value));
+              this.bezierCurve.setPoints(points);
+              resultNode.value = this.bezierCurve.valueAt(timeWithEasing);
+          }
+          else {
+              if (!Array.isArray(resultNode.children)) {
+                  if (time >= this.keyframe.startAt) {
+                      resultNode.value = cloneNodes[cloneNodes.length - 1].value;
+                  }
+                  else {
+                      resultNode.value = cloneNodes[0].value;
+                  }
+              }
+          }
+      }
+      update(time) {
+          this.updateKeyframeGraphs();
+          this.time = time;
+          visitor.setCallback(this.visit);
+          visitor.visitDown(this.keyframeGraphs, true);
+          const value = this.keyframe.result.graph.toString();
+          this.keyframe.result.value = value;
+          return this.keyframe.result;
+      }
+  }
+
+  const divider = new clarityPatternParser.RegexValue("divider", "\\s*[,]\\s*");
+
+  const number = new clarityPatternParser.RegexValue("number", "[-+]?[0-9]*[.]?[0-9]+([eE][-+]?[0-9]+)?");
+
+  const unitType = new clarityPatternParser.RegexValue("unit-type", "[a-zA-Z%]+");
+  const unit = new clarityPatternParser.AndComposite("unit", [number, unitType]);
+
+  const hex = new clarityPatternParser.RegexValue("hex", "#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}");
+
+  const name = new clarityPatternParser.RegexValue("name", "[a-zA-Z]+[a-zA-Z0-9_-]*");
+
+  const space$1 = new clarityPatternParser.Literal("optional-space", " ");
+  const spaces$1 = new clarityPatternParser.RepeatValue("optional-spaces", space$1);
+  const optionalSpaces = new clarityPatternParser.OptionalValue(spaces$1);
+
+  const openParen = new clarityPatternParser.Literal("open-paren", "(");
+  const closeParen = new clarityPatternParser.Literal("close-paren", ")");
+  const values$1 = new clarityPatternParser.RecursivePattern("values");
+  const args = new clarityPatternParser.RepeatComposite("arguments", values$1, divider);
+  const optionalArgs = new clarityPatternParser.OptionalComposite(args);
+  const method = new clarityPatternParser.AndComposite("method", [
+      name,
+      openParen,
+      optionalSpaces,
+      optionalArgs,
+      optionalSpaces,
+      closeParen
+  ]);
+
+  const value = new clarityPatternParser.OrComposite("value", [hex, method, unit, number, name]);
+
+  const space = new clarityPatternParser.Literal("space", " ");
+  const spaces = new clarityPatternParser.RepeatValue("spaces", space);
+
+  const values = new clarityPatternParser.RepeatComposite("values", value, spaces);
+
+  const cssValue = new clarityPatternParser.RepeatComposite("css-value", values, divider);
+
+  const hexRegEx = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})|([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i;
+  class HexColor {
+      constructor(hexString) {
+          this.setHex(hexString);
+      }
+      setHex(hexString) {
+          this.hexString = hexString;
+          this.normalizeHex();
+          this.saveRgba();
+      }
+      saveRgba() {
+          const hex = this.hexString;
+          hexRegEx.lastIndex = 0;
+          const result = hexRegEx.exec(hex);
+          this.rgba = result
+              ? [
+                  parseInt(result[1], 16),
+                  parseInt(result[2], 16),
+                  parseInt(result[3], 16),
+                  1,
+              ]
+              : [0, 0, 0, 1];
+      }
+      toComplexNode() {
+          const children = this.rgba
+              .map((number) => {
+              const valuesNode = new clarityPatternParser.CompositeNode("repeat-composite", "values");
+              valuesNode.children.push(new clarityPatternParser.ValueNode("regex-value", "number", number.toString()));
+              return valuesNode;
+          })
+              .reduce((acc, valueNode) => {
+              acc.push(valueNode);
+              acc.push(new clarityPatternParser.ValueNode("regex-value", "divider", ", "));
+              return acc;
+          }, []);
+          const node = new clarityPatternParser.CompositeNode("and-composite", "method");
+          const name = new clarityPatternParser.ValueNode("regex-value", "name", "rgba");
+          const openParen = new clarityPatternParser.ValueNode("literal", "open-paren", "(");
+          const args = new clarityPatternParser.CompositeNode("repeat-composite", "arguments");
+          const closeParen = new clarityPatternParser.ValueNode("literal", "close-paren", ")");
+          args.children = children;
+          node.children.push(name, openParen, args, closeParen);
+          return node;
+      }
+      toValueNode() {
+          return new clarityPatternParser.ValueNode("literal", "hex", this.hexString);
+      }
+      toRgbString() {
+          return `rgb(${this.rgba[0]},${this.rgba[1]},${this.rgba[2]})`;
+      }
+      normalizeHex() {
+          if (this.hexString.length === 4) {
+              this.hexString = this.hexString + this.hexString.substring(1);
+          }
+      }
+      numberToHex(number) {
+          if (number > 255) {
+              number = 255;
+          }
+          if (number < 0) {
+              number = 0;
+          }
+          let hex = number.toString(16);
+          if (hex.length < 2) {
+              hex = "0" + hex;
+          }
+          return hex;
+      }
+      toHexString() {
+          const rgbArray = this.rgba;
+          const red = this.numberToHex(rgbArray[0]);
+          const green = this.numberToHex(rgbArray[1]);
+          const blue = this.numberToHex(rgbArray[2]);
+          return `#${red}${green}${blue}`;
+      }
+  }
+
+  const filterOutSpaces = (child) => child.name !== "optional-spaces";
+  class TreeNormalizer {
+      constructor() {
+          this.visitNode = this.visitNode.bind(this);
+          this.visitor = new Visitor(this.visitNode);
+      }
+      visitNode(node) {
+          if (Array.isArray(node.children)) {
+              this.removeOptionalSpaces(node);
+              this.replaceHex(node);
+              this.removeUnnecessaryDividers(node);
+              this.removeUnnecessaryValuesSpaces(node);
+          }
+          this.collapseWhiteSpace(node);
+          this.removeSpacesAroundDividers(node);
+      }
+      collapseWhiteSpace(node) {
+          if (node.name === "spaces") {
+              node.value = " ";
+          }
+      }
+      removeSpacesAroundDividers(node) {
+          if (node.name === "divider") {
+              node.value = node.value.trim() + " ";
+          }
+      }
+      removeUnnecessaryDividers(node) {
+          const children = node.children;
+          while (children.length > 0 &&
+              children[children.length - 1].name === "divider") {
+              children.pop();
+          }
+      }
+      removeUnnecessaryValuesSpaces(node) {
+          const children = node.children;
+          while (node.name === "values" &&
+              children.length > 0 &&
+              children[children.length - 1].name === "spaces") {
+              children.pop();
+          }
+      }
+      removeOptionalSpaces(node) {
+          node.children = node.children.filter(filterOutSpaces);
+      }
+      replaceHex(node) {
+          node.children = node.children.map((child) => {
+              if (child.name === "hex") {
+                  const hexColor = new HexColor(child.value);
+                  return hexColor.toComplexNode();
+              }
+              return child;
+          });
+      }
+      normalize(node) {
+          this.visitor.visitDown(node);
+          return node;
+      }
+  }
+
+  const treeUtility = new TreeUtility();
+  const treeNormalizer = new TreeNormalizer();
+  class ParsedValue {
+      constructor(value, graph, graphHash) {
+          this.value = value;
+          if (typeof graph === "undefined") {
+              const node = cssValue.parse(new clarityPatternParser.Cursor(value));
+              if (node == null) {
+                  throw new Error("Couldn't parse css value.");
+              }
+              this.graph = treeNormalizer.normalize(node);
+              treeUtility.convertNumberNodesToNumberValues(this.graph);
+          }
+          else {
+              this.graph = graph;
+          }
+          if (typeof graphHash === "undefined") {
+              this.graphHash = treeUtility.sequenceHash(this.graph).toString();
+          }
+          else {
+              this.graphHash = graphHash;
+          }
+      }
+      clone() {
+          return new ParsedValue(this.value, this.graph.clone(), this.graphHash);
+      }
+  }
+
+  class KeyframeConfigValidator {
+      constructor() {
+          this.config = null;
+      }
+      setConfig(config) {
+          this.config = config;
+      }
+      isSimpleConfig() {
+          return this.hasValidToAsString();
+      }
+      validateConfig() {
+          if (this.config == null) {
+              throw new Error(`Invalid Arguments: The "config" cannot be null or undefined.`);
+          }
+      }
+      validate(config) {
+          this.setConfig(config);
+          this.validateName();
+          this.validateProperty();
+          this.validateToAsParsedValue();
+          this.validateControlsAsParsedValues();
+          this.validateFromAsParsedValue();
+          this.validateStartAt();
+          this.validateEndAt();
+          this.validateEasingFunction();
+          this.validateNodes();
+      }
+      validateName() {
+          this.validateConfig();
+          if (!this.hasValidName()) {
+              throw new Error(`Invalid Arguments: The "name" property needs to be an string.`);
+          }
+      }
+      hasValidName() {
+          return typeof this.config.name === "string";
+      }
+      validateProperty() {
+          this.validateConfig();
+          if (!this.hasValidProperty()) {
+              throw new Error(`The "property" property needs to be a string.`);
+          }
+      }
+      hasValidProperty() {
+          return typeof this.config.property === "string";
+      }
+      validateToAsString() {
+          this.validateConfig();
+          if (!this.hasValidToAsString()) {
+              throw new Error(`The "to" property needs to be a string, but found ${this.config.to}.`);
+          }
+      }
+      hasValidToAsString() {
+          return typeof this.config.to === "string";
+      }
+      validateToAsParsedValue() {
+          this.validateConfig();
+          if (!this.hasValidToAsParsedValue()) {
+              throw new Error(`The "to" property needs to be a ParsedValue, but found ${this.config.to}.`);
+          }
+      }
+      hasValidToAsParsedValue() {
+          return this.config.to instanceof ParsedValue;
+      }
+      validateFromAsString() {
+          this.validateConfig();
+          if (typeof this.config.from !== "string") {
+              throw new Error(`The "from" property needs to be a string, but found ${this.config.from}.`);
+          }
+      }
+      hasValidFromAsString() {
+          return typeof this.config.from === "string";
+      }
+      validateFromAsParsedValue() {
+          this.validateConfig();
+          if (!this.hasValidFromAsParsedValue()) {
+              throw new Error(`The "from" property needs to be a ParsedValue, but found ${this.config.from}.`);
+          }
+      }
+      hasValidFromAsParsedValue() {
+          return this.config.from instanceof ParsedValue;
+      }
+      validateControlsAsStrings() {
+          this.validateConfig();
+          if (!this.hasValidControlsAsStrings()) {
+              throw new Error(`The "controls" property needs to be made of strings, but found ${this.config.controls}.`);
+          }
+      }
+      hasValidControlsAsStrings() {
+          return (Array.isArray(this.config.controls) &&
+              this.config.controls.every((control) => typeof control === "string"));
+      }
+      validateControlsAsParsedValues() {
+          this.validateConfig();
+          if (!this.hasValidControlsAsParsedValues()) {
+              throw new Error(`The "controls" property needs to be made of ParsedValues, but found ${this.config.controls}.`);
+          }
+      }
+      hasValidControlsAsParsedValues() {
+          return this.config.controls.every((control) => control instanceof ParsedValue);
+      }
+      validateStartAt() {
+          this.validateConfig();
+          if (!this.hasValidStartAt) {
+              throw new Error(`The "startAt" property must be a number between 0 and 1.`);
+          }
+      }
+      hasValidStartAt() {
+          return (typeof this.config.startAt === "number" &&
+              this.config.startAt >= 0 &&
+              this.config.startAt <= 1);
+      }
+      validateEndAt() {
+          this.validateConfig();
+          if (!this.hasValidEndAt()) {
+              throw new Error(`The "endAt" property must be a number between 0 and 1.`);
+          }
+      }
+      hasValidEndAt() {
+          return (typeof this.config.endAt === "number" &&
+              this.config.endAt >= 0 &&
+              this.config.endAt <= 1);
+      }
+      validateEasingString() {
+          this.validateConfig();
+          if (!this.hasValidEasingString()) {
+              throw new Error(`The "easing" property must be a string.`);
+          }
+      }
+      hasValidEasingString() {
+          return typeof this.config.easing === "string";
+      }
+      validateEasingFunction() {
+          this.validateConfig();
+          if (!this.hasValidEasingFunction()) {
+              throw new Error(`The "easing" property must be a function.`);
+          }
+      }
+      hasValidEasingFunction() {
+          return typeof this.config.easing === "function";
+      }
+      validateNodes() {
+          this.validateConfig();
+          const config = this.config;
+          if (!this.areGraphStructuresEqual()) {
+              throw new Error(`Invalid Keyframe: The value types that are being animated do not match. From: ${JSON.stringify(config.from.value)}, To:${JSON.stringify(config.to.value)}, Controls: ${JSON.stringify(config.controls.map((v) => v.value))}`);
+          }
+      }
+      areGraphStructuresEqual() {
+          let allStructuresAreEqual = true;
+          const config = this.config;
+          if (config.to.graphHash !== config.from.graphHash) {
+              allStructuresAreEqual = false;
+          }
+          for (let x = 0; x < config.controls.length; x++) {
+              const value = config.controls[x];
+              if (value.graphHash !== config.from.graphHash) {
+                  allStructuresAreEqual = false;
+                  break;
+              }
+          }
+          return allStructuresAreEqual;
+      }
+  }
+
+  var easeInQuad = (percentage) => {
+      return percentage * percentage;
+  };
+
+  var easeOutQuad = (percentage) => {
+      return -percentage * (percentage - 2);
+  };
+
+  var easeInOutQuad = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+          return (1 / 2) * percentage * percentage;
+      return (-1 / 2) * (--percentage * (percentage - 2) - 1);
+  };
+
+  var easeInElastic = (percentage) => {
+      const p = 0.3 / 1;
+      const s = p / 4;
+      const a = 1;
+      if (percentage <= 0)
+          return 0;
+      if (percentage >= 1)
+          return 1;
+      return -(a *
+          Math.pow(2, 10 * (percentage -= 1)) *
+          Math.sin(((percentage - s) * (2 * Math.PI)) / p));
+  };
+
+  var easeInOutElastic = (t) => {
+      var b = 0;
+      var c = 1;
+      var d = 1;
+      var s = 1.70158;
+      var p = 0;
+      var a = c;
+      if (t == 0)
+          return b;
+      if ((t /= d / 2) == 2)
+          return b + c;
+      if (!p)
+          p = d * (0.3 / 1);
+      if (a < Math.abs(c)) {
+          a = c;
+          var s = p / 4;
+      }
+      else
+          var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+      if (t < 1)
+          return (-0.5 *
+              (a *
+                  Math.pow(2, 10 * (t -= 1)) *
+                  Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
+              b);
+      return (a *
+          Math.pow(2, -10 * (t -= 1)) *
+          Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
+          0.5 +
+          c +
+          b);
+  };
+
+  var easeOutElastic = (percentage) => {
+      const p = 0.3 / 1;
+      const s = p / 4;
+      const a = 1;
+      if (percentage <= 0)
+          return 0;
+      if (percentage >= 1)
+          return 1;
+      return (a *
+          Math.pow(2, -10 * percentage) *
+          Math.sin(((percentage - s) * (2 * Math.PI)) / p) +
+          1);
+  };
+
+  var easeInOutBack = (percentage) => {
+      const s = 1.70158 * 1.525;
+      if ((percentage /= 1 / 2) < 1) {
+          return (1 / 2) * (percentage * percentage * ((s + 1) * percentage - s));
+      }
+      return ((1 / 2) * ((percentage -= 2) * percentage * ((s + 1) * percentage + s) + 2));
+  };
+
+  var easeOutBounce = (percentage) => {
+      let t = percentage;
+      if ((t /= 1) < 1 / 2.75) {
+          return 7.5625 * t * t;
+      }
+      else if (t < 2 / 2.75) {
+          return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+      }
+      else if (t < 2.5 / 2.75) {
+          return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+      }
+      else {
+          return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+      }
+  };
+
+  var easeInBounce = (percentage) => {
+      return 1 - easeOutBounce(1 - percentage);
+  };
+
+  var easeInOutBounce = (percentage) => {
+      if (percentage < 0.5) {
+          return easeInBounce(percentage * 2) * 0.5;
+      }
+      else {
+          return easeOutBounce(percentage * 2 - 1) * 0.5 + 0.5;
+      }
+  };
+
+  var easeInCubic = (percentage) => {
+      return 1 * (percentage /= 1) * percentage * percentage;
+  };
+
+  var easeOutCubic = (percentage) => {
+      return 1 * ((percentage = percentage / 1 - 1) * percentage * percentage + 1);
+  };
+
+  var easeInOutCubic = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+          return (1 / 2) * percentage * percentage * percentage;
+      return (1 / 2) * ((percentage -= 2) * percentage * percentage + 2);
+  };
+
+  var easeInQuart = (percentage) => {
+      return 1 * (percentage /= 1) * percentage * percentage * percentage;
+  };
+
+  var easeOutQuart = (percentage) => {
+      return (-1 *
+          ((percentage = percentage / 1 - 1) * percentage * percentage * percentage -
+              1));
+  };
+
+  var easeInOutQuart = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+          return (1 / 2) * percentage * percentage * percentage * percentage;
+      return ((-1 / 2) * ((percentage -= 2) * percentage * percentage * percentage - 2));
+  };
+
+  var easeInQuint = (percentage) => {
+      return (1 * (percentage /= 1) * percentage * percentage * percentage * percentage);
+  };
+
+  var easeOutQuint = (percentage) => {
+      return (1 *
+          ((percentage = percentage / 1 - 1) *
+              percentage *
+              percentage *
+              percentage *
+              percentage +
+              1));
+  };
+
+  var easeInOutQuint = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+          return ((1 / 2) * percentage * percentage * percentage * percentage * percentage);
+      return ((1 / 2) *
+          ((percentage -= 2) * percentage * percentage * percentage * percentage + 2));
+  };
+
+  var easeInSine = (percentage) => {
+      return -Math.cos(percentage * (Math.PI / 2)) + 1;
+  };
+
+  var easeOutSine = (percentage) => {
+      return 1 * Math.sin((percentage / 1) * (Math.PI / 2));
+  };
+
+  var easeInOutSine = (percentage) => {
+      return (-1 / 2) * (Math.cos((Math.PI * percentage) / 1) - 1);
+  };
+
+  var easeInExpo = (percentage) => {
+      return percentage == 0 ? 0 : 1 * Math.pow(2, 10 * (percentage / 1 - 1));
+  };
+
+  var easeOutExpo = (percentage) => {
+      return percentage == 1 ? 1 : 1 * (-Math.pow(2, (-10 * percentage) / 1) + 1);
+  };
+
+  var easeInOutExpo = (percentage) => {
+      if (percentage == 0)
+          return 0;
+      if (percentage == 1)
+          return 1;
+      if ((percentage /= 1 / 2) < 1)
+          return (1 / 2) * Math.pow(2, 10 * (percentage - 1));
+      return (1 / 2) * (-Math.pow(2, -10 * --percentage) + 2);
+  };
+
+  var easeInCirc = (percentage) => {
+      return -1 * (Math.sqrt(1 - (percentage /= 1) * percentage) - 1);
+  };
+
+  var easeOutCirc = (percentage) => {
+      return 1 * Math.sqrt(1 - (percentage = percentage / 1 - 1) * percentage);
+  };
+
+  var easeInOutCirc = (percentage) => {
+      if ((percentage /= 1 / 2) < 1)
+          return (-1 / 2) * (Math.sqrt(1 - percentage * percentage) - 1);
+      return (1 / 2) * (Math.sqrt(1 - (percentage -= 2) * percentage) + 1);
+  };
+
+  var easeInBack = (percentage) => {
+      const s = 1.70158;
+      return 1 * (percentage /= 1) * percentage * ((s + 1) * percentage - s);
+  };
+
+  var easeOutBack = (percentage) => {
+      const s = 1.70158;
+      return (1 *
+          ((percentage = percentage / 1 - 1) *
+              percentage *
+              ((s + 1) * percentage + s) +
+              1));
+  };
+
+  var easeLinear = (percentage) => {
+      return percentage;
+  };
+
+  const easings = {
+      easeInQuad: easeInQuad,
+      easeOutQuad: easeOutQuad,
+      easeInOutQuad: easeInOutQuad,
+      easeInCubic: easeInCubic,
+      easeOutCubic: easeOutCubic,
+      easeInOutCubic: easeInOutCubic,
+      easeInQuart: easeInQuart,
+      easeOutQuart: easeOutQuart,
+      easeInOutQuart: easeInOutQuart,
+      easeInQuint: easeInQuint,
+      easeOutQuint: easeOutQuint,
+      easeInOutQuint: easeInOutQuint,
+      easeInSine: easeInSine,
+      easeOutSine: easeOutSine,
+      easeInOutSine: easeInOutSine,
+      easeInExpo: easeInExpo,
+      easeOutExpo: easeOutExpo,
+      easeInOutExpo: easeInOutExpo,
+      easeInCirc: easeInCirc,
+      easeOutCirc: easeOutCirc,
+      easeInOutCirc: easeInOutCirc,
+      easeInElastic: easeInElastic,
+      easeOutElastic: easeOutElastic,
+      easeInOutElastic: easeInOutElastic,
+      easeInBack: easeInBack,
+      easeOutBack: easeOutBack,
+      easeInOutBack: easeInOutBack,
+      easeInBounce: easeInBounce,
+      easeOutBounce: easeOutBounce,
+      easeInOutBounce: easeInOutBounce,
+      linear: easeLinear,
+  };
+
+  const validator$1 = new KeyframeConfigValidator();
+  class KeyframeUtility {
+      _setConfig(config) {
+          this.config = config;
+          this.result = {};
+          validator$1.setConfig(config);
+      }
+      normalizeConfig(config) {
+          this._setConfig(config);
+          this._normalizeName();
+          this._normalizeProperty();
+          this._normalizeValue();
+          this._normalizeFrom();
+          this._normalizeControls();
+          this._normalizeTo();
+          this._normalizeStartAt();
+          this._normalizeEndAt();
+          this._normalizeEasing();
+          return this.result;
+      }
+      _normalizeName() {
+          this.result.name = this.config.name;
+      }
+      _normalizeProperty() {
+          this.result.property = this.config.property;
+      }
+      _normalizeValue() {
+          if (this.config.value != null) {
+              this.config.to = this.config.value;
+              this.config.from = this.config.value;
+          }
+      }
+      _normalizeFrom() {
+          if (validator$1.hasValidFromAsString()) {
+              this.result.from = new ParsedValue(this.config.from);
+          }
+          else {
+              validator$1.validateFromAsString();
+          }
+      }
+      _normalizeControls() {
+          if (!Array.isArray(this.config.controls)) {
+              this.config.controls = [];
+          }
+          if (validator$1.hasValidControlsAsStrings()) {
+              this.result.controls = this.config.controls.map((control) => new ParsedValue(control));
+          }
+          else {
+              validator$1.validateControlsAsStrings();
+          }
+      }
+      _normalizeTo() {
+          if (validator$1.hasValidToAsString()) {
+              this.result.to = new ParsedValue(this.config.to);
+          }
+          else {
+              validator$1.validateToAsString();
+          }
+      }
+      _normalizeStartAt() {
+          if (validator$1.hasValidStartAt()) {
+              this.result.startAt = this.config.startAt;
+          }
+          else {
+              this.result.startAt = 0;
+          }
+      }
+      _normalizeEndAt() {
+          if (validator$1.hasValidEndAt()) {
+              this.result.endAt = this.config.endAt;
+          }
+          else {
+              this.result.endAt = 1;
+          }
+      }
+      _normalizeEasing() {
+          if (!validator$1.hasValidEasingString() &&
+              !validator$1.hasValidEasingFunction()) {
+              this.result.easing = easings.linear;
+          }
+          else if (validator$1.hasValidEasingString()) {
+              this.result.easing =
+                  easings[this.config.easing] ||
+                      easings.linear;
+          }
+          else if (validator$1.hasValidEasingFunction()) {
+              this.result.easing = this.config.easing;
+          }
+      }
+  }
+
+  const validator = new KeyframeConfigValidator();
+  const utility = new KeyframeUtility();
+  class Keyframe {
+      constructor(config) {
+          validator.setConfig(config);
+          validator.validate(config);
+          this.name = config.name;
+          this.property = config.property;
+          this.to = config.to;
+          this.from = config.from;
+          this.result = config.from.clone();
+          this.startAt = config.startAt;
+          this.endAt = config.endAt;
+          this.controls = config.controls;
+          this.easing = config.easing;
+      }
+      static fromSimpleConfig(config) {
+          return new Keyframe(utility.normalizeConfig(config));
+      }
+  }
+
+  const sortAsc = (animatorA, animatorB) => {
+      return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
+  };
+  class Animation {
+      constructor(keyframes) {
+          this.animators = [];
+          this._time = 0;
+          this.initialize(keyframes);
+      }
+      initialize(keyframes) {
+          this._currentValues = {};
+          this.animators = keyframes
+              .map((keyframe) => {
+              if (keyframe instanceof Keyframe) {
+                  return keyframe;
+              }
+              else {
+                  return Keyframe.fromSimpleConfig(keyframe);
+              }
+          })
+              .map((keyframe) => new Animator(keyframe));
+          this._createCurrentValues();
+          // Sort by time.
+          this.animators.sort(sortAsc);
+      }
+      _createCurrentValues() {
+          this._currentValues = this.animators.reduce((results, animator) => {
+              const name = animator.keyframe.name;
+              const property = animator.keyframe.property;
+              let keyframe = results[name];
+              if (keyframe == null) {
+                  keyframe = results[name] = {};
+              }
+              if (keyframe[property] == null) {
+                  keyframe[property] = animator.keyframe.result.clone();
+              }
+              return results;
+          }, {});
+      }
+      _assignValue(keyframe) {
+          const currentValue = this._currentValues[keyframe.name][keyframe.property];
+          currentValue.value = keyframe.result.value;
+          currentValue.graph = keyframe.result.graph;
+          currentValue.graphHash = keyframe.result.graphHash;
+      }
+      _saveCurrentValues() {
+          const visitedMap = new Map();
+          const animators = this.animators;
+          const length = animators.length;
+          // Assign all values at least once.
+          // This initials values beyond the time we are at.
+          for (let x = 0; x < length; x++) {
+              const keyframe = animators[x].keyframe;
+              const key = `${keyframe.name}|${keyframe.property}`;
+              if (!visitedMap.has(key)) {
+                  visitedMap.set(key, true);
+                  this._assignValue(keyframe);
+              }
+          }
+          // Assign if the value of the start at was before the time now.
+          // Since we have it sorted, the most current will win.
+          for (let x = 0; x < length; x++) {
+              const keyframe = animators[x].keyframe;
+              if (keyframe.startAt <= this._time) {
+                  this._assignValue(keyframe);
+              }
+          }
+      }
+      update(time) {
+          this._time = time;
+          // Update all keyframes
+          this.animators.forEach((animator) => {
+              animator.update(time);
+          });
+          this._saveCurrentValues();
+          return this;
+      }
+      getCurrentValues() {
+          return this._currentValues;
+      }
+      merge(animation) {
+          const oldKeyframes = this.animators.map((a) => a.keyframe);
+          const newKeyframes = animation.animators.map((a) => a.keyframe);
+          this.initialize([...oldKeyframes, ...newKeyframes]);
+          return this;
+      }
+  }
+
+  const states$1 = {
+      ACTIVE: 1,
+      STOPPED: 0,
+      DISPOSED: -1,
+  };
+  class Observer {
+      constructor(type, callback, unbind) {
+          this.type = type;
+          this.callback = callback;
+          this.unbind = unbind;
+          this.state = states$1.ACTIVE;
+      }
+      notify(event) {
+          if (event.type === this.type) {
+              this.callback(event);
+          }
+      }
+      stop() {
+          if (this.state === states$1.ACTIVE) {
+              this.state = states$1.STOPPED;
+          }
+      }
+      start() {
+          if (this.state !== states$1.DISPOSED) {
+              this.state = states$1.ACTIVE;
+          }
+      }
+      dispose() {
+          this.state = states$1.DISPOSED;
+          this.unbind();
+      }
+  }
+
+  class TimeObserver extends Observer {
+      constructor(time, callback, unbind) {
+          super("TIME_OBSERVER", callback, unbind);
+          this.time = time;
+      }
+      notify(event) {
+          if (typeof event.lastTime === "number" && typeof event.time === "number") {
+              const high = Math.max(event.time, event.lastTime);
+              const low = Math.min(event.time, event.lastTime);
+              if (this.time >= low && this.time <= high) {
+                  this.callback(event);
+              }
+          }
+      }
+  }
+
+  class Observable {
+      constructor() {
+          this.observers = [];
+      }
+      observeTime(time, callback) {
+          const observer = new TimeObserver(time, callback, () => {
+              const index = this.observers.indexOf(observer);
+              if (index > -1) {
+                  this.observers.splice(index, 1);
+              }
+          });
+          this.observers.push(observer);
+          return observer;
+      }
+      observe(type, callback) {
+          const observer = new Observer(type, callback, () => {
+              const index = this.observers.indexOf(observer);
+              if (index > -1) {
+                  this.observers.splice(index, 1);
+              }
+          });
+          this.observers.push(observer);
+          return observer;
+      }
+      notify(event) {
+          this.observers.forEach((observer) => {
+              observer.notify(event);
+          });
+      }
+      dispose() {
+          this.observers = [];
+      }
+  }
+
+  class DefaultClock {
+      constructor() {
+          this.registeredCallbacks = new Map();
+          this._tick = this._tick.bind(this);
+          this.animationFrame = null;
+      }
+      _tick() {
+          this.registeredCallbacks.forEach((callback) => {
+              callback();
+          });
+          if (this.registeredCallbacks.size > 0) {
+              this.animationFrame = window.requestAnimationFrame(this._tick);
+          }
+          else {
+              this.animationFrame = null;
+          }
+      }
+      register(callback) {
+          this.registeredCallbacks.set(callback, callback);
+          if (this.animationFrame == null) {
+              this._tick();
+          }
+      }
+      unregister(callback) {
+          this.registeredCallbacks.delete(callback);
+      }
+      now() {
+          return performance.now();
+      }
+  }
+
+  class GraphOperations {
+      constructor() {
+          this.add = this.add.bind(this);
+          this.subtract = this.subtract.bind(this);
+          this.multiply = this.multiply.bind(this);
+          this.divide = this.divide.bind(this);
+      }
+      add(nodes) {
+          if (this.canOperate(nodes) && this.isNumberNode(nodes)) {
+              const leftNode = nodes[0];
+              const rightNode = nodes[1];
+              const resultNode = nodes[2];
+              resultNode.value = leftNode.value + rightNode.value;
+          }
+      }
+      subtract(nodes) {
+          if (this.canOperate(nodes) && this.isNumberNode(nodes)) {
+              const leftNode = nodes[0];
+              const rightNode = nodes[1];
+              const resultNode = nodes[2];
+              resultNode.value =
+                  leftNode.value - rightNode.value;
+          }
+      }
+      multiply(nodes) {
+          if (this.canOperate(nodes) && this.isNumberNode(nodes)) {
+              const leftNode = nodes[0];
+              const rightNode = nodes[1];
+              const resultNode = nodes[2];
+              resultNode.value =
+                  leftNode.value * rightNode.value;
+          }
+      }
+      divide(nodes) {
+          if (this.canOperate(nodes) && this.isNumberNode(nodes)) {
+              const leftNode = nodes[0];
+              const rightNode = nodes[1];
+              const resultNode = nodes[2];
+              resultNode.value =
+                  leftNode.value / rightNode.value;
+          }
+      }
+      isNumberNode(nodes) {
+          return nodes[0].name === "number";
+      }
+      canOperate(nodes) {
+          return nodes.length === 3;
+      }
+  }
+
+  class GraphOperator {
+      constructor() {
+          this.graphsVisitor = new GraphsVisitor();
+          this.visitor = new Visitor();
+          this.graphOperations = new GraphOperations();
+      }
+      assign(graph, number) {
+          this.visitor.setCallback((node) => {
+              if (node.name === "number") {
+                  node.value = number;
+              }
+          });
+          this.visitor.visitDown(graph);
+      }
+      add(graphs) {
+          this.graphsVisitor.setCallback(this.graphOperations.add);
+          this.graphsVisitor.visitDown(graphs);
+      }
+      subtract(graphs) {
+          this.graphsVisitor.setCallback(this.graphOperations.subtract);
+          this.graphsVisitor.visitDown(graphs);
+      }
+      multiply(graphs) {
+          this.graphsVisitor.setCallback(this.graphOperations.multiply);
+          this.graphsVisitor.visitDown(graphs);
+      }
+      divide(graphs) {
+          this.graphsVisitor.setCallback(this.graphOperations.divide);
+          this.graphsVisitor.visitDown(graphs);
+      }
+  }
+
+  const FORWARD$1 = 1;
+  const BACKWARD = -1;
+  class SlopeAnimationBuilder {
+      constructor() {
+          this.animation = null;
+          this.slopeAnimation = null;
+          this.direction = 0;
+          this.newDuration = 0;
+          this.duration = 0;
+          this.offset = 0;
+          this.delta = 0.0001;
+          this.deltaStepValues = null;
+          this.scaledValues = null;
+          this.deltaValues = null;
+          this.nowValues = null;
+          this.diffValues = null;
+          this.derivativeValues = null;
+          this.scaledValues = null;
+          this.toValues = null;
+          this.graphOperator = new GraphOperator();
+      }
+      cloneValues(values) {
+          return Object.keys(values).reduce((clone, name) => {
+              clone[name] = Object.keys(values[name]).reduce((clone, property) => {
+                  clone[property] = values[name][property].clone();
+                  return clone;
+              }, {});
+              return clone;
+          }, {});
+      }
+      build(animation, offset, duration, newDuration, direction) {
+          this.animation = animation;
+          this.offset = offset;
+          this.duration = duration;
+          this.newDuration = newDuration;
+          this.direction = direction;
+          this.cacheValues();
+          this.calculate();
+          this.createSlopeTimeline();
+          return this.slopeAnimation;
+      }
+      cacheValues() {
+          this.animation.update(this.offset);
+          this.nowValues = this.cloneValues(this.animation.getCurrentValues());
+          this.deltaStepValues = this.cloneValues(this.nowValues);
+          this.scaleValues = this.cloneValues(this.nowValues);
+          this.diffValues = this.cloneValues(this.nowValues);
+          this.derivativeValues = this.cloneValues(this.nowValues);
+          this.scaledValues = this.cloneValues(this.nowValues);
+          this.toValues = this.cloneValues(this.nowValues);
+          this.cacheDeltaStepValues();
+          this.cacheScaleValues();
+          if (this.direction === FORWARD$1) {
+              this.cacheDeltaValueForward();
+          }
+          else if (this.direction === BACKWARD) {
+              this.cacheDeltaValueBackward();
+          }
+          else {
+              this.cacheDeltaValueStopped();
+          }
+      }
+      cacheDeltaStepValues() {
+          Object.keys(this.deltaStepValues).forEach((name) => {
+              Object.keys(this.deltaStepValues[name]).forEach((property) => {
+                  this.graphOperator.assign(this.deltaStepValues[name][property].graph, this.delta);
+              });
+          });
+      }
+      cacheScaleValues() {
+          const scale = this.newDuration / this.duration;
+          Object.keys(this.scaleValues).forEach((name) => {
+              Object.keys(this.scaleValues[name]).forEach((property) => {
+                  this.graphOperator.assign(this.scaleValues[name][property].graph, scale);
+              });
+          });
+      }
+      cacheDeltaValueForward() {
+          this.animation.update(this.offset + this.delta);
+          this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
+      }
+      cacheDeltaValueBackward() {
+          this.animation.update(this.offset - this.delta);
+          this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
+      }
+      cacheDeltaValueStopped() {
+          this.animation.update(this.offset);
+          this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
+      }
+      calculate() {
+          Object.keys(this.nowValues).forEach((name) => {
+              Object.keys(this.nowValues[name]).forEach((property) => {
+                  const now = this.nowValues[name][property].graph;
+                  const delta = this.deltaValues[name][property].graph;
+                  const diff = this.diffValues[name][property].graph;
+                  const deltaStep = this.deltaStepValues[name][property].graph;
+                  const derivative = this.derivativeValues[name][property].graph;
+                  const scale = this.scaleValues[name][property].graph;
+                  const scaled = this.scaledValues[name][property].graph;
+                  const to = this.toValues[name][property].graph;
+                  this.graphOperator.subtract([delta, now, diff]);
+                  this.graphOperator.divide([diff, deltaStep, derivative]);
+                  this.graphOperator.multiply([derivative, scale, scaled]);
+                  this.graphOperator.add([now, scaled, to]);
+                  // Lets update the ParsedValue.value.
+                  this.toValues[name][property].value = to.toString();
+              });
+          });
+      }
+      createSlopeTimeline() {
+          const keyframes = Object.keys(this.nowValues)
+              .map((name) => {
+              return Object.keys(this.nowValues[name]).map((property) => {
+                  return new Keyframe({
+                      name,
+                      property,
+                      from: this.nowValues[name][property],
+                      controls: [],
+                      to: this.toValues[name][property],
+                      startAt: 0,
+                      endAt: 1,
+                      easing: easings.linear,
+                  });
+              });
+          })
+              .flat();
+          this.slopeAnimation = new Animation(keyframes);
+      }
+  }
+
+  class BlendedAnimation extends Animation {
+      constructor(fromAnimation, toAnimation, easing) {
+          const fromValues = fromAnimation.getCurrentValues();
+          const toValues = toAnimation.getCurrentValues();
+          const animations = Object.keys(fromValues)
+              .map((name) => {
+              const fromValue = fromValues[name];
+              const toValue = toValues[name];
+              return Object.keys(fromValue).map((property) => {
+                  const from = fromValue[property];
+                  const to = toValue[property];
+                  return new Keyframe({
+                      name,
+                      property,
+                      startAt: 0,
+                      endAt: 1,
+                      from,
+                      to,
+                      controls: [],
+                      easing: easing || easings.linear,
+                  });
+              });
+          })
+              .flat();
+          super(animations);
+          this.fromAnimation = fromAnimation;
+          this.toAnimation = toAnimation;
+      }
+      update(time) {
+          this.fromAnimation.update(time);
+          this.toAnimation.update(time);
+          super.update(time);
+          return this;
+      }
+  }
+
+  const defaultClock = new DefaultClock();
+  const DEFAULT = 0;
+  const ALTERNATE = 1;
+  const FORWARD = 1;
+  const REVERSE = -1;
+  const STOPPED = 0;
+  const repeatDirections = {
+      DEFAULT,
+      ALTERNATE,
+  };
+  const states = {
+      FORWARD,
+      REVERSE,
+      STOPPED,
+  };
+  function defaultRender() { }
+  class Player extends Observable {
+      constructor(animation, { clock, duration, timeScale, repeatDirection, render }) {
+          super();
+          this._timeScale = typeof timeScale === "number" ? timeScale : 1;
+          this._time = 0;
+          this._step = 0;
+          this._duration = duration;
+          this._lastTimestamp = 0;
+          this._animationFrame = null;
+          this._iterations = 0;
+          this._repeat = 1;
+          this._repeatDirection =
+              typeof repeatDirection === "number" ? repeatDirection : DEFAULT;
+          this._animation = animation;
+          this._clock = clock || defaultClock;
+          this._state = STOPPED;
+          this._render = typeof render === "function" ? render : defaultRender;
+          this._slopeAnimationBuilder = new SlopeAnimationBuilder();
+          this.tick = this.tick.bind(this);
+      }
+      get time() {
+          return this._time;
+      }
+      get timeScale() {
+          return this._timeScale;
+      }
+      set timeScale(value) {
+          if (value > 0) {
+              this._timeScale = value;
+          }
+      }
+      get duration() {
+          return this._duration;
+      }
+      set duration(value) {
+          if (typeof value !== "number") {
+              value = 0;
+          }
+          // Virtually Nothing. All Math blows up if the duration is "0".
+          if (value <= 0) {
+              value = 0.00001;
+          }
+          this._duration = value;
+      }
+      get repeat() {
+          return this._repeat;
+      }
+      set repeat(value) {
+          if (typeof value !== "number" && value > 0) {
+              return;
+          }
+          this._repeat = value;
+      }
+      get repeatDirection() {
+          return this._repeatDirection;
+      }
+      set repeatDirection(value) {
+          if ((value !== 0) && (value !== 1)) {
+              return;
+          }
+          this._repeatDirection = value;
+      }
+      get state() {
+          return this._state;
+      }
+      get animation() {
+          return this._animation;
+      }
+      set animation(animation) {
+          if (typeof animation.render === "function") {
+              this._animation = animation;
+          }
+      }
+      get iterations() {
+          return this._iterations;
+      }
+      play() {
+          if (this._state !== FORWARD) {
+              this._lastTimestamp = this._clock.now();
+              this._state = FORWARD;
+              this._clock.register(this.tick);
+              this.notify({
+                  type: "PLAYED",
+                  animation: this._animation,
+              });
+          }
+      }
+      tick() {
+          const timestamp = this._clock.now();
+          const deltaTime = timestamp - this._lastTimestamp;
+          this._step = (deltaTime / this._duration) * this._timeScale;
+          if (this._step > 1) {
+              this._step = 1;
+          }
+          if (deltaTime === 0) {
+              return;
+          }
+          if (this._state === REVERSE) {
+              this.stepBackward();
+          }
+          else if (this._state === FORWARD) {
+              this.stepForward();
+          }
+          this._lastTimestamp = timestamp;
+      }
+      stepForward() {
+          let time = this._time + this._step;
+          let lastTime = this._time;
+          const repeatDirection = this._repeatDirection;
+          if (time >= 1) {
+              this._iterations++;
+              if (this._iterations >= this._repeat) {
+                  this.seek(1);
+                  this.stop();
+                  return;
+              }
+              if (repeatDirection === ALTERNATE) {
+                  const adjustedTime = 1 - (time - 1);
+                  this.notify({
+                      type: "TICK",
+                      time: 1,
+                      lastTime,
+                      animation: this._animation,
+                  });
+                  this._time = 1;
+                  this.seek(adjustedTime);
+                  this._state = REVERSE;
+              }
+              else {
+                  const adjustedTime = time - 1;
+                  this.notify({
+                      type: "TICK",
+                      time: 1,
+                      lastTime,
+                      animation: this._animation,
+                  });
+                  this._time = 0;
+                  this.seek(adjustedTime);
+                  this._state = FORWARD;
+              }
+          }
+          else {
+              this.seek(time);
+          }
+      }
+      stepBackward() {
+          let time = this._time - this._step;
+          let lastTime = this._time;
+          const repeatDirection = this._repeatDirection;
+          if (time <= 0) {
+              this._iterations++;
+              if (this._iterations >= this._repeat) {
+                  this.seek(0);
+                  this.stop();
+                  return;
+              }
+              if (repeatDirection === ALTERNATE) {
+                  const adjustedTime = time * -1;
+                  this.notify({
+                      type: "TICK",
+                      time: 0,
+                      lastTime,
+                      animation: this._animation,
+                  });
+                  this._time = 0;
+                  this.seek(adjustedTime);
+                  this._state = FORWARD;
+              }
+              else {
+                  const adjustedTime = 1 + time;
+                  this.notify({
+                      type: "TICK",
+                      time: 1,
+                      lastTime,
+                      animation: this._animation,
+                  });
+                  this._time = 1;
+                  this.seek(adjustedTime);
+                  this._state = REVERSE;
+              }
+          }
+          else {
+              this.seek(time);
+          }
+      }
+      seek(time) {
+          const lastTime = this._time;
+          this._time = time;
+          this._animation.update(this._time);
+          this._render(this._animation);
+          this.notify({
+              type: "TICK",
+              time,
+              lastTime,
+              animation: this._animation,
+          });
+      }
+      stop() {
+          if (this._state !== STOPPED) {
+              this._state = STOPPED;
+              this._clock.unregister(this.tick);
+              this.notify({
+                  type: "STOPPED",
+                  animation: this._animation,
+              });
+          }
+      }
+      reverse() {
+          if (this._state !== REVERSE) {
+              this._lastTimestamp = this._clock.now();
+              this._state = REVERSE;
+              this._clock.register(this.tick);
+              this.notify({
+                  type: "REVERSED",
+                  animation: this._animation,
+              });
+          }
+      }
+      transitionToTimeline(animation, duration, easing) {
+          const slopeAnimation = this._slopeAnimationBuilder.build(this._animation, this._time, this._duration, duration, this._state);
+          const blendedAnimation = new BlendedAnimation(slopeAnimation, animation, easing);
+          this._animation = blendedAnimation;
+          this._time = 0;
+          this._duration = duration;
+          this.notify({
+              type: "TRANSITION",
+              animation: this._animation,
+          });
+          const observer = this.observeTime(1, () => {
+              this._animation = animation;
+              observer.dispose();
+              transitionObserver.dispose();
+          });
+          const transitionObserver = this.observe("TRANSITION", () => {
+              observer.dispose();
+              transitionObserver.dispose();
+          });
+          return this;
+      }
+      dispose() {
+          this.stop();
+          super.dispose();
+      }
+      static get repeatDirections() {
+          return repeatDirections;
+      }
+      static get states() {
+          return states;
+      }
+  }
+
+  exports.Animation = Animation;
+  exports.Animator = Animator;
+  exports.BezierCurve = BezierCurve;
+  exports.Keyframe = Keyframe;
+  exports.Player = Player;
+  exports.easings = easings;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+//# sourceMappingURL=index.browser.js.map
