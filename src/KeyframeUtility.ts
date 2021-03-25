@@ -15,9 +15,9 @@ export interface SimpleKeyframeConfig {
   from: string;
   endAt: number;
   startAt: number;
-  controls: string[];
-  easing: EasingAsStrings | EasingFunction;
-  value: string;
+  controls?: string[];
+  easing?: EasingAsStrings | EasingFunction;
+  value?: string;
 }
 
 export default class KeyframeUtility {

@@ -13,8 +13,8 @@ export interface KeyframeConfig {
   from: ParsedValue;
   endAt: number;
   startAt: number;
-  controls: ParsedValue[];
-  easing: EasingFunction;
+  controls?: ParsedValue[];
+  easing?: EasingFunction;
 }
 
 export default class Keyframe {

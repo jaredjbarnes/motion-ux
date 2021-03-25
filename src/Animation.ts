@@ -1,4 +1,3 @@
-import { Node } from "clarity-pattern-parser";
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
 import ParsedValue from "./ParsedValue";

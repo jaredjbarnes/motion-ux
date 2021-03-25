@@ -84,7 +84,7 @@ export default class GraphsVisitor {
     this.visitor(graphs);
 
     const node = graphs[0];
-    if (Array.isArray(node.children)) {
+    if (node.isComposite) {
       for (let index = 0; index < node.children.length; index++) {
         const childGraphs = graphs.map((node) => {
           return node.children[index];

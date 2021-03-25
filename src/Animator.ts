@@ -53,7 +53,7 @@ export default class Animator {
       this.bezierCurve.setPoints(points);
       resultNode.value = this.bezierCurve.valueAt(timeWithEasing);
     } else {
-      if (!Array.isArray(resultNode.children)) {
+      if (!resultNode.isComposite) {
         if (time >= this.keyframe.startAt) {
           resultNode.value = cloneNodes[cloneNodes.length - 1].value;
         } else {

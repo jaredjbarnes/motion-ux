@@ -1,5 +1,4 @@
-import "../../dist/main.js";
-import easeInExpo from "../../src/easingFunctions/easeInExpo.js";
+import "../../dist/index.browser.js";
 
 const { easings, Animation, Player } = motionUX;
 const circleWithBezier = document.createElement("div");

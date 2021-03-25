@@ -13,7 +13,7 @@ export default class TreeNormalizer {
   }
 
   visitNode(node: Node) {
-    if (Array.isArray(node.children)) {
+    if (node.isComposite) {
       this.removeOptionalSpaces(node);
       this.replaceHex(node);
       this.removeUnnecessaryDividers(node);

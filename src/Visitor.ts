@@ -12,7 +12,7 @@ export default class Visitor {
   }
 
   walkUp(node: Node) {
-    if (Array.isArray(node.children)) {
+    if (node.isComposite) {
       node.children.forEach(this.visitUp);
     }
 
