@@ -1,6 +1,6 @@
 {
   "name": "motion-ux",
-  "version": "4.0.9",
+  "version": "5.0.0",
   "description": "UI Animation Framework",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
