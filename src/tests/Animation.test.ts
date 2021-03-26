@@ -175,4 +175,28 @@ describe("Animation", () => {
     expect(display).toBe("none");
     expect(opacity).toBe("1");
   });
+
+  // test("AnimationConfig", ()=>{
+  //   const animation = Animation.from("test", {
+  //     from: {
+  //       fontSize: "10px",
+  //       width: "100%",
+  //       height: "100%",
+  //     },
+  //     "75%": {
+  //       fontSize: "15px",
+  //       width: {
+  //         value: "300%"
+  //       },
+  //       height: "300%",
+  //     },
+  //     to: {
+  //       fontSize: "20px",
+  //       width: "50%",
+  //       height: "75%",
+  //     },
+  //   });
+
+  //   expect(animation.animators.length).toBe(6);
+  // });
 });

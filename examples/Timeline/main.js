@@ -5,6 +5,7 @@ const circleWithBezier = document.createElement("div");
 
 circleWithBezier.style.borderRadius = "50% 50%";
 circleWithBezier.style.boxShadow = "0 5px 5px rgba(0,0,0,0.5)";
+circleWithBezier.style.transformOrigin = "center center";
 circleWithBezier.style.display = "flex";
 circleWithBezier.style.alignItems = "center";
 circleWithBezier.style.justifyContent = "center";
@@ -17,51 +18,12 @@ referenceCircle.style.height = "300px";
 
 document.body.appendChild(circleWithBezier);
 
-const secondAnimation = new Animation([
-  {
-    name: "circle",
-    property: "transform",
-    from: "translate(150px, 0px)",
-    controls: ["translate(300px, 0px)", "translate(300px, 300px)"],
-    to: "translate(150px, 300px)",
-    startAt: 0,
-    endAt: 0.5,
-  },
-  {
-    name: "circle",
-    property: "transform",
-    from: "translate(150px, 300px)",
-    controls: ["translate(0px, 300px)", "translate(0px, 0px)"],
-    to: "translate(150px, 0px)",
-    startAt: 0.5,
-    endAt: 1,
-  },
-  {
-    name: "circle",
-    property: "background",
-    to: "rgba(255,0,0)",
-    from: "rgba(255,0,0)",
-    startAt: 0,
-    endAt: 1,
-    easing: "easeOutExpo",
-  },
-  // {
-  //   name: "circle",
-  //   property: "color",
-  //   from: "#fff",
-  //   to: "#000",
-  //   startAt: 0,
-  //   endAt: 1,
-  //   easing: "easeOutExpo",
-  // },
-]);
-
 const animation = new Animation([
   {
     name: "circle",
     property: "transform",
-    from: "translate(0px, 0px)",
-    to: "translate(150px , 150px)",
+    from: "scale(1) translate(0px, 0px)",
+    to: "scale(1) translate(150px , 150px)",
     startAt: 0,
     endAt: 0.5,
     easing: "easeInOutQuad",
@@ -69,8 +31,8 @@ const animation = new Animation([
   {
     name: "circle",
     property: "transform",
-    from: "translate(150px, 150px)",
-    to: "translate(0px , 0px)",
+    from: "scale(1) translate(150px, 150px)",
+    to: "scale(1) translate(0px , 0px)",
     startAt: 0.5,
     endAt: 1,
     easing: "easeInOutQuad",
@@ -84,16 +46,68 @@ const animation = new Animation([
     endAt: 1,
     easing: "easeOutExpo",
   },
-  // {
-  //   name: "circle",
-  //   property: "color",
-  //   from: "#fff",
-  //   to: "#ff0000",
-  //   startAt: 0,
-  //   endAt: 1,
-  //   easing: "easeOutExpo",
-  // },
 ]);
+
+const secondAnimation = new Animation([
+  {
+    name: "circle",
+    property: "transform",
+    from: "scale(1) translate(150px, 0px)",
+    controls: [
+      "scale(1) translate(300px, 0px)",
+      "scale(1) translate(300px, 300px)",
+    ],
+    to: "scale(1) translate(150px, 300px)",
+    startAt: 0,
+    endAt: 0.5,
+  },
+  {
+    name: "circle",
+    property: "transform",
+    from: "scale(1) translate(150px, 300px)",
+    controls: [
+      "scale(1) translate(0px, 300px)",
+      "scale(1) translate(0px, 0px)",
+    ],
+    to: "scale(1) translate(150px, 0px)",
+    startAt: 0.5,
+    endAt: 1,
+  },
+  {
+    name: "circle",
+    property: "background",
+    to: "rgba(255,0,0)",
+    from: "rgba(255,0,0)",
+    startAt: 0,
+    endAt: 1,
+    easing: "easeOutExpo",
+  },
+]);
+
+const pulseAnimation = Animation.fromKeyframes("circle", {
+  from: {
+    background: "rgb(255,255,0)",
+    transform: {
+      value: "scale(1) translate(50px, 50px)",
+      easeOut: "quad",
+    },
+  },
+  "50%": {
+    background: "rgb(255,255,0)",
+    transform: {
+      value: "scale(2) translate(50px, 50px)",
+      easeIn: "quad",
+      easeOut: "quad",
+    },
+  },
+  to: {
+    background: "rgb(255,255,0)",
+    transform: {
+      value: "scale(1) translate(50px, 50px)",
+      easeIn: "quad",
+    },
+  },
+});
 
 function render(animation) {
   const values = animation.getCurrentValues();
@@ -102,9 +116,9 @@ function render(animation) {
   });
 }
 
-let onAnimation = 0
+let onAnimation = 0;
 
-const player = new Player(animation, { render, duration: 1500 });
+const player = new Player(animation, { render, duration: 750 });
 player.repeat = Infinity;
 
 player.observeTime(1, () => {
@@ -121,9 +135,12 @@ function callback() {
   if (onAnimation === 0) {
     onAnimation = 1;
     player.transitionToTimeline(secondAnimation, 750, easings.easeOutBack);
+  } else if (onAnimation === 1) {
+    onAnimation = 2;
+    player.transitionToTimeline(animation, 750, easings.easeOutBack);
   } else {
     onAnimation = 0;
-    player.transitionToTimeline(animation, 750, easings.easeOutBack);
+    player.transitionToTimeline(pulseAnimation, 750, easings.easeOutBack);
   }
 
   const innerObserver = player.observeTime(1, () => {

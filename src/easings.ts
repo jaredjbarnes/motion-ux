@@ -63,7 +63,7 @@ export type EasingNames =
   | "easeInBounce"
   | "easeOutBounce"
   | "easeInOutBounce"
-  | "easeLinear";
+  | "linear";
 
 const easings = {
   easeInQuad: easeInQuad,

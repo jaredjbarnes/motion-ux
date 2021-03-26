@@ -1990,9 +1990,68 @@ class Keyframe {
     }
 }
 
+const easingOutMap = {
+    linear: [1],
+    quad: [1, 1],
+    cubic: [1, 1, 1],
+    quart: [1, 1, 1, 1],
+    back: [0, 0, -0.5],
+    quint: [1, 1, 1, 1, 1],
+    expo: [1, 1, 1, 1, 1, 1],
+    circ: [0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1],
+    elastic: [2, 2, -1, 1.5, 1.5, 0.75, 1.25, 0.85, 1, 1, 1],
+};
+const easingInMap = {
+    linear: [0],
+    quad: [0, 0],
+    cubic: [0, 0, 0],
+    quart: [0, 0, 0, 0],
+    back: [1.5, 1, 1],
+    quint: [0, 0, 0, 0, 0],
+    expo: [0, 0, 0, 0, 0, 0],
+    circ: [0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35],
+    elastic: [0, 0, 0, 0.15, -0.25, 0.25, -0.5, -0.5, 2, -1, -1],
+};
+function createDynamicEasing(easingIn, easingOut) {
+    const points = [...easingInMap[easingIn], ...easingOutMap[easingOut]];
+    const bezierCurve = new BezierCurve(points);
+    return (percentage) => {
+        return bezierCurve.valueAt(percentage);
+    };
+}
+
 const sortAsc = (animatorA, animatorB) => {
     return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
+const sortPercentages = (keyA, keyB) => {
+    if (keyA === "from") {
+        return -1;
+    }
+    if (keyB === "from") {
+        return 1;
+    }
+    if (keyA === "to") {
+        return 1;
+    }
+    if (keyB === "to") {
+        return -1;
+    }
+    const keyANumber = parseInt(keyA, 10);
+    const keyBNumber = parseInt(keyB, 10);
+    if (keyANumber < keyBNumber) {
+        return -1;
+    }
+    else if (keyANumber > keyBNumber) {
+        return 1;
+    }
+    return 0;
+};
+function getDecimalFromPercentage(percentage) {
+    let decimal = parseInt(percentage, 10) / 100;
+    decimal = Math.max(0, decimal);
+    decimal = Math.min(1, decimal);
+    return decimal;
+}
 class Animation {
     constructor(keyframes) {
         this.animators = [];
@@ -2075,6 +2134,52 @@ class Animation {
         const newKeyframes = animation.animators.map((a) => a.keyframe);
         this.initialize([...oldKeyframes, ...newKeyframes]);
         return this;
+    }
+    static from(name, config) {
+        const timeKeys = Object.keys(config);
+        const keyframes = [];
+        let lastKeyFramePercentage = 0;
+        timeKeys.sort(sortPercentages);
+        for (let index = 0; index < timeKeys.length - 1; index++) {
+            const key = timeKeys[index];
+            const nextKey = timeKeys[index + 1];
+            const currentAnimationKeyframe = config[key];
+            const nextAnimationKeyframe = config[nextKey] || null;
+            const startAt = lastKeyFramePercentage;
+            const endAt = getDecimalFromPercentage(timeKeys[index + 1]);
+            lastKeyFramePercentage = endAt;
+            Object.keys(currentAnimationKeyframe).forEach((key) => {
+                const currentValue = currentAnimationKeyframe[key];
+                const nextValue = nextAnimationKeyframe[key];
+                if (nextValue == null) {
+                    throw new Error(`All keyframe declarations need to have the same properties. Missing: '${key}'`);
+                }
+                const easingIn = typeof currentValue === "string"
+                    ? "linear"
+                    : currentValue.easeOut || "linear";
+                const easingOut = typeof nextValue === "string"
+                    ? "linear"
+                    : nextValue.easeIn || "linear";
+                const easing = createDynamicEasing(easingIn, easingOut);
+                const controlsIn = typeof currentValue === "string" ? [] : currentValue.controlsIn || [];
+                const controlsOut = typeof nextValue === "string" ? [] : nextValue.controlsOut || [];
+                const controls = [...controlsIn, ...controlsOut];
+                const from = typeof currentValue === "string" ? currentValue : currentValue.value;
+                const to = typeof nextValue === "string" ? nextValue : nextValue.value;
+                const keyframeConfig = {
+                    name,
+                    property: key,
+                    from,
+                    to,
+                    controls,
+                    easing,
+                    startAt,
+                    endAt,
+                };
+                keyframes.push(Keyframe.fromSimpleConfig(keyframeConfig));
+            });
+        }
+        return new Animation(keyframes);
     }
 }
 
