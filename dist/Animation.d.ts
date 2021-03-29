@@ -8,7 +8,7 @@ declare type AnimationState = {
         [key: string]: ParsedValue;
     };
 };
-export interface AnimationKeyframeConfig {
+export interface IAnimationKeyframes {
     [key: string]: {
         [key: string]: string | {
             value: string;
@@ -31,6 +31,6 @@ export default class Animation {
     update(time: number): this;
     getCurrentValues(): AnimationState;
     merge(animation: Animation): this;
-    static from(name: string, config: AnimationKeyframeConfig): Animation;
+    static fromKeyframes(name: string, config: IAnimationKeyframes): Animation;
 }
 export {};

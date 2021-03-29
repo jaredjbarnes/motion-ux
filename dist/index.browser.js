@@ -2137,7 +2137,7 @@
           this.initialize([...oldKeyframes, ...newKeyframes]);
           return this;
       }
-      static from(name, config) {
+      static fromKeyframes(name, config) {
           const timeKeys = Object.keys(config);
           const keyframes = [];
           let lastKeyFramePercentage = 0;

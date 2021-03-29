@@ -65,19 +65,20 @@ const statefulMotion = {
     duration: 1000,
     blendDuration: 700,
     easing: "easeOutBack",
-    loop: true,
+    iterationCount: Infinity // Defaults to 1
   },
   pacing: {
     animation: pacing,
     duration: 1000,
     easing: "easeOutBack",
-    loop: true,
+    iterationCount: Infinity
   },
   shaking: {
     animation: shake,
     duration: 1000,
     easing: "easeOutBack",
-    loop: true,
+    iterationCount: Infinity,
+    // direction: "alternate" | "default"
   },
 };
 ```
