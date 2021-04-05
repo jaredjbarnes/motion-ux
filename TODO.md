@@ -63,21 +63,21 @@ const statefulMotion = {
   pulsing: {
     animation: pulse,
     duration: 1000,
-    blendDuration: 700,
-    easing: "easeOutBack",
     iterationCount: Infinity // Defaults to 1
+    transitionDuration: 700, // These are transition
+    transitionEasing: "easeOutBack",
   },
   pacing: {
     animation: pacing,
     duration: 1000,
-    easing: "easeOutBack",
     iterationCount: Infinity
+    transitionEasing: "easeOutBack",
   },
   shaking: {
     animation: shake,
     duration: 1000,
-    easing: "easeOutBack",
     iterationCount: Infinity,
+    transitionEasing: "easeOutBack",
     // direction: "alternate" | "default"
   },
 };

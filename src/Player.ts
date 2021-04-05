@@ -322,7 +322,7 @@ export default class Player extends Observable {
     }
   }
 
-  transitionToTimeline(animation: Animation, duration: number, easing: EasingFunction) {
+  transitionToAnimation(animation: Animation, duration: number, easing: EasingFunction) {
     const slopeAnimation = this._slopeAnimationBuilder.build(
       this._animation,
       this._time,

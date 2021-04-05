@@ -134,13 +134,13 @@ function callback() {
 
   if (onAnimation === 0) {
     onAnimation = 1;
-    player.transitionToTimeline(secondAnimation, 1500, easings.easeOutBack);
+    player.transitionToAnimation(secondAnimation, 1500, easings.easeOutBack);
   } else if (onAnimation === 1) {
     onAnimation = 2;
-    player.transitionToTimeline(animation, 1500, easings.easeOutBack);
+    player.transitionToAnimation(animation, 1500, easings.easeOutBack);
   } else {
     onAnimation = 0;
-    player.transitionToTimeline(pulseAnimation, 1500, easings.easeOutBack);
+    player.transitionToAnimation(pulseAnimation, 1500, easings.easeOutBack);
   }
 
   const innerObserver = player.observeTime(1, () => {

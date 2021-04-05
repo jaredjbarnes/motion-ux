@@ -2519,6 +2519,9 @@
               .map((name) => {
               const fromValue = fromValues[name];
               const toValue = toValues[name];
+              if (toValue == null) {
+                  throw new Error(`Blended animations need to have the same properties to animated.  From Animation: ${JSON.stringify(Object.keys(fromValues))}, To Animation: ${JSON.stringify(Object.keys(toValues))}`);
+              }
               return Object.keys(fromValue).map((property) => {
                   const from = fromValue[property];
                   const to = toValue[property];
@@ -2781,7 +2784,7 @@
               });
           }
       }
-      transitionToTimeline(animation, duration, easing) {
+      transitionToAnimation(animation, duration, easing) {
           const slopeAnimation = this._slopeAnimationBuilder.build(this._animation, this._time, this._duration, duration, this._state);
           const blendedAnimation = new BlendedAnimation(slopeAnimation, animation, easing);
           this._animation = blendedAnimation;
