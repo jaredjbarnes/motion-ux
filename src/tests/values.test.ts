@@ -162,4 +162,10 @@ describe("Patterns", () => {
     );
     const node = values.parse(cursor);
   });
+
+  test("array", () => {
+    const cursor = new Cursor("[0,0,0,0]");
+    const node = values.parse(cursor);
+    expect(node?.toString()).toBe("[0,0,0,0]");
+  });
 });

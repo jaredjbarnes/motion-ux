@@ -1,4 +1,4 @@
-import { EasingFunction } from "./easings";
+import easings, { EasingFunction } from "./easings";
 import KeyframeConfigValidator from "./KeyframeConfigValidator";
 import KeyframeUtility, { SimpleKeyframeConfig } from "./KeyframeUtility";
 import ParsedValue from "./ParsedValue";
@@ -18,15 +18,15 @@ export interface KeyframeConfig {
 }
 
 export default class Keyframe {
-  public name: any;
-  public property: any;
-  public to: any;
-  public from: any;
-  public result: any;
-  public startAt: any;
-  public endAt: any;
-  public controls: any;
-  public easing: any;
+  public name: string;
+  public property: string;
+  public to: ParsedValue;
+  public from: ParsedValue;
+  public result: ParsedValue;
+  public startAt: number;
+  public endAt: number;
+  public controls: ParsedValue[];
+  public easing: EasingFunction;
 
   constructor(config: KeyframeConfig) {
     validator.setConfig(config);
@@ -39,8 +39,8 @@ export default class Keyframe {
     this.result = config.from.clone();
     this.startAt = config.startAt;
     this.endAt = config.endAt;
-    this.controls = config.controls;
-    this.easing = config.easing;
+    this.controls = config.controls || [];
+    this.easing = config.easing || easings.linear;
   }
 
   static fromSimpleConfig(config: SimpleKeyframeConfig) {

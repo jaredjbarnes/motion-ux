@@ -82,3 +82,6 @@ const statefulMotion = {
   },
 };
 ```
+
+Need to make a Animator of an object or an array of numbers. This can by-pass the parsing
+which is the most expensive part of animation.
