@@ -245,6 +245,264 @@ class Animator {
     }
 }
 
+var easeInQuad = (percentage) => {
+    return percentage * percentage;
+};
+
+var easeOutQuad = (percentage) => {
+    return -percentage * (percentage - 2);
+};
+
+var easeInOutQuad = (percentage) => {
+    if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * percentage * percentage;
+    return (-1 / 2) * (--percentage * (percentage - 2) - 1);
+};
+
+var easeInElastic = (percentage) => {
+    const p = 0.3 / 1;
+    const s = p / 4;
+    const a = 1;
+    if (percentage <= 0)
+        return 0;
+    if (percentage >= 1)
+        return 1;
+    return -(a *
+        Math.pow(2, 10 * (percentage -= 1)) *
+        Math.sin(((percentage - s) * (2 * Math.PI)) / p));
+};
+
+var easeInOutElastic = (t) => {
+    var b = 0;
+    var c = 1;
+    var d = 1;
+    var s = 1.70158;
+    var p = 0;
+    var a = c;
+    if (t == 0)
+        return b;
+    if ((t /= d / 2) == 2)
+        return b + c;
+    if (!p)
+        p = d * (0.3 / 1);
+    if (a < Math.abs(c)) {
+        a = c;
+        var s = p / 4;
+    }
+    else
+        var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+    if (t < 1)
+        return (-0.5 *
+            (a *
+                Math.pow(2, 10 * (t -= 1)) *
+                Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
+            b);
+    return (a *
+        Math.pow(2, -10 * (t -= 1)) *
+        Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
+        0.5 +
+        c +
+        b);
+};
+
+var easeOutElastic = (percentage) => {
+    const p = 0.3 / 1;
+    const s = p / 4;
+    const a = 1;
+    if (percentage <= 0)
+        return 0;
+    if (percentage >= 1)
+        return 1;
+    return (a *
+        Math.pow(2, -10 * percentage) *
+        Math.sin(((percentage - s) * (2 * Math.PI)) / p) +
+        1);
+};
+
+var easeInOutBack = (percentage) => {
+    const s = 1.70158 * 1.525;
+    if ((percentage /= 1 / 2) < 1) {
+        return (1 / 2) * (percentage * percentage * ((s + 1) * percentage - s));
+    }
+    return ((1 / 2) * ((percentage -= 2) * percentage * ((s + 1) * percentage + s) + 2));
+};
+
+var easeOutBounce = (percentage) => {
+    let t = percentage;
+    if ((t /= 1) < 1 / 2.75) {
+        return 7.5625 * t * t;
+    }
+    else if (t < 2 / 2.75) {
+        return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+    }
+    else if (t < 2.5 / 2.75) {
+        return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+    }
+    else {
+        return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+    }
+};
+
+var easeInBounce = (percentage) => {
+    return 1 - easeOutBounce(1 - percentage);
+};
+
+var easeInOutBounce = (percentage) => {
+    if (percentage < 0.5) {
+        return easeInBounce(percentage * 2) * 0.5;
+    }
+    else {
+        return easeOutBounce(percentage * 2 - 1) * 0.5 + 0.5;
+    }
+};
+
+var easeInCubic = (percentage) => {
+    return 1 * (percentage /= 1) * percentage * percentage;
+};
+
+var easeOutCubic = (percentage) => {
+    return 1 * ((percentage = percentage / 1 - 1) * percentage * percentage + 1);
+};
+
+var easeInOutCubic = (percentage) => {
+    if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * percentage * percentage * percentage;
+    return (1 / 2) * ((percentage -= 2) * percentage * percentage + 2);
+};
+
+var easeInQuart = (percentage) => {
+    return 1 * (percentage /= 1) * percentage * percentage * percentage;
+};
+
+var easeOutQuart = (percentage) => {
+    return (-1 *
+        ((percentage = percentage / 1 - 1) * percentage * percentage * percentage -
+            1));
+};
+
+var easeInOutQuart = (percentage) => {
+    if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * percentage * percentage * percentage * percentage;
+    return ((-1 / 2) * ((percentage -= 2) * percentage * percentage * percentage - 2));
+};
+
+var easeInQuint = (percentage) => {
+    return (1 * (percentage /= 1) * percentage * percentage * percentage * percentage);
+};
+
+var easeOutQuint = (percentage) => {
+    return (1 *
+        ((percentage = percentage / 1 - 1) *
+            percentage *
+            percentage *
+            percentage *
+            percentage +
+            1));
+};
+
+var easeInOutQuint = (percentage) => {
+    if ((percentage /= 1 / 2) < 1)
+        return ((1 / 2) * percentage * percentage * percentage * percentage * percentage);
+    return ((1 / 2) *
+        ((percentage -= 2) * percentage * percentage * percentage * percentage + 2));
+};
+
+var easeInSine = (percentage) => {
+    return -Math.cos(percentage * (Math.PI / 2)) + 1;
+};
+
+var easeOutSine = (percentage) => {
+    return 1 * Math.sin((percentage / 1) * (Math.PI / 2));
+};
+
+var easeInOutSine = (percentage) => {
+    return (-1 / 2) * (Math.cos((Math.PI * percentage) / 1) - 1);
+};
+
+var easeInExpo = (percentage) => {
+    return percentage == 0 ? 0 : 1 * Math.pow(2, 10 * (percentage / 1 - 1));
+};
+
+var easeOutExpo = (percentage) => {
+    return percentage == 1 ? 1 : 1 * (-Math.pow(2, (-10 * percentage) / 1) + 1);
+};
+
+var easeInOutExpo = (percentage) => {
+    if (percentage == 0)
+        return 0;
+    if (percentage == 1)
+        return 1;
+    if ((percentage /= 1 / 2) < 1)
+        return (1 / 2) * Math.pow(2, 10 * (percentage - 1));
+    return (1 / 2) * (-Math.pow(2, -10 * --percentage) + 2);
+};
+
+var easeInCirc = (percentage) => {
+    return -1 * (Math.sqrt(1 - (percentage /= 1) * percentage) - 1);
+};
+
+var easeOutCirc = (percentage) => {
+    return 1 * Math.sqrt(1 - (percentage = percentage / 1 - 1) * percentage);
+};
+
+var easeInOutCirc = (percentage) => {
+    if ((percentage /= 1 / 2) < 1)
+        return (-1 / 2) * (Math.sqrt(1 - percentage * percentage) - 1);
+    return (1 / 2) * (Math.sqrt(1 - (percentage -= 2) * percentage) + 1);
+};
+
+var easeInBack = (percentage) => {
+    const s = 1.70158;
+    return 1 * (percentage /= 1) * percentage * ((s + 1) * percentage - s);
+};
+
+var easeOutBack = (percentage) => {
+    const s = 1.70158;
+    return (1 *
+        ((percentage = percentage / 1 - 1) *
+            percentage *
+            ((s + 1) * percentage + s) +
+            1));
+};
+
+var easeLinear = (percentage) => {
+    return percentage;
+};
+
+const easings = {
+    easeInQuad: easeInQuad,
+    easeOutQuad: easeOutQuad,
+    easeInOutQuad: easeInOutQuad,
+    easeInCubic: easeInCubic,
+    easeOutCubic: easeOutCubic,
+    easeInOutCubic: easeInOutCubic,
+    easeInQuart: easeInQuart,
+    easeOutQuart: easeOutQuart,
+    easeInOutQuart: easeInOutQuart,
+    easeInQuint: easeInQuint,
+    easeOutQuint: easeOutQuint,
+    easeInOutQuint: easeInOutQuint,
+    easeInSine: easeInSine,
+    easeOutSine: easeOutSine,
+    easeInOutSine: easeInOutSine,
+    easeInExpo: easeInExpo,
+    easeOutExpo: easeOutExpo,
+    easeInOutExpo: easeInOutExpo,
+    easeInCirc: easeInCirc,
+    easeOutCirc: easeOutCirc,
+    easeInOutCirc: easeInOutCirc,
+    easeInElastic: easeInElastic,
+    easeOutElastic: easeOutElastic,
+    easeInOutElastic: easeInOutElastic,
+    easeInBack: easeInBack,
+    easeOutBack: easeOutBack,
+    easeInOutBack: easeInOutBack,
+    easeInBounce: easeInBounce,
+    easeOutBounce: easeOutBounce,
+    easeInOutBounce: easeInOutBounce,
+    linear: easeLinear,
+};
+
 class Node {
     constructor(type, name, startIndex, endIndex, isComposite = false) {
         this.children = [];
@@ -1279,7 +1537,25 @@ const method = new AndComposite("method", [
     closeParen
 ]);
 
-const value = new OrComposite("value", [hex, method, unit, number, name]);
+const openBracket = new Literal("open-square-bracket", "[");
+const closeBracket = new Literal("close-square-bracket", "]");
+const items = new RepeatComposite("items", number, divider);
+const array = new AndComposite("array", [
+    openBracket,
+    optionalSpaces,
+    items,
+    optionalSpaces,
+    closeBracket,
+]);
+
+const value = new OrComposite("value", [
+    array,
+    hex,
+    method,
+    unit,
+    number,
+    name,
+]);
 
 const space = new Literal("space", " ");
 const spaces = new RepeatValue("spaces", space);
@@ -1616,264 +1892,6 @@ class KeyframeConfigValidator {
     }
 }
 
-var easeInQuad = (percentage) => {
-    return percentage * percentage;
-};
-
-var easeOutQuad = (percentage) => {
-    return -percentage * (percentage - 2);
-};
-
-var easeInOutQuad = (percentage) => {
-    if ((percentage /= 1 / 2) < 1)
-        return (1 / 2) * percentage * percentage;
-    return (-1 / 2) * (--percentage * (percentage - 2) - 1);
-};
-
-var easeInElastic = (percentage) => {
-    const p = 0.3 / 1;
-    const s = p / 4;
-    const a = 1;
-    if (percentage <= 0)
-        return 0;
-    if (percentage >= 1)
-        return 1;
-    return -(a *
-        Math.pow(2, 10 * (percentage -= 1)) *
-        Math.sin(((percentage - s) * (2 * Math.PI)) / p));
-};
-
-var easeInOutElastic = (t) => {
-    var b = 0;
-    var c = 1;
-    var d = 1;
-    var s = 1.70158;
-    var p = 0;
-    var a = c;
-    if (t == 0)
-        return b;
-    if ((t /= d / 2) == 2)
-        return b + c;
-    if (!p)
-        p = d * (0.3 / 1);
-    if (a < Math.abs(c)) {
-        a = c;
-        var s = p / 4;
-    }
-    else
-        var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-    if (t < 1)
-        return (-0.5 *
-            (a *
-                Math.pow(2, 10 * (t -= 1)) *
-                Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
-            b);
-    return (a *
-        Math.pow(2, -10 * (t -= 1)) *
-        Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
-        0.5 +
-        c +
-        b);
-};
-
-var easeOutElastic = (percentage) => {
-    const p = 0.3 / 1;
-    const s = p / 4;
-    const a = 1;
-    if (percentage <= 0)
-        return 0;
-    if (percentage >= 1)
-        return 1;
-    return (a *
-        Math.pow(2, -10 * percentage) *
-        Math.sin(((percentage - s) * (2 * Math.PI)) / p) +
-        1);
-};
-
-var easeInOutBack = (percentage) => {
-    const s = 1.70158 * 1.525;
-    if ((percentage /= 1 / 2) < 1) {
-        return (1 / 2) * (percentage * percentage * ((s + 1) * percentage - s));
-    }
-    return ((1 / 2) * ((percentage -= 2) * percentage * ((s + 1) * percentage + s) + 2));
-};
-
-var easeOutBounce = (percentage) => {
-    let t = percentage;
-    if ((t /= 1) < 1 / 2.75) {
-        return 7.5625 * t * t;
-    }
-    else if (t < 2 / 2.75) {
-        return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
-    }
-    else if (t < 2.5 / 2.75) {
-        return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
-    }
-    else {
-        return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
-    }
-};
-
-var easeInBounce = (percentage) => {
-    return 1 - easeOutBounce(1 - percentage);
-};
-
-var easeInOutBounce = (percentage) => {
-    if (percentage < 0.5) {
-        return easeInBounce(percentage * 2) * 0.5;
-    }
-    else {
-        return easeOutBounce(percentage * 2 - 1) * 0.5 + 0.5;
-    }
-};
-
-var easeInCubic = (percentage) => {
-    return 1 * (percentage /= 1) * percentage * percentage;
-};
-
-var easeOutCubic = (percentage) => {
-    return 1 * ((percentage = percentage / 1 - 1) * percentage * percentage + 1);
-};
-
-var easeInOutCubic = (percentage) => {
-    if ((percentage /= 1 / 2) < 1)
-        return (1 / 2) * percentage * percentage * percentage;
-    return (1 / 2) * ((percentage -= 2) * percentage * percentage + 2);
-};
-
-var easeInQuart = (percentage) => {
-    return 1 * (percentage /= 1) * percentage * percentage * percentage;
-};
-
-var easeOutQuart = (percentage) => {
-    return (-1 *
-        ((percentage = percentage / 1 - 1) * percentage * percentage * percentage -
-            1));
-};
-
-var easeInOutQuart = (percentage) => {
-    if ((percentage /= 1 / 2) < 1)
-        return (1 / 2) * percentage * percentage * percentage * percentage;
-    return ((-1 / 2) * ((percentage -= 2) * percentage * percentage * percentage - 2));
-};
-
-var easeInQuint = (percentage) => {
-    return (1 * (percentage /= 1) * percentage * percentage * percentage * percentage);
-};
-
-var easeOutQuint = (percentage) => {
-    return (1 *
-        ((percentage = percentage / 1 - 1) *
-            percentage *
-            percentage *
-            percentage *
-            percentage +
-            1));
-};
-
-var easeInOutQuint = (percentage) => {
-    if ((percentage /= 1 / 2) < 1)
-        return ((1 / 2) * percentage * percentage * percentage * percentage * percentage);
-    return ((1 / 2) *
-        ((percentage -= 2) * percentage * percentage * percentage * percentage + 2));
-};
-
-var easeInSine = (percentage) => {
-    return -Math.cos(percentage * (Math.PI / 2)) + 1;
-};
-
-var easeOutSine = (percentage) => {
-    return 1 * Math.sin((percentage / 1) * (Math.PI / 2));
-};
-
-var easeInOutSine = (percentage) => {
-    return (-1 / 2) * (Math.cos((Math.PI * percentage) / 1) - 1);
-};
-
-var easeInExpo = (percentage) => {
-    return percentage == 0 ? 0 : 1 * Math.pow(2, 10 * (percentage / 1 - 1));
-};
-
-var easeOutExpo = (percentage) => {
-    return percentage == 1 ? 1 : 1 * (-Math.pow(2, (-10 * percentage) / 1) + 1);
-};
-
-var easeInOutExpo = (percentage) => {
-    if (percentage == 0)
-        return 0;
-    if (percentage == 1)
-        return 1;
-    if ((percentage /= 1 / 2) < 1)
-        return (1 / 2) * Math.pow(2, 10 * (percentage - 1));
-    return (1 / 2) * (-Math.pow(2, -10 * --percentage) + 2);
-};
-
-var easeInCirc = (percentage) => {
-    return -1 * (Math.sqrt(1 - (percentage /= 1) * percentage) - 1);
-};
-
-var easeOutCirc = (percentage) => {
-    return 1 * Math.sqrt(1 - (percentage = percentage / 1 - 1) * percentage);
-};
-
-var easeInOutCirc = (percentage) => {
-    if ((percentage /= 1 / 2) < 1)
-        return (-1 / 2) * (Math.sqrt(1 - percentage * percentage) - 1);
-    return (1 / 2) * (Math.sqrt(1 - (percentage -= 2) * percentage) + 1);
-};
-
-var easeInBack = (percentage) => {
-    const s = 1.70158;
-    return 1 * (percentage /= 1) * percentage * ((s + 1) * percentage - s);
-};
-
-var easeOutBack = (percentage) => {
-    const s = 1.70158;
-    return (1 *
-        ((percentage = percentage / 1 - 1) *
-            percentage *
-            ((s + 1) * percentage + s) +
-            1));
-};
-
-var easeLinear = (percentage) => {
-    return percentage;
-};
-
-const easings = {
-    easeInQuad: easeInQuad,
-    easeOutQuad: easeOutQuad,
-    easeInOutQuad: easeInOutQuad,
-    easeInCubic: easeInCubic,
-    easeOutCubic: easeOutCubic,
-    easeInOutCubic: easeInOutCubic,
-    easeInQuart: easeInQuart,
-    easeOutQuart: easeOutQuart,
-    easeInOutQuart: easeInOutQuart,
-    easeInQuint: easeInQuint,
-    easeOutQuint: easeOutQuint,
-    easeInOutQuint: easeInOutQuint,
-    easeInSine: easeInSine,
-    easeOutSine: easeOutSine,
-    easeInOutSine: easeInOutSine,
-    easeInExpo: easeInExpo,
-    easeOutExpo: easeOutExpo,
-    easeInOutExpo: easeInOutExpo,
-    easeInCirc: easeInCirc,
-    easeOutCirc: easeOutCirc,
-    easeInOutCirc: easeInOutCirc,
-    easeInElastic: easeInElastic,
-    easeOutElastic: easeOutElastic,
-    easeInOutElastic: easeInOutElastic,
-    easeInBack: easeInBack,
-    easeOutBack: easeOutBack,
-    easeInOutBack: easeInOutBack,
-    easeInBounce: easeInBounce,
-    easeOutBounce: easeOutBounce,
-    easeInOutBounce: easeInOutBounce,
-    linear: easeLinear,
-};
-
 const validator$1 = new KeyframeConfigValidator();
 class KeyframeUtility {
     _setConfig(config) {
@@ -1978,8 +1996,8 @@ class Keyframe {
         this.result = config.from.clone();
         this.startAt = config.startAt;
         this.endAt = config.endAt;
-        this.controls = config.controls;
-        this.easing = config.easing;
+        this.controls = config.controls || [];
+        this.easing = config.easing || easings.linear;
     }
     static fromSimpleConfig(config) {
         return new Keyframe(utility.normalizeConfig(config));
@@ -2617,7 +2635,7 @@ class Player extends Observable {
         return this._repeatDirection;
     }
     set repeatDirection(value) {
-        if ((value !== 0) && (value !== 1)) {
+        if (value !== 0 && value !== 1) {
             return;
         }
         this._repeatDirection = value;
@@ -2778,20 +2796,27 @@ class Player extends Observable {
             });
         }
     }
-    transitionToAnimation(animation, duration, easing) {
-        const slopeAnimation = this._slopeAnimationBuilder.build(this._animation, this._time, this._duration, duration, this._state);
-        const blendedAnimation = new BlendedAnimation(slopeAnimation, animation, easing);
+    transitionToAnimation(animation, duration, transitionDuration, transitionEasing = easings.linear) {
+        transitionDuration =
+            typeof transitionDuration === "number" ? transitionDuration : duration;
+        const slopeAnimation = this._slopeAnimationBuilder.build(this._animation, this._time, this._duration, transitionDuration, this._state);
+        const blendedAnimation = new BlendedAnimation(slopeAnimation, animation, transitionEasing);
         this._animation = blendedAnimation;
         this._time = 0;
-        this._duration = duration;
+        this._duration = transitionDuration;
         this.notify({
             type: "TRANSITION",
             animation: this._animation,
         });
         const observer = this.observeTime(1, () => {
             this._animation = animation;
+            this._duration = duration;
             observer.dispose();
             transitionObserver.dispose();
+            this.notify({
+                type: "TRANSITION-END",
+                animation: this._animation,
+            });
         });
         const transitionObserver = this.observe("TRANSITION", () => {
             observer.dispose();

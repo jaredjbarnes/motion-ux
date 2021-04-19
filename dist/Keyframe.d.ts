@@ -12,15 +12,15 @@ export interface KeyframeConfig {
     easing?: EasingFunction;
 }
 export default class Keyframe {
-    name: any;
-    property: any;
-    to: any;
-    from: any;
-    result: any;
-    startAt: any;
-    endAt: any;
-    controls: any;
-    easing: any;
+    name: string;
+    property: string;
+    to: ParsedValue;
+    from: ParsedValue;
+    result: ParsedValue;
+    startAt: number;
+    endAt: number;
+    controls: ParsedValue[];
+    easing: EasingFunction;
     constructor(config: KeyframeConfig);
     static fromSimpleConfig(config: SimpleKeyframeConfig): Keyframe;
 }

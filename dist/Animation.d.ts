@@ -8,15 +8,23 @@ declare type AnimationState = {
         [key: string]: ParsedValue;
     };
 };
+export interface IComplexKeyframeValue {
+    value: string;
+    controlsIn?: string[];
+    controlsOut?: string[];
+    easeIn?: IEasingNames;
+    easeOut?: IEasingNames;
+}
+export declare type IAnimationKeyframeValue = string | IComplexKeyframeValue;
 export interface IAnimationKeyframes {
     [key: string]: {
-        [key: string]: string | {
-            value: string;
-            controlsIn?: string[];
-            controlsOut?: string[];
-            easeIn?: IEasingNames;
-            easeOut?: IEasingNames;
-        };
+        [key: string]: IAnimationKeyframeValue;
+    };
+    from: {
+        [key: string]: IAnimationKeyframeValue;
+    };
+    to: {
+        [key: string]: IAnimationKeyframeValue;
     };
 }
 export default class Animation {

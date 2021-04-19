@@ -134,17 +134,28 @@ function callback() {
 
   if (onAnimation === 0) {
     onAnimation = 1;
-    player.transitionToAnimation(secondAnimation, 1500, easings.easeOutBack);
+    player.transitionToAnimation(
+      secondAnimation,
+      1500,
+      1500,
+      easings.easeOutBack
+    );
   } else if (onAnimation === 1) {
     onAnimation = 2;
-    player.transitionToAnimation(animation, 1500, easings.easeOutBack);
+    player.transitionToAnimation(animation, 1500, 1500, easings.easeOutBack);
   } else {
     onAnimation = 0;
-    player.transitionToAnimation(pulseAnimation, 1500, easings.easeOutBack);
+    player.transitionToAnimation(
+      pulseAnimation,
+      1500,
+      1500,
+      easings.easeOutBack
+    );
   }
 
   const innerObserver = player.observeTime(1, () => {
-    observer = player.observeTime(0.5, callback);
+    const at = Math.random();
+    observer = player.observeTime(at, callback);
     innerObserver.dispose();
   });
 }

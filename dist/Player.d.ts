@@ -48,7 +48,7 @@ export default class Player extends Observable {
     seek(time: number): void;
     stop(): void;
     reverse(): void;
-    transitionToAnimation(animation: Animation, duration: number, easing: EasingFunction): this;
+    transitionToAnimation(animation: Animation, duration: number, transitionDuration?: number, transitionEasing?: EasingFunction): this;
     dispose(): void;
     static get repeatDirections(): {
         DEFAULT: number;

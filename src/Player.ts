@@ -3,7 +3,7 @@ import DefaultClock from "./DefaultClock";
 import SlopeAnimationBuilder from "./SlopeAnimationBuilder";
 import BlendedAnimation from "./BlendedAnimation";
 import { IClock } from "./IClock";
-import { EasingFunction } from "./easings";
+import easings, { EasingFunction } from "./easings";
 import Animation from "./Animation";
 
 const defaultClock = new DefaultClock();
@@ -37,24 +37,24 @@ export interface PlayerOptions {
   repeatDirection: RepeatDirection;
   states: States;
   timeScale: number;
-  render: ()=>void;
+  render: () => void;
 }
 
 export default class Player extends Observable {
-	public _timeScale: number;
-	public _time: number;
-	public _step: any;
-	public _duration: number;
-	public _lastTimestamp: number;
-	public _animationFrame: any;
-	public _iterations: any;
-	public _repeat: any;
-	public _repeatDirection: any;
-	public _animation: any;
-	public _clock: any;
-	public _state: any;
-	public _render: any;
-	public _slopeAnimationBuilder: any;
+  public _timeScale: number;
+  public _time: number;
+  public _step: any;
+  public _duration: number;
+  public _lastTimestamp: number;
+  public _animationFrame: any;
+  public _iterations: any;
+  public _repeat: any;
+  public _repeatDirection: any;
+  public _animation: any;
+  public _clock: any;
+  public _state: any;
+  public _render: any;
+  public _slopeAnimationBuilder: any;
 
   constructor(
     animation: Animation,
@@ -128,7 +128,7 @@ export default class Player extends Observable {
   }
 
   set repeatDirection(value: RepeatDirection) {
-    if ((value !== 0) && (value !== 1)) {
+    if (value !== 0 && value !== 1) {
       return;
     }
 
@@ -322,24 +322,32 @@ export default class Player extends Observable {
     }
   }
 
-  transitionToAnimation(animation: Animation, duration: number, easing: EasingFunction) {
+  transitionToAnimation(
+    animation: Animation,
+    duration: number,
+    transitionDuration?: number,
+    transitionEasing: EasingFunction = easings.linear
+  ) {
+    transitionDuration =
+      typeof transitionDuration === "number" ? transitionDuration : duration;
+
     const slopeAnimation = this._slopeAnimationBuilder.build(
       this._animation,
       this._time,
       this._duration,
-      duration,
+      transitionDuration,
       this._state
     );
 
     const blendedAnimation = new BlendedAnimation(
       slopeAnimation,
       animation,
-      easing
+      transitionEasing
     );
 
     this._animation = blendedAnimation;
     this._time = 0;
-    this._duration = duration;
+    this._duration = transitionDuration;
 
     this.notify({
       type: "TRANSITION",
@@ -348,8 +356,15 @@ export default class Player extends Observable {
 
     const observer = this.observeTime(1, () => {
       this._animation = animation;
+      this._duration = duration;
+
       observer.dispose();
       transitionObserver.dispose();
+
+      this.notify({
+        type: "TRANSITION-END",
+        animation: this._animation,
+      });
     });
 
     const transitionObserver = this.observe("TRANSITION", () => {
