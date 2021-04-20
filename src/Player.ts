@@ -29,15 +29,14 @@ const states = {
 function defaultRender() {}
 
 export type RepeatDirection = 0 | 1;
-export type States = 1 | -1 | 0;
+export type PlayerState = 1 | -1 | 0;
 
 export interface PlayerOptions {
   clock?: IClock;
-  duration: number;
-  repeatDirection: RepeatDirection;
-  states: States;
-  timeScale: number;
-  render: () => void;
+  duration?: number;
+  repeatDirection?: RepeatDirection;
+  timeScale?: number;
+  render?: () => void;
 }
 
 export default class Player extends Observable {
@@ -56,15 +55,13 @@ export default class Player extends Observable {
   public _render: any;
   public _slopeAnimationBuilder: any;
 
-  constructor(
-    animation: Animation,
-    { clock, duration, timeScale, repeatDirection, render }: PlayerOptions
-  ) {
+  constructor(animation: Animation, options: PlayerOptions = {}) {
     super();
+    const { clock, duration, timeScale, repeatDirection, render } = options;
     this._timeScale = typeof timeScale === "number" ? timeScale : 1;
     this._time = 0;
     this._step = 0;
-    this._duration = duration;
+    this._duration = typeof duration === "number" ? duration : 0;
     this._lastTimestamp = 0;
     this._animationFrame = null;
     this._iterations = 0;
@@ -164,9 +161,11 @@ export default class Player extends Observable {
         animation: this._animation,
       });
     }
+
+    return this;
   }
 
-  tick() {
+  private tick() {
     const timestamp = this._clock.now();
     const deltaTime = timestamp - this._lastTimestamp;
     this._step = (deltaTime / this._duration) * this._timeScale;
@@ -188,7 +187,7 @@ export default class Player extends Observable {
     this._lastTimestamp = timestamp;
   }
 
-  stepForward() {
+  private stepForward() {
     let time = this._time + this._step;
     let lastTime = this._time;
 
@@ -235,7 +234,7 @@ export default class Player extends Observable {
     }
   }
 
-  stepBackward() {
+  private stepBackward() {
     let time = this._time - this._step;
     let lastTime = this._time;
 
@@ -295,6 +294,8 @@ export default class Player extends Observable {
       lastTime,
       animation: this._animation,
     });
+
+    return this;
   }
 
   stop() {
@@ -307,6 +308,8 @@ export default class Player extends Observable {
         animation: this._animation,
       });
     }
+
+    return this;
   }
 
   reverse() {
@@ -320,6 +323,8 @@ export default class Player extends Observable {
         animation: this._animation,
       });
     }
+
+    return this;
   }
 
   transitionToAnimation(

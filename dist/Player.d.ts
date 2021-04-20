@@ -3,14 +3,13 @@ import { IClock } from "./IClock";
 import { EasingFunction } from "./easings";
 import Animation from "./Animation";
 export declare type RepeatDirection = 0 | 1;
-export declare type States = 1 | -1 | 0;
+export declare type PlayerState = 1 | -1 | 0;
 export interface PlayerOptions {
     clock?: IClock;
-    duration: number;
-    repeatDirection: RepeatDirection;
-    states: States;
-    timeScale: number;
-    render: () => void;
+    duration?: number;
+    repeatDirection?: RepeatDirection;
+    timeScale?: number;
+    render?: () => void;
 }
 export default class Player extends Observable {
     _timeScale: number;
@@ -27,7 +26,7 @@ export default class Player extends Observable {
     _state: any;
     _render: any;
     _slopeAnimationBuilder: any;
-    constructor(animation: Animation, { clock, duration, timeScale, repeatDirection, render }: PlayerOptions);
+    constructor(animation: Animation, options?: PlayerOptions);
     get time(): number;
     get timeScale(): number;
     set timeScale(value: number);
@@ -41,13 +40,13 @@ export default class Player extends Observable {
     get animation(): any;
     set animation(animation: any);
     get iterations(): any;
-    play(): void;
-    tick(): void;
-    stepForward(): void;
-    stepBackward(): void;
-    seek(time: number): void;
-    stop(): void;
-    reverse(): void;
+    play(): this;
+    private tick;
+    private stepForward;
+    private stepBackward;
+    seek(time: number): this;
+    stop(): this;
+    reverse(): this;
     transitionToAnimation(animation: Animation, duration: number, transitionDuration?: number, transitionEasing?: EasingFunction): this;
     dispose(): void;
     static get repeatDirections(): {

@@ -2583,12 +2583,13 @@ const states = {
 };
 function defaultRender() { }
 class Player extends Observable {
-    constructor(animation, { clock, duration, timeScale, repeatDirection, render }) {
+    constructor(animation, options = {}) {
         super();
+        const { clock, duration, timeScale, repeatDirection, render } = options;
         this._timeScale = typeof timeScale === "number" ? timeScale : 1;
         this._time = 0;
         this._step = 0;
-        this._duration = duration;
+        this._duration = typeof duration === "number" ? duration : 0;
         this._lastTimestamp = 0;
         this._animationFrame = null;
         this._iterations = 0;
@@ -2668,6 +2669,7 @@ class Player extends Observable {
                 animation: this._animation,
             });
         }
+        return this;
     }
     tick() {
         const timestamp = this._clock.now();
@@ -2778,6 +2780,7 @@ class Player extends Observable {
             lastTime,
             animation: this._animation,
         });
+        return this;
     }
     stop() {
         if (this._state !== STOPPED) {
@@ -2788,6 +2791,7 @@ class Player extends Observable {
                 animation: this._animation,
             });
         }
+        return this;
     }
     reverse() {
         if (this._state !== REVERSE) {
@@ -2799,6 +2803,7 @@ class Player extends Observable {
                 animation: this._animation,
             });
         }
+        return this;
     }
     transitionToAnimation(animation, duration, transitionDuration, transitionEasing = easings.linear) {
         transitionDuration =
