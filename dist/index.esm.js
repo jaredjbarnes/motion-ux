@@ -2648,9 +2648,13 @@ class Player extends Observable {
         return this._animation;
     }
     set animation(animation) {
-        if (typeof animation.render === "function") {
-            this._animation = animation;
-        }
+        this._animation = animation;
+    }
+    get render() {
+        return this._render;
+    }
+    set render(render) {
+        this._render = render;
     }
     get iterations() {
         return this._iterations;

@@ -36,7 +36,7 @@ export interface PlayerOptions {
   duration?: number;
   repeatDirection?: RepeatDirection;
   timeScale?: number;
-  render?: () => void;
+  render?: (animation: Animation) => void;
 }
 
 export default class Player extends Observable {
@@ -49,7 +49,7 @@ export default class Player extends Observable {
   public _iterations: any;
   public _repeat: any;
   public _repeatDirection: any;
-  public _animation: any;
+  public _animation: Animation;
   public _clock: any;
   public _state: any;
   public _render: any;
@@ -140,10 +140,16 @@ export default class Player extends Observable {
     return this._animation;
   }
 
-  set animation(animation) {
-    if (typeof animation.render === "function") {
-      this._animation = animation;
-    }
+  set animation(animation: Animation) {
+    this._animation = animation;
+  }
+
+  get render() {
+    return this._render;
+  }
+
+  set render(render: (animation: Animation) => void) {
+    this._render = render;
   }
 
   get iterations() {
