@@ -2532,7 +2532,7 @@ class BlendedAnimation extends Animation {
             const fromValue = fromValues[name];
             const toValue = toValues[name];
             if (toValue == null) {
-                throw new Error(`Blended animations need to have the same properties to animated.  From Animation: ${JSON.stringify(Object.keys(fromValues))}, To Animation: ${JSON.stringify(Object.keys(toValues))}`);
+                throw new Error(`Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(Object.keys(fromValues))}, To Animation: ${JSON.stringify(Object.keys(toValues))}`);
             }
             return Object.keys(fromValue).map((property) => {
                 const from = fromValue[property];

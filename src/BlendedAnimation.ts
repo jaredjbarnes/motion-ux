@@ -21,7 +21,7 @@ export default class BlendedAnimation extends Animation {
 
         if (toValue == null) {
           throw new Error(
-            `Blended animations need to have the same properties to animated.  From Animation: ${JSON.stringify(
+            `Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(
               Object.keys(fromValues)
             )}, To Animation: ${JSON.stringify(Object.keys(toValues))}`
           );

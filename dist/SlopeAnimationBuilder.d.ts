@@ -1,5 +1,5 @@
 import Animation from "./Animation";
-import { States } from "./Player";
+import { PlayerState } from "./Player";
 export default class SlopeAnimationBuilder {
     animation: any;
     slopeAnimation: any;
@@ -19,7 +19,7 @@ export default class SlopeAnimationBuilder {
     scaleValues: any;
     constructor();
     private cloneValues;
-    build(animation: Animation, offset: number, duration: number, newDuration: number, direction: States): any;
+    build(animation: Animation, offset: number, duration: number, newDuration: number, direction: PlayerState): any;
     private cacheValues;
     private cacheDeltaStepValues;
     private cacheScaleValues;

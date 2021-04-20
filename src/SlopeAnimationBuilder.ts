@@ -2,7 +2,7 @@ import easings from "./easings";
 import GraphOperator from "./GraphOperator";
 import Keyframe from "./Keyframe";
 import Animation from "./Animation";
-import { States } from "./Player";
+import { PlayerState } from "./Player";
 
 const FORWARD = 1;
 const BACKWARD = -1;
@@ -59,7 +59,7 @@ export default class SlopeAnimationBuilder {
     offset: number,
     duration: number,
     newDuration: number,
-    direction: States
+    direction: PlayerState
   ) {
     this.animation = animation;
     this.offset = offset;
