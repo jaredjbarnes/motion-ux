@@ -118,7 +118,10 @@ function render(animation) {
 
 let onAnimation = 0;
 
-const player = new Player(animation, { render, duration: 750 });
+const player = new Player();
+player.animation = animation;
+player.duration = 750;
+player.render = render;
 player.repeat = Infinity;
 
 player.observeTime(1, () => {

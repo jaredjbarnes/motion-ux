@@ -31,14 +31,6 @@ function defaultRender() {}
 export type RepeatDirection = 0 | 1;
 export type PlayerState = 1 | -1 | 0;
 
-export interface PlayerOptions {
-  clock?: IClock;
-  duration?: number;
-  repeatDirection?: RepeatDirection;
-  timeScale?: number;
-  render?: (animation: Animation) => void;
-}
-
 export default class Player extends Observable {
   public _timeScale: number;
   public _time: number;
@@ -49,29 +41,26 @@ export default class Player extends Observable {
   public _iterations: any;
   public _repeat: any;
   public _repeatDirection: any;
-  public _animation: Animation;
+  public _animation: Animation | null = null;
   public _clock: any;
   public _state: any;
   public _render: any;
   public _slopeAnimationBuilder: any;
 
-  constructor(animation: Animation, options: PlayerOptions = {}) {
+  constructor() {
     super();
-    const { clock, duration, timeScale, repeatDirection, render } = options;
-    this._timeScale = typeof timeScale === "number" ? timeScale : 1;
+    this._timeScale = 1;
     this._time = 0;
     this._step = 0;
-    this._duration = typeof duration === "number" ? duration : 0;
+    this._duration = 0;
     this._lastTimestamp = 0;
     this._animationFrame = null;
     this._iterations = 0;
     this._repeat = 1;
-    this._repeatDirection =
-      typeof repeatDirection === "number" ? repeatDirection : DEFAULT;
-    this._animation = animation;
-    this._clock = clock || defaultClock;
+    this._repeatDirection = DEFAULT;
+    this._clock = defaultClock;
     this._state = STOPPED;
-    this._render = typeof render === "function" ? render : defaultRender;
+    this._render = defaultRender;
     this._slopeAnimationBuilder = new SlopeAnimationBuilder();
 
     this.tick = this.tick.bind(this);
@@ -140,7 +129,7 @@ export default class Player extends Observable {
     return this._animation;
   }
 
-  set animation(animation: Animation) {
+  set animation(animation: Animation | null) {
     this._animation = animation;
   }
 
@@ -154,6 +143,14 @@ export default class Player extends Observable {
 
   get iterations() {
     return this._iterations;
+  }
+
+  get clock() {
+    return this._clock;
+  }
+
+  set clock(value: IClock) {
+    this._clock = value;
   }
 
   play() {
@@ -291,6 +288,10 @@ export default class Player extends Observable {
     const lastTime = this._time;
     this._time = time;
 
+    if (this._animation == null) {
+      return;
+    }
+
     this._animation.update(this._time);
     this._render(this._animation);
 
@@ -339,6 +340,12 @@ export default class Player extends Observable {
     transitionDuration?: number,
     transitionEasing: EasingFunction = easings.linear
   ) {
+    if (this._animation == null) {
+      this._animation = animation;
+      this._duration = duration;
+      return this;
+    }
+
     transitionDuration =
       typeof transitionDuration === "number" ? transitionDuration : duration;
 

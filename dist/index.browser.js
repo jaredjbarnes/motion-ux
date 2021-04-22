@@ -2585,23 +2585,21 @@
   };
   function defaultRender() { }
   class Player extends Observable {
-      constructor(animation, options = {}) {
+      constructor() {
           super();
-          const { clock, duration, timeScale, repeatDirection, render } = options;
-          this._timeScale = typeof timeScale === "number" ? timeScale : 1;
+          this._animation = null;
+          this._timeScale = 1;
           this._time = 0;
           this._step = 0;
-          this._duration = typeof duration === "number" ? duration : 0;
+          this._duration = 0;
           this._lastTimestamp = 0;
           this._animationFrame = null;
           this._iterations = 0;
           this._repeat = 1;
-          this._repeatDirection =
-              typeof repeatDirection === "number" ? repeatDirection : DEFAULT;
-          this._animation = animation;
-          this._clock = clock || defaultClock;
+          this._repeatDirection = DEFAULT;
+          this._clock = defaultClock;
           this._state = STOPPED;
-          this._render = typeof render === "function" ? render : defaultRender;
+          this._render = defaultRender;
           this._slopeAnimationBuilder = new SlopeAnimationBuilder();
           this.tick = this.tick.bind(this);
       }
@@ -2664,6 +2662,12 @@
       }
       get iterations() {
           return this._iterations;
+      }
+      get clock() {
+          return this._clock;
+      }
+      set clock(value) {
+          this._clock = value;
       }
       play() {
           if (this._state !== FORWARD) {
@@ -2778,6 +2782,9 @@
       seek(time) {
           const lastTime = this._time;
           this._time = time;
+          if (this._animation == null) {
+              return;
+          }
           this._animation.update(this._time);
           this._render(this._animation);
           this.notify({
@@ -2812,6 +2819,11 @@
           return this;
       }
       transitionToAnimation(animation, duration, transitionDuration, transitionEasing = easings.linear) {
+          if (this._animation == null) {
+              this._animation = animation;
+              this._duration = duration;
+              return this;
+          }
           transitionDuration =
               typeof transitionDuration === "number" ? transitionDuration : duration;
           const slopeAnimation = this._slopeAnimationBuilder.build(this._animation, this._time, this._duration, transitionDuration, this._state);
