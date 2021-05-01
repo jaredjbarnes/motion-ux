@@ -1,6 +1,5 @@
 import Observable from "./Observable";
 import { IClock } from "./IClock";
-import { EasingFunction } from "./easings";
 import Animation from "./Animation";
 export declare type RepeatDirection = 0 | 1;
 export declare type PlayerState = 1 | -1 | 0;
@@ -47,7 +46,6 @@ export default class Player extends Observable {
     stop(): this;
     play(): this;
     reverse(): this;
-    transitionToAnimation(animation: Animation, duration: number, transitionDuration?: number, transitionEasing?: EasingFunction): this;
     dispose(): void;
     static get repeatDirections(): {
         DEFAULT: number;

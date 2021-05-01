@@ -1,6 +1,6 @@
-import { Node } from "clarity-pattern-parser";
+import { Node, Visitor } from "clarity-pattern-parser";
 export default class TreeNormalizer {
-    visitor: any;
+    visitor: Visitor;
     constructor();
     visitNode(node: Node): void;
     collapseWhiteSpace(node: Node): void;

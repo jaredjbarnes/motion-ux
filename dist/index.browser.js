@@ -36,7 +36,7 @@
   }
 
   const emptyFn$1 = () => { };
-  class Visitor {
+  class Visitor$1 {
       constructor(callback = emptyFn$1) {
           this.setCallback(callback);
           this.visitDown = this.visitDown.bind(this);
@@ -71,7 +71,7 @@
       }
   }
 
-  const visitor$1 = new Visitor();
+  const visitor$1 = new Visitor$1();
   function convertNumberNode(node) {
       if (node.name === "number") {
           node.value = Number(node.value);
@@ -536,19 +536,6 @@
           });
           return node;
       }
-      filter(shouldKeep, context = []) {
-          const childrenContext = context.slice();
-          childrenContext.push(this);
-          Object.freeze(childrenContext);
-          const matches = this.children.reduce((acc, child) => {
-              return acc.concat(child.filter(shouldKeep, childrenContext));
-          }, []);
-          const match = shouldKeep(this, context);
-          if (match) {
-              matches.push(this);
-          }
-          return matches;
-      }
       toString() {
           return this.children.map((child) => child.toString()).join("");
       }
@@ -560,17 +547,10 @@
           this.value = value;
       }
       clone() {
-          return new ValueNode(this.type, this.name, this.value, this.startIndex, this.endIndex);
-      }
-      filter(shouldKeep, context = []) {
-          const match = shouldKeep(this, context);
-          if (match) {
-              return [this];
-          }
-          return [];
+          return new ValueNode(this.type, this.name, this.value || "", this.startIndex, this.endIndex);
       }
       toString() {
-          return this.value;
+          return this.value || "";
       }
   }
 
@@ -1514,6 +1494,214 @@
       }
   }
 
+  class Visitor {
+      constructor(root = null, selectedNodes = []) {
+          this.root = root;
+          this.selectedNodes = selectedNodes;
+      }
+      flatten() {
+          this.selectedNodes.forEach((node) => {
+              if (node.isComposite) {
+                  const children = [];
+                  this.walkUp(node, (descendant) => {
+                      if (!descendant.isComposite) {
+                          children.push(descendant);
+                      }
+                  });
+                  node.children = children;
+              }
+          });
+          return this;
+      }
+      remove() {
+          if (this.root == null) {
+              return this;
+          }
+          this.recursiveRemove(this.root);
+          return this;
+      }
+      recursiveRemove(node) {
+          const nodesToRemove = this.selectedNodes;
+          if (node.isComposite && Array.isArray(node.children)) {
+              for (let x = 0; x < node.children.length; x++) {
+                  if (nodesToRemove.indexOf(node.children[x]) > -1) {
+                      node.children.splice(x, 1);
+                      x--;
+                  }
+                  else {
+                      this.recursiveRemove(node.children[x]);
+                  }
+              }
+          }
+      }
+      wrap(callback) {
+          const visitor = new Visitor(this.root);
+          visitor.selectRoot().transform((node) => {
+              if (this.selectedNodes.includes(node)) {
+                  return callback(node);
+              }
+              return node;
+          });
+          return this;
+      }
+      unwrap() {
+          if (this.root == null) {
+              return this;
+          }
+          this.walkDown(this.root, (node, stack) => {
+              if (this.selectedNodes.includes(node)) {
+                  const parent = stack[stack.length - 1];
+                  const grandParent = stack[stack.length - 2];
+                  if (parent != null && grandParent != null) {
+                      const index = grandParent.children.indexOf(parent);
+                      if (index > -1) {
+                          grandParent.children.splice(index, 1, ...parent.children);
+                      }
+                  }
+              }
+          });
+          return this;
+      }
+      prepend(callback) {
+          if (this.root == null) {
+              return this;
+          }
+          this.walkUp(this.root, (node, stack) => {
+              if (this.selectedNodes.includes(node)) {
+                  const parent = stack[stack.length - 1];
+                  if (parent != null) {
+                      const index = parent.children.indexOf(node);
+                      if (index > -1) {
+                          parent.children.splice(index, 0, callback(node));
+                      }
+                  }
+              }
+          });
+          return this;
+      }
+      append(callback) {
+          if (this.root == null) {
+              return this;
+          }
+          this.walkDown(this.root, (node, stack) => {
+              if (this.selectedNodes.includes(node)) {
+                  const parent = stack[stack.length - 1];
+                  if (parent != null) {
+                      const index = parent.children.indexOf(node);
+                      if (index > -1) {
+                          parent.children.splice(index + 1, 0, callback(node));
+                      }
+                  }
+              }
+          });
+          return this;
+      }
+      transform(callback) {
+          this.selectedNodes.forEach((node) => {
+              return this.recursiveTransform(node, callback);
+          });
+          return this;
+      }
+      recursiveTransform(node, callback) {
+          if (node.isComposite && Array.isArray(node.children)) {
+              const length = node.children.length;
+              for (let x = 0; x < length; x++) {
+                  node.children[x] = this.recursiveTransform(node.children[x], callback);
+              }
+          }
+          return callback(node);
+      }
+      walkUp(node, callback, ancestors = []) {
+          ancestors.push(node);
+          if (node.isComposite && Array.isArray(node.children)) {
+              const children = node.children.slice();
+              children.forEach((c) => this.walkUp(c, callback, ancestors));
+          }
+          ancestors.pop();
+          callback(node, ancestors);
+          return this;
+      }
+      walkDown(node, callback, ancestors = []) {
+          callback(node, ancestors);
+          ancestors.push(node);
+          if (node.isComposite && Array.isArray(node.children)) {
+              const children = node.children.slice();
+              children.forEach((c) => this.walkDown(c, callback, ancestors));
+          }
+          ancestors.pop();
+          return this;
+      }
+      selectAll() {
+          return this.select((n) => true);
+      }
+      selectNode(node) {
+          return new Visitor(this.root, [...this.selectedNodes, node]);
+      }
+      deselectNode(node) {
+          const visitor = new Visitor(this.root, this.selectedNodes.slice());
+          return visitor.filter((n) => n !== node);
+      }
+      select(callback) {
+          if (this.root == null) {
+              return this;
+          }
+          const node = this.root;
+          const selectedNodes = [];
+          if (node.isComposite) {
+              this.walkDown(node, (descendant) => {
+                  if (callback(descendant)) {
+                      selectedNodes.push(descendant);
+                  }
+              });
+          }
+          return new Visitor(this.root, selectedNodes);
+      }
+      forEach(callback) {
+          this.selectedNodes.forEach(callback);
+          return this;
+      }
+      filter(callback) {
+          return new Visitor(this.root, this.selectedNodes.filter(callback));
+      }
+      map(callback) {
+          return new Visitor(this.root, this.selectedNodes.map(callback));
+      }
+      selectRoot() {
+          if (this.root == null) {
+              return this;
+          }
+          return new Visitor(this.root, [this.root]);
+      }
+      first() {
+          return this.get(0);
+      }
+      last() {
+          return this.get(this.selectedNodes.length - 1);
+      }
+      get(index) {
+          const node = this.selectedNodes[index];
+          if (node == null) {
+              throw new Error(`Couldn't find node at index: ${index}, out of ${this.selectedNodes.length}.`);
+          }
+          return new Visitor(node, []);
+      }
+      clear() {
+          this.selectedNodes = [];
+          return this;
+      }
+      setRoot(root) {
+          this.root = root;
+      }
+      static select(root, callback) {
+          if (callback != null) {
+              return new Visitor(root).select(callback);
+          }
+          else {
+              return new Visitor(root);
+          }
+      }
+  }
+
   const divider = new RegexValue("divider", "\\s*[,]\\s*");
 
   const number = new RegexValue("number", "[-+]?[0-9]*[.]?[0-9]+([eE][-+]?[0-9]+)?");
@@ -1651,7 +1839,7 @@
   class TreeNormalizer {
       constructor() {
           this.visitNode = this.visitNode.bind(this);
-          this.visitor = new Visitor(this.visitNode);
+          this.visitor = new Visitor();
       }
       visitNode(node) {
           if (node.isComposite) {
@@ -1701,7 +1889,9 @@
           });
       }
       normalize(node) {
-          this.visitor.visitDown(node);
+          this.visitor.setRoot(node);
+          this.visitor.flatten();
+          //this.visitor.forEach(this.visitNode);
           return node;
       }
   }
@@ -2370,7 +2560,7 @@
   class GraphOperator {
       constructor() {
           this.graphsVisitor = new GraphsVisitor();
-          this.visitor = new Visitor();
+          this.visitor = new Visitor$1();
           this.graphOperations = new GraphOperations();
       }
       assign(graph, number) {
@@ -2533,45 +2723,6 @@
           })
               .flat();
           this.slopeAnimation = new Animation(keyframes);
-      }
-  }
-
-  class BlendedAnimation extends Animation {
-      constructor(fromAnimation, toAnimation, easing) {
-          const fromValues = fromAnimation.getCurrentValues();
-          const toValues = toAnimation.getCurrentValues();
-          const animations = Object.keys(fromValues)
-              .map((name) => {
-              const fromValue = fromValues[name];
-              const toValue = toValues[name];
-              if (toValue == null) {
-                  throw new Error(`Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(Object.keys(fromValues))}, To Animation: ${JSON.stringify(Object.keys(toValues))}`);
-              }
-              return Object.keys(fromValue).map((property) => {
-                  const from = fromValue[property];
-                  const to = toValue[property];
-                  return new Keyframe({
-                      name,
-                      property,
-                      startAt: 0,
-                      endAt: 1,
-                      from,
-                      to,
-                      controls: [],
-                      easing: easing || easings.linear,
-                  });
-              });
-          })
-              .flat();
-          super(animations);
-          this.fromAnimation = fromAnimation;
-          this.toAnimation = toAnimation;
-      }
-      update(time) {
-          this.fromAnimation.update(time);
-          this.toAnimation.update(time);
-          super.update(time);
-          return this;
       }
   }
 
@@ -2833,42 +2984,6 @@
                   animation: this._animation,
               });
           }
-          return this;
-      }
-      transitionToAnimation(animation, duration, transitionDuration, transitionEasing = easings.linear) {
-          if (this._state === -1) {
-              throw new Error("Player doesn't yet support reversed transitions.");
-          }
-          if (this._animation == null) {
-              this._animation = animation;
-              this._duration = duration;
-              return this;
-          }
-          transitionDuration =
-              typeof transitionDuration === "number" ? transitionDuration : duration;
-          const slopeAnimation = this._slopeAnimationBuilder.build(this._animation, this._time, this._duration, transitionDuration, this._state);
-          const blendedAnimation = new BlendedAnimation(slopeAnimation, animation, transitionEasing);
-          this._animation = blendedAnimation;
-          this._time = 0;
-          this._duration = transitionDuration;
-          this.notify({
-              type: "TRANSITION",
-              animation: this._animation,
-          });
-          const observer = this.observeTime(1, () => {
-              this._animation = animation;
-              this._duration = duration;
-              observer.dispose();
-              transitionObserver.dispose();
-              this.notify({
-                  type: "TRANSITION-END",
-                  animation: this._animation,
-              });
-          });
-          const transitionObserver = this.observe("TRANSITION", () => {
-              observer.dispose();
-              transitionObserver.dispose();
-          });
           return this;
       }
       dispose() {

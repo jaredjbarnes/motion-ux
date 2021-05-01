@@ -66,7 +66,7 @@ describe("Animation", () => {
   test("Curved Path.", () => {
     const name = "my-animation";
     const from = "M 0 0 C 0 0, 0 0, 0 0";
-    const to = "M 10 10 C 150 150, 30 30, 20 20";
+    const to = "M 10 10 C 150 150,30 30,20 20";
 
     const animation = new Animation([
       Keyframe.fromSimpleConfig({

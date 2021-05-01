@@ -14,7 +14,7 @@ describe("GraphOperator", () => {
 
     const stringResult = result.graph.toString();
 
-    expect(stringResult).toBe("rgba(200, 200, 200, 0.5)");
+    expect(stringResult).toBe("rgba(200,200,200,0.5)");
   });
 
   test("Subtract", () => {
@@ -29,7 +29,7 @@ describe("GraphOperator", () => {
 
     const stringResult = result.graph.toString();
 
-    expect(stringResult).toBe("rgba(0, 0, 0, 0.5)");
+    expect(stringResult).toBe("rgba(0,0,0,0.5)");
   });
 
   test("Multiply", () => {
@@ -44,7 +44,7 @@ describe("GraphOperator", () => {
 
     const stringResult = result.graph.toString();
 
-    expect(stringResult).toBe("rgba(4, 4, 4, 0)");
+    expect(stringResult).toBe("rgba(4,4,4,0)");
   });
 
   test("Divide", () => {
@@ -59,7 +59,7 @@ describe("GraphOperator", () => {
 
     const stringResult = result.graph.toString();
 
-    expect(stringResult).toBe("rgba(1, 1, 1, 0.5)");
+    expect(stringResult).toBe("rgba(1,1,1,0.5)");
   });
 
   test("assign", () => {
@@ -70,6 +70,6 @@ describe("GraphOperator", () => {
 
     const stringResult = left.graph.toString();
 
-    expect(stringResult).toBe("rgba(1, 1, 1, 1)");
+    expect(stringResult).toBe("rgba(1,1,1,1)");
   });
 });

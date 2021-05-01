@@ -16,6 +16,6 @@ describe("Keyframe", () => {
     const animator = new Animator(keyframe);
     const value = animator.update(0.5).value;
 
-    expect("rgba(127.5, 127.5, 127.5, 0.5)").toBe(value);
+    expect("rgba(127.5,127.5,127.5,0.5)").toBe(value);
   });
 });

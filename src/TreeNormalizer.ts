@@ -1,15 +1,11 @@
-import Visitor from "./Visitor";
 import HexColor from "./HexColor";
-import { Node } from "clarity-pattern-parser";
+import { Node, Visitor } from "clarity-pattern-parser";
 
 const filterOutSpaces = (child: Node) => child.name !== "optional-spaces";
 
 export default class TreeNormalizer {
-  public visitor: any;
-
   constructor() {
     this.visitNode = this.visitNode.bind(this);
-    this.visitor = new Visitor(this.visitNode);
   }
 
   visitNode(node: Node) {
@@ -32,7 +28,7 @@ export default class TreeNormalizer {
 
   removeSpacesAroundDividers(node: Node) {
     if (node.name === "divider") {
-      node.value = node.value.trim() + " ";
+      node.value = node.value.trim();
     }
   }
 
@@ -74,7 +70,9 @@ export default class TreeNormalizer {
   }
 
   normalize(node: Node) {
-    this.visitor.visitDown(node);
+    new Visitor(node, [node]).flatten();
+    Visitor.walkDown(node, this.visitNode);
+
     return node;
   }
 }
