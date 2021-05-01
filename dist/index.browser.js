@@ -2397,6 +2397,13 @@
           this.graphsVisitor.setCallback(this.graphOperations.divide);
           this.graphsVisitor.visitDown(graphs);
       }
+      invert(graph) {
+          const negativeOne = graph.clone();
+          this.assign(negativeOne, -1);
+          const graphs = [graph, negativeOne, graph];
+          this.graphsVisitor.setCallback(this.graphOperations.multiply);
+          this.graphsVisitor.visitDown(graphs);
+      }
   }
 
   const FORWARD$1 = 1;
@@ -2593,7 +2600,6 @@
           this._step = 0;
           this._duration = 0;
           this._lastTimestamp = 0;
-          this._animationFrame = null;
           this._iterations = 0;
           this._repeat = 1;
           this._repeatDirection = DEFAULT;
@@ -2601,10 +2607,14 @@
           this._state = STOPPED;
           this._render = defaultRender;
           this._slopeAnimationBuilder = new SlopeAnimationBuilder();
+          this._delay = 0;
           this.tick = this.tick.bind(this);
       }
       get time() {
           return this._time;
+      }
+      set time(value) {
+          this._time = value;
       }
       get timeScale() {
           return this._timeScale;
@@ -2669,17 +2679,11 @@
       set clock(value) {
           this._clock = value;
       }
-      play() {
-          if (this._state !== FORWARD) {
-              this._lastTimestamp = this._clock.now();
-              this._state = FORWARD;
-              this._clock.register(this.tick);
-              this.notify({
-                  type: "PLAYED",
-                  animation: this._animation,
-              });
-          }
-          return this;
+      get delay() {
+          return this._delay;
+      }
+      set delay(value) {
+          this._delay = value;
       }
       tick() {
           const timestamp = this._clock.now();
@@ -2688,7 +2692,8 @@
           if (this._step > 1) {
               this._step = 1;
           }
-          if (deltaTime === 0) {
+          // This helps with unneeded renders as well as delays.
+          if (deltaTime <= 0) {
               return;
           }
           if (this._state === REVERSE) {
@@ -2705,6 +2710,12 @@
           const repeatDirection = this._repeatDirection;
           if (time >= 1) {
               this._iterations++;
+              this.notify({
+                  type: "TICK",
+                  time: 1,
+                  lastTime,
+                  animation: this._animation,
+              });
               if (this._iterations >= this._repeat) {
                   this.seek(1);
                   this.stop();
@@ -2712,12 +2723,6 @@
               }
               if (repeatDirection === ALTERNATE) {
                   const adjustedTime = 1 - (time - 1);
-                  this.notify({
-                      type: "TICK",
-                      time: 1,
-                      lastTime,
-                      animation: this._animation,
-                  });
                   this._time = 1;
                   this.seek(adjustedTime);
                   this._state = REVERSE;
@@ -2726,7 +2731,7 @@
                   const adjustedTime = time - 1;
                   this.notify({
                       type: "TICK",
-                      time: 1,
+                      time: 0,
                       lastTime,
                       animation: this._animation,
                   });
@@ -2745,6 +2750,12 @@
           const repeatDirection = this._repeatDirection;
           if (time <= 0) {
               this._iterations++;
+              this.notify({
+                  type: "TICK",
+                  time: 0,
+                  lastTime,
+                  animation: this._animation,
+              });
               if (this._iterations >= this._repeat) {
                   this.seek(0);
                   this.stop();
@@ -2752,12 +2763,6 @@
               }
               if (repeatDirection === ALTERNATE) {
                   const adjustedTime = time * -1;
-                  this.notify({
-                      type: "TICK",
-                      time: 0,
-                      lastTime,
-                      animation: this._animation,
-                  });
                   this._time = 0;
                   this.seek(adjustedTime);
                   this._state = FORWARD;
@@ -2806,9 +2811,21 @@
           }
           return this;
       }
+      play() {
+          if (this._state !== FORWARD) {
+              this._lastTimestamp = this._clock.now() + this._delay;
+              this._state = FORWARD;
+              this._clock.register(this.tick);
+              this.notify({
+                  type: "PLAYED",
+                  animation: this._animation,
+              });
+          }
+          return this;
+      }
       reverse() {
           if (this._state !== REVERSE) {
-              this._lastTimestamp = this._clock.now();
+              this._lastTimestamp = this._clock.now() + this._delay;
               this._state = REVERSE;
               this._clock.register(this.tick);
               this.notify({
@@ -2819,6 +2836,9 @@
           return this;
       }
       transitionToAnimation(animation, duration, transitionDuration, transitionEasing = easings.linear) {
+          if (this._state === -1) {
+              throw new Error("Player doesn't yet support reversed transitions.");
+          }
           if (this._animation == null) {
               this._animation = animation;
               this._duration = duration;
@@ -2868,6 +2888,7 @@
   exports.BezierCurve = BezierCurve;
   exports.Keyframe = Keyframe;
   exports.Player = Player;
+  exports.createDynamicEasing = createDynamicEasing;
   exports.easings = easings;
 
   Object.defineProperty(exports, '__esModule', { value: true });

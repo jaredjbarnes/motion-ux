@@ -1,6 +1,6 @@
 import "../../dist/index.browser.js";
 
-const { easings, Animation, Player } = motionUX;
+const { easings, Animation, Player, createDynamicEasing } = motionUX;
 const circleWithBezier = document.createElement("div");
 
 circleWithBezier.style.borderRadius = "50% 50%";
@@ -18,92 +18,136 @@ referenceCircle.style.height = "300px";
 
 document.body.appendChild(circleWithBezier);
 
-const animation = new Animation([
-  {
-    name: "circle",
-    property: "transform",
-    from: "scale(1) translate(0px, 0px)",
-    to: "scale(1) translate(150px , 150px)",
-    startAt: 0,
-    endAt: 0.5,
-    easing: "easeInOutQuad",
-  },
-  {
-    name: "circle",
-    property: "transform",
-    from: "scale(1) translate(150px, 150px)",
-    to: "scale(1) translate(0px , 0px)",
-    startAt: 0.5,
-    endAt: 1,
-    easing: "easeInOutQuad",
-  },
-  {
-    name: "circle",
-    property: "background",
-    from: "rgba(80,80,255)",
-    to: "rgba(80,80,255)",
-    startAt: 0,
-    endAt: 1,
-    easing: "easeOutExpo",
-  },
-]);
+// const animation = new Animation([
+//   {
+//     name: "circle",
+//     property: "transform",
+//     from: "scale(1) translate(0px, 0px)",
+//     to: "scale(1) translate(1500px , 1500px)",
+//     startAt: 0,
+//     endAt: 0.5,
+//     easing: "easeInOutQuad",
+//   },
+//   {
+//     name: "circle",
+//     property: "transform",
+//     from: "scale(1) translate(1500px, 1500px)",
+//     to: "scale(1) translate(0px , 0px)",
+//     startAt: 0.5,
+//     endAt: 1,
+//     easing: "easeInOutQuad",
+//   },
+//   {
+//     name: "circle",
+//     property: "background",
+//     from: "rgba(80,80,255)",
+//     to: "rgba(80,80,255)",
+//     startAt: 0,
+//     endAt: 1,
+//     easing: "easeOutExpo",
+//   },
+// ]);
 
-const secondAnimation = new Animation([
-  {
-    name: "circle",
-    property: "transform",
-    from: "scale(1) translate(150px, 0px)",
-    controls: [
-      "scale(1) translate(300px, 0px)",
-      "scale(1) translate(300px, 300px)",
-    ],
-    to: "scale(1) translate(150px, 300px)",
-    startAt: 0,
-    endAt: 0.5,
-  },
-  {
-    name: "circle",
-    property: "transform",
-    from: "scale(1) translate(150px, 300px)",
-    controls: [
-      "scale(1) translate(0px, 300px)",
-      "scale(1) translate(0px, 0px)",
-    ],
-    to: "scale(1) translate(150px, 0px)",
-    startAt: 0.5,
-    endAt: 1,
-  },
-  {
-    name: "circle",
-    property: "background",
-    to: "rgba(255,0,0)",
-    from: "rgba(255,0,0)",
-    startAt: 0,
-    endAt: 1,
-    easing: "easeOutExpo",
-  },
-]);
+// const secondAnimation = new Animation([
+//   {
+//     name: "circle",
+//     property: "transform",
+//     from: "scale(1) translate(1500px, 0px)",
+//     controls: [
+//       "scale(1) translate(300px, 0px)",
+//       "scale(1) translate(300px, 300px)",
+//     ],
+//     to: "scale(1) translate(1500px, 300px)",
+//     startAt: 0,
+//     endAt: 0.5,
+//   },
+//   {
+//     name: "circle",
+//     property: "transform",
+//     from: "scale(1) translate(1500px, 300px)",
+//     controls: [
+//       "scale(1) translate(0px, 300px)",
+//       "scale(1) translate(0px, 0px)",
+//     ],
+//     to: "scale(1) translate(1500px, 0px)",
+//     startAt: 0.5,
+//     endAt: 1,
+//   },
+//   {
+//     name: "circle",
+//     property: "background",
+//     to: "rgba(255,0,0)",
+//     from: "rgba(255,0,0)",
+//     startAt: 0,
+//     endAt: 1,
+//     easing: "easeOutExpo",
+//   },
+// ]);
 
-const pulseAnimation = Animation.fromKeyframes("circle", {
+// const pulseAnimation = Animation.fromKeyframes("circle", {
+//   from: {
+//     background: "rgb(255,255,0)",
+//     transform: {
+//       value: "scale(1) translate(500px, 500px)",
+//       easeOut: "quad",
+//     },
+//   },
+//   "50%": {
+//     background: "rgb(255,255,0)",
+//     transform: {
+//       value: "scale(2) translate(500px, 500px)",
+//       easeIn: "quad",
+//       easeOut: "quad",
+//     },
+//   },
+//   to: {
+//     background: "rgb(255,255,0)",
+//     transform: {
+//       value: "scale(1) translate(500px, 500px)",
+//       easeIn: "quad",
+//     },
+//   },
+// });
+
+const leftToRight = Animation.fromKeyframes("circle", {
   from: {
-    background: "rgb(255,255,0)",
     transform: {
-      value: "scale(1) translate(50px, 50px)",
+      value: "translate(0px, 0px)",
       easeOut: "quad",
     },
   },
   "50%": {
-    background: "rgb(255,255,0)",
     transform: {
-      value: "scale(2) translate(50px, 50px)",
+      value: "translate(500px, 500px)",
       easeIn: "quad",
       easeOut: "quad",
     },
   },
   to: {
-    background: "rgb(255,255,0)",
     transform: {
-      value: "scale(1) translate(50px, 50px)",
+      value: "translate(0px, 0px)",
+      easeIn: "quad",
+    },
+  },
+});
+
+const rightToLeft = Animation.fromKeyframes("circle", {
+  from: {
+    transform: {
+      value: "translate(500px, 0px)",
+      easeOut: "quad",
+    },
+  },
+  "50%": {
+    transform: {
+      value: "translate(0px, 500px)",
+      easeIn: "quad",
+      easeOut: "quad",
+    },
+  },
+  to: {
+    transform: {
+      value: "translate(500px, 0px)",
       easeIn: "quad",
     },
   },
@@ -116,11 +160,11 @@ function render(animation) {
   });
 }
 
-let onAnimation = 0;
-
+let onAnimation = 1;
+const DURATION = 5000;
 const player = new Player();
-player.animation = animation;
-player.duration = 750;
+player.animation = leftToRight;
+player.duration = DURATION;
 player.render = render;
 player.repeat = Infinity;
 
@@ -138,21 +182,18 @@ function callback() {
   if (onAnimation === 0) {
     onAnimation = 1;
     player.transitionToAnimation(
-      secondAnimation,
-      1500,
-      1500,
-      easings.easeOutBack
+      leftToRight,
+      DURATION,
+      DURATION,
+      createDynamicEasing("quad", "back")
     );
-  } else if (onAnimation === 1) {
-    onAnimation = 2;
-    player.transitionToAnimation(animation, 1500, 1500, easings.easeOutBack);
   } else {
     onAnimation = 0;
     player.transitionToAnimation(
-      pulseAnimation,
-      1500,
-      1500,
-      easings.easeOutBack
+      rightToLeft,
+      DURATION,
+      DURATION,
+      createDynamicEasing("quad", "back")
     );
   }
 
@@ -165,8 +206,8 @@ function callback() {
 
 let observer = player.observeTime(0.5, callback);
 
+//player.time = 1;
 player.play();
 
-window.animation = animation;
-window.secondAnimation = secondAnimation;
 window.player = player;
+window.createDynamicEasing();

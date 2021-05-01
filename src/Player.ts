@@ -32,20 +32,20 @@ export type RepeatDirection = 0 | 1;
 export type PlayerState = 1 | -1 | 0;
 
 export default class Player extends Observable {
-  public _timeScale: number;
-  public _time: number;
-  public _step: any;
-  public _duration: number;
-  public _lastTimestamp: number;
-  public _animationFrame: any;
-  public _iterations: any;
-  public _repeat: any;
-  public _repeatDirection: any;
-  public _animation: Animation | null = null;
-  public _clock: any;
-  public _state: any;
-  public _render: any;
-  public _slopeAnimationBuilder: any;
+  private _timeScale: number;
+  private _time: number;
+  private _step: any;
+  private _duration: number;
+  private _lastTimestamp: number;
+  private _iterations: any;
+  private _repeat: any;
+  private _repeatDirection: any;
+  private _animation: Animation | null = null;
+  private _clock: IClock;
+  private _state: any;
+  private _render: any;
+  private _slopeAnimationBuilder: SlopeAnimationBuilder;
+  private _delay: number;
 
   constructor() {
     super();
@@ -54,7 +54,6 @@ export default class Player extends Observable {
     this._step = 0;
     this._duration = 0;
     this._lastTimestamp = 0;
-    this._animationFrame = null;
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = DEFAULT;
@@ -62,12 +61,16 @@ export default class Player extends Observable {
     this._state = STOPPED;
     this._render = defaultRender;
     this._slopeAnimationBuilder = new SlopeAnimationBuilder();
-
+    this._delay = 0;
     this.tick = this.tick.bind(this);
   }
 
   get time() {
     return this._time;
+  }
+
+  set time(value: number) {
+    this._time = value;
   }
 
   get timeScale() {
@@ -153,19 +156,12 @@ export default class Player extends Observable {
     this._clock = value;
   }
 
-  play() {
-    if (this._state !== FORWARD) {
-      this._lastTimestamp = this._clock.now();
-      this._state = FORWARD;
-      this._clock.register(this.tick);
+  get delay() {
+    return this._delay;
+  }
 
-      this.notify({
-        type: "PLAYED",
-        animation: this._animation,
-      });
-    }
-
-    return this;
+  set delay(value: number) {
+    this._delay = value;
   }
 
   private tick() {
@@ -177,7 +173,8 @@ export default class Player extends Observable {
       this._step = 1;
     }
 
-    if (deltaTime === 0) {
+    // This helps with unneeded renders as well as delays.
+    if (deltaTime <= 0) {
       return;
     }
 
@@ -199,6 +196,13 @@ export default class Player extends Observable {
     if (time >= 1) {
       this._iterations++;
 
+      this.notify({
+        type: "TICK",
+        time: 1,
+        lastTime,
+        animation: this._animation,
+      });
+
       if (this._iterations >= this._repeat) {
         this.seek(1);
         this.stop();
@@ -208,13 +212,6 @@ export default class Player extends Observable {
       if (repeatDirection === ALTERNATE) {
         const adjustedTime = 1 - (time - 1);
 
-        this.notify({
-          type: "TICK",
-          time: 1,
-          lastTime,
-          animation: this._animation,
-        });
-
         this._time = 1;
         this.seek(adjustedTime);
         this._state = REVERSE;
@@ -223,7 +220,7 @@ export default class Player extends Observable {
 
         this.notify({
           type: "TICK",
-          time: 1,
+          time: 0,
           lastTime,
           animation: this._animation,
         });
@@ -246,6 +243,13 @@ export default class Player extends Observable {
     if (time <= 0) {
       this._iterations++;
 
+      this.notify({
+        type: "TICK",
+        time: 0,
+        lastTime,
+        animation: this._animation,
+      });
+
       if (this._iterations >= this._repeat) {
         this.seek(0);
         this.stop();
@@ -254,13 +258,6 @@ export default class Player extends Observable {
 
       if (repeatDirection === ALTERNATE) {
         const adjustedTime = time * -1;
-
-        this.notify({
-          type: "TICK",
-          time: 0,
-          lastTime,
-          animation: this._animation,
-        });
 
         this._time = 0;
         this.seek(adjustedTime);
@@ -319,9 +316,26 @@ export default class Player extends Observable {
     return this;
   }
 
+  play() {
+    if (this._state !== FORWARD) {
+      this._lastTimestamp = this._clock.now() + this._delay;
+
+      this._state = FORWARD;
+      this._clock.register(this.tick);
+
+      this.notify({
+        type: "PLAYED",
+        animation: this._animation,
+      });
+    }
+
+    return this;
+  }
+
   reverse() {
     if (this._state !== REVERSE) {
-      this._lastTimestamp = this._clock.now();
+      this._lastTimestamp = this._clock.now() + this._delay;
+
       this._state = REVERSE;
       this._clock.register(this.tick);
 
@@ -330,65 +344,6 @@ export default class Player extends Observable {
         animation: this._animation,
       });
     }
-
-    return this;
-  }
-
-  transitionToAnimation(
-    animation: Animation,
-    duration: number,
-    transitionDuration?: number,
-    transitionEasing: EasingFunction = easings.linear
-  ) {
-    if (this._animation == null) {
-      this._animation = animation;
-      this._duration = duration;
-      return this;
-    }
-
-    transitionDuration =
-      typeof transitionDuration === "number" ? transitionDuration : duration;
-
-    const slopeAnimation = this._slopeAnimationBuilder.build(
-      this._animation,
-      this._time,
-      this._duration,
-      transitionDuration,
-      this._state
-    );
-
-    const blendedAnimation = new BlendedAnimation(
-      slopeAnimation,
-      animation,
-      transitionEasing
-    );
-
-    this._animation = blendedAnimation;
-    this._time = 0;
-    this._duration = transitionDuration;
-
-    this.notify({
-      type: "TRANSITION",
-      animation: this._animation,
-    });
-
-    const observer = this.observeTime(1, () => {
-      this._animation = animation;
-      this._duration = duration;
-
-      observer.dispose();
-      transitionObserver.dispose();
-
-      this.notify({
-        type: "TRANSITION-END",
-        animation: this._animation,
-      });
-    });
-
-    const transitionObserver = this.observe("TRANSITION", () => {
-      observer.dispose();
-      transitionObserver.dispose();
-    });
 
     return this;
   }

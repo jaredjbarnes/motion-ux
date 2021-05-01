@@ -56,6 +56,7 @@ export default class BlendedAnimation extends Animation {
     this.toAnimation.update(time);
 
     super.update(time);
+
     return this;
   }
 }

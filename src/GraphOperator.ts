@@ -4,9 +4,9 @@ import GraphsVisitor from "./GraphsVisitor";
 import Visitor from "./Visitor";
 
 export default class GraphOperator {
-  public graphsVisitor: any;
-  public visitor: any;
-  public graphOperations: any;
+  public graphsVisitor: GraphsVisitor;
+  public visitor: Visitor;
+  public graphOperations: GraphOperations;
 
   constructor() {
     this.graphsVisitor = new GraphsVisitor();
@@ -41,6 +41,15 @@ export default class GraphOperator {
 
   divide(graphs: Node[]) {
     this.graphsVisitor.setCallback(this.graphOperations.divide);
+    this.graphsVisitor.visitDown(graphs);
+  }
+
+  invert(graph: Node) {
+    const negativeOne = graph.clone();
+    this.assign(negativeOne, -1);
+
+    const graphs = [graph, negativeOne, graph];
+    this.graphsVisitor.setCallback(this.graphOperations.multiply);
     this.graphsVisitor.visitDown(graphs);
   }
 }
