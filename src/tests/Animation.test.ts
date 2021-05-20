@@ -43,121 +43,94 @@ describe("Animation", () => {
     expect(animation.getCurrentValues()).toBe("");
   });
 
-  test("Valid Path.", () => {
-    const name = "my-animation";
-    const from =
-      "M 10 315 L 110 215 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 109.9 L 315 10";
-    const to =
-      "M 10 315 L 110 400 A 30 50 0 0 1 162.55 162.45 L 172.55 152.45 A 30 50 -45 0 1 215.1 149.9 L 315 10";
-
-    const animation = new Animation([
-      new Keyframe({
-        name: name,
-        property: "path",
-        startAt: 0,
-        endAt: 1,
-        from: from.split(" "),
-        to: to.split(" "),
-      }),
-    ]);
-
-    animation.update(1);
-    const value = animation.getCurrentValues()[name].path;
-    if (Array.isArray(value)) {
-      expect(value.join(" ")).toBe(to);
-    } else {
-      throw new Error("Value should have been an array.");
-    }
-  });
-
   test("Multiple startAts on same property.", () => {
     const name = "my-animation";
-    const animation = new Animation([
+    const animation = new Animation<string | number>([
       new Keyframe({
         name: name,
         property: "opacity",
         startAt: 0,
         endAt: 1,
-        from: [1],
-        to: [0],
+        from: 1,
+        to: 0,
       }),
       new Keyframe({
         name: name,
         property: "display",
         startAt: 0.01,
         endAt: 0.01,
-        from: ["none"],
-        to: ["block"],
+        from: "none",
+        to: "block",
       }),
       new Keyframe({
         name: name,
         property: "display",
         startAt: 0.25,
         endAt: 0.25,
-        from: ["block"],
-        to: ["none"],
+        from: "block",
+        to: "none",
       }),
       new Keyframe({
         name: name,
         property: "display",
         startAt: 0.5,
         endAt: 0.5,
-        from: ["none"],
-        to: ["block"],
+        from: "none",
+        to: "block",
       }),
       new Keyframe({
         name: name,
         property: "display",
         startAt: 0.99,
         endAt: 0.99,
-        from: ["block"],
-        to: ["none"],
+        from: "block",
+        to: "none",
       }),
     ]);
 
     animation.update(1);
 
     let values = animation.getCurrentValues()[name];
-    let opacity = values.opacity as number[];
-    let display = values.display as string[];
+    let opacity = values.opacity;
+    let display = values.display;
 
-    expect(display[0]).toBe("none");
-    expect(opacity[0]).toBe(0);
+    expect(display).toBe("none");
+    expect(opacity).toBe(0);
 
     animation.update(0.3);
     values = animation.getCurrentValues()[name];
 
-    opacity = values.opacity as number[];
-    display = values.display as string[];
+    opacity = values.opacity;
+    display = values.display;
 
-    expect(display[0]).toBe("none");
-    expect(opacity[0]).toBe(0.7);
+    expect(display).toBe("none");
+    expect(opacity).toBe(0.7);
 
     animation.update(0.49);
     values = animation.getCurrentValues()[name];
 
-    opacity = values.opacity as number[];
-    display = values.display as string[];
+    opacity = values.opacity;
+    display = values.display;
 
-    expect(display[0]).toBe("none");
-    expect(opacity[0]).toBe(0.51);
+    expect(display).toBe("none");
+    expect(opacity).toBe(0.51);
 
     animation.update(0.75);
     values = animation.getCurrentValues()[name];
 
-    opacity = values.opacity as number[];
-    display = values.display as string[];
+    opacity = values.opacity;
+    display = values.display;
 
-    expect(display[0]).toBe("block");
-    expect(opacity[0]).toBe(0.25);
+    expect(display).toBe("block");
+    expect(opacity).toBe(0.25);
 
     animation.update(0);
     values = animation.getCurrentValues()[name];
 
-    opacity = values.opacity as number[];
-    display = values.display as string[];
+    opacity = values.opacity;
+    display = values.display;
 
-    expect(display[0]).toBe("none");
-    expect(opacity[0]).toBe(1);
+    expect(display).toBe("none");
+    expect(opacity).toBe(1);
   });
 });

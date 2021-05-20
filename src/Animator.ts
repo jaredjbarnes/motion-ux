@@ -1,6 +1,8 @@
 import BezierCurve from "./BezierCurve";
 import Keyframe from "./Keyframe";
 
+const emptyArray: any[] = [];
+
 export default class Animator<T> {
   public keyframe: Keyframe<T>;
   public bezierCurve: BezierCurve;
@@ -12,68 +14,76 @@ export default class Animator<T> {
     this.bezierCurve = new BezierCurve([]);
   }
 
-  traverse(keyframe: { from: any; controls: any; to: any; result: any }) {
+  getNumberValue(from: any, controls: any[] = emptyArray, to: any) {
+    const elapsedTime = this.time - this.keyframe.startAt;
+    const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
+    const timeWithEasing = this.keyframe.easing(
+      elapsedTime / animationDuration
+    );
+    const points = [from, ...controls, to];
+    this.bezierCurve.setPoints(points);
+    return this.bezierCurve.valueAt(timeWithEasing);
+  }
 
-    if (typeof keyframe.from === "string") {
-      if (this.time >= this.keyframe.startAt) {
-        keyframe.result = keyframe.to;
-      } else {
-        keyframe.result = keyframe.from;
-      }
-    } else if (typeof keyframe.from === "number") {
-      const elapsedTime = this.time - this.keyframe.startAt;
-      const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
-      const timeWithEasing = this.keyframe.easing(
-        elapsedTime / animationDuration
-      );
-      const points = [keyframe.from, ...keyframe.controls, keyframe.to];
-      this.bezierCurve.setPoints(points);
-      keyframe.result = this.bezierCurve.valueAt(timeWithEasing);
-    } else if (typeof keyframe.from === "object" && keyframe.from != null) {
-      Object.keys(keyframe.from).forEach((key)=>{
-        this.traverse({
-          from: keyframe.from[key],
-          to: keyframe.to[key],
-          controls: keyframe.controls[key],
-          result: keyframe.result[key]
-        });
-      });
+  getStringValue(from: any, to: any) {
+    if (this.time >= this.keyframe.startAt) {
+      return to;
+    } else {
+      return from;
     }
+  }
 
-    // Object.keys(fromObject).forEach((key) => {
-    //   const from = fromObject[key];
-    //   const to = toObject[key];
-    //   if (typeof from === "number") {
-    //     const elapsedTime = this.time - this.keyframe.startAt;
-    //     const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
-    //     const timeWithEasing = this.keyframe.easing(
-    //       elapsedTime / animationDuration
-    //     );
-    //     const controls = controlsObject.map((c: any) => c[key]);
-    //     const points = [from, ...controls, to];
-    //     this.bezierCurve.setPoints(points);
-    //     resultObject[key] = this.bezierCurve.valueAt(timeWithEasing);
-    //   } else if (typeof from === "string") {
-    //     if (this.time >= this.keyframe.startAt) {
-    //       resultObject[key] = to;
-    //     } else {
-    //       resultObject[key] = from;
-    //     }
-    //   } else if (typeof from === "object" && from != null) {
-    //     this.traverse(
-    //       fromObject[key],
-    //       controlsObject[key],
-    //       toObject[key],
-    //       resultObject[key]
-    //     );
-    //   }
-    // });
+  traverse(
+    fromObject: any,
+    controlsObject: any,
+    toObject: any,
+    resultObject: any
+  ) {
+    Object.keys(fromObject).forEach((key) => {
+      const from = fromObject[key];
+      const to = toObject[key];
+      const controls = controlsObject.map((c: any) => c[key]);
+
+      if (typeof from === "number") {
+        resultObject[key] = this.getNumberValue(from, controls, to);
+      } else if (typeof from === "string") {
+        resultObject[key] = this.getStringValue(from, to);
+      } else if (typeof from === "object" && from != null) {
+        this.traverse(
+          fromObject[key],
+          controlsObject[key],
+          toObject[key],
+          resultObject[key]
+        );
+      }
+    });
   }
 
   update(time: number) {
     this.time = time;
 
-    this.traverse(this.keyframe);
+    if (typeof this.keyframe.from === "string") {
+      this.keyframe.result = this.getStringValue(
+        this.keyframe.from,
+        this.keyframe.to
+      );
+    } else if (typeof this.keyframe.from === "number") {
+      this.keyframe.result = this.getNumberValue(
+        this.keyframe.from,
+        this.keyframe.controls,
+        this.keyframe.to
+      );
+    } else if (
+      typeof this.keyframe.from === "object" &&
+      this.keyframe.from != null
+    ) {
+      this.traverse(
+        this.keyframe.from,
+        this.keyframe.controls,
+        this.keyframe.to,
+        this.keyframe.result
+      );
+    }
 
     return this.keyframe.result;
   }
