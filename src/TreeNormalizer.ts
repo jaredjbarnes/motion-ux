@@ -73,6 +73,12 @@ export default class TreeNormalizer {
     new Visitor(node, [node]).flatten();
     Visitor.walkDown(node, this.visitNode);
 
+    const resultArray = node.children.map((node) => {
+      if (node.name === "number") {
+        return Number(node.value);
+      }
+      return node.value;
+    });
     return node;
   }
 }

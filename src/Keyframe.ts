@@ -1,49 +1,37 @@
 import easings, { EasingFunction } from "./easings";
-import KeyframeConfigValidator from "./KeyframeConfigValidator";
-import KeyframeUtility, { SimpleKeyframeConfig } from "./KeyframeUtility";
-import ParsedValue from "./ParsedValue";
 
-const validator = new KeyframeConfigValidator();
-const utility = new KeyframeUtility();
-
-export interface KeyframeConfig {
+export interface KeyframeConfig<T> {
   name: string;
   property: string;
-  to: ParsedValue;
-  from: ParsedValue;
-  endAt: number;
-  startAt: number;
-  controls?: ParsedValue[];
+  to: T;
+  from: T;
+  endAt?: number;
+  startAt?: number;
+  controls?: T[];
   easing?: EasingFunction;
 }
 
-export default class Keyframe {
+export default class Keyframe<T> {
   public name: string;
   public property: string;
-  public to: ParsedValue;
-  public from: ParsedValue;
-  public result: ParsedValue;
+  public to: T;
+  public from: T;
+  public result: T;
   public startAt: number;
   public endAt: number;
-  public controls: ParsedValue[];
+  public controls: T[];
   public easing: EasingFunction;
 
-  constructor(config: KeyframeConfig) {
-    validator.setConfig(config);
-    validator.validate(config);
-
+  constructor(config: KeyframeConfig<T>) {
     this.name = config.name;
     this.property = config.property;
     this.to = config.to;
     this.from = config.from;
-    this.result = config.from.clone();
-    this.startAt = config.startAt;
-    this.endAt = config.endAt;
-    this.controls = config.controls || [];
-    this.easing = config.easing || easings.linear;
-  }
-
-  static fromSimpleConfig(config: SimpleKeyframeConfig) {
-    return new Keyframe(utility.normalizeConfig(config));
+    this.result = JSON.parse(JSON.stringify(config.from));
+    this.startAt = typeof config.startAt === "number" ? config.startAt : 0;
+    this.endAt = typeof config.endAt === "number" ? config.endAt : 1;
+    this.controls = Array.isArray(config.controls) ? config.controls : [];
+    this.easing =
+      typeof config.easing === "function" ? config.easing : easings.linear;
   }
 }

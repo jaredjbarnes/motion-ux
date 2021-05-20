@@ -1,99 +1,26 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
-import { SimpleKeyframeConfig } from "./KeyframeUtility";
-import ParsedValue from "./ParsedValue";
-import createDynamicEasing, { IEasingNames } from "./createDynamicEasing";
 
-const sortAsc = (animatorA: Animator, animatorB: Animator) => {
+const sortAsc = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 
-type AnimationState = {
-  [key: string]: { [key: string]: ParsedValue };
+type AnimationState<T> = {
+  [key: string]: { [key: string]: T };
 };
 
-export interface IComplexKeyframeValue {
-  value: string;
-  controlsIn?: string[];
-  controlsOut?: string[];
-  easeIn?: IEasingNames;
-  easeOut?: IEasingNames;
-}
-
-export type IAnimationKeyframeValue = string | IComplexKeyframeValue;
-
-export interface IAnimationKeyframes {
-  [key: string]: {
-    [key: string]: IAnimationKeyframeValue;
-  };
-  from: {
-    [key: string]: IAnimationKeyframeValue;
-  };
-  to: {
-    [key: string]: IAnimationKeyframeValue;
-  };
-}
-
-const sortPercentages = (keyA: string, keyB: string) => {
-  if (keyA === "from") {
-    return -1;
-  }
-
-  if (keyB === "from") {
-    return 1;
-  }
-
-  if (keyA === "to") {
-    return 1;
-  }
-
-  if (keyB === "to") {
-    return -1;
-  }
-
-  const keyANumber = parseInt(keyA, 10);
-  const keyBNumber = parseInt(keyB, 10);
-
-  if (keyANumber < keyBNumber) {
-    return -1;
-  } else if (keyANumber > keyBNumber) {
-    return 1;
-  }
-
-  return 0;
-};
-
-function getDecimalFromPercentage(percentage: string) {
-  let decimal = parseInt(percentage, 10) / 100;
-
-  decimal = Math.max(0, decimal);
-  decimal = Math.min(1, decimal);
-
-  return decimal;
-}
-
-export default class Animation {
-  public animators: Animator[] = [];
+export default class Animation<T> {
+  public animators: Animator<T>[] = [];
   public _time: number = 0;
-  public _currentValues!: AnimationState;
+  public _currentValues!: AnimationState<T>;
 
-  constructor(keyframes: Keyframe[] | SimpleKeyframeConfig[]) {
+  constructor(keyframes: Keyframe<T>[]) {
     this.initialize(keyframes);
   }
 
-  initialize(keyframes: Keyframe[] | SimpleKeyframeConfig[]) {
+  initialize(keyframes: Keyframe<T>[]) {
     this._currentValues = {};
-
-    this.animators = keyframes
-      .map((keyframe: any) => {
-        if (keyframe instanceof Keyframe) {
-          return keyframe;
-        } else {
-          return Keyframe.fromSimpleConfig(keyframe);
-        }
-      })
-      .map((keyframe) => new Animator(keyframe));
-
+    this.animators = keyframes.map((keyframe) => new Animator(keyframe));
     this._createCurrentValues();
 
     // Sort by time.
@@ -102,7 +29,7 @@ export default class Animation {
 
   private _createCurrentValues() {
     this._currentValues = this.animators.reduce(
-      (results: AnimationState, animator) => {
+      (results: AnimationState<T>, animator) => {
         const name = animator.keyframe.name;
         const property = animator.keyframe.property;
 
@@ -113,21 +40,13 @@ export default class Animation {
         }
 
         if (keyframe[property] == null) {
-          keyframe[property] = animator.keyframe.result.clone();
+          keyframe[property] = animator.keyframe.result;
         }
 
         return results;
       },
       {}
     );
-  }
-
-  private _assignValue(keyframe: Keyframe) {
-    const currentValue = this._currentValues[keyframe.name][keyframe.property];
-
-    currentValue.value = keyframe.result.value;
-    currentValue.graph = keyframe.result.graph;
-    currentValue.graphHash = keyframe.result.graphHash;
   }
 
   private _saveCurrentValues() {
@@ -143,7 +62,7 @@ export default class Animation {
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this._assignValue(keyframe);
+        this._currentValues[keyframe.name][keyframe.property] = keyframe.result;
       }
     }
 
@@ -153,14 +72,14 @@ export default class Animation {
       const keyframe = animators[x].keyframe;
 
       if (keyframe.startAt <= this._time) {
-        this._assignValue(keyframe);
+        this._currentValues[keyframe.name][keyframe.property] = keyframe.result;
       }
     }
   }
 
   update(time: number) {
     this._time = time;
-    // Update all keyframes
+
     this.animators.forEach((animator) => {
       animator.update(time);
     });
@@ -174,79 +93,12 @@ export default class Animation {
     return this._currentValues;
   }
 
-  merge(animation: Animation) {
+  merge(animation: Animation<T>) {
     const oldKeyframes = this.animators.map((a) => a.keyframe);
     const newKeyframes = animation.animators.map((a) => a.keyframe);
 
     this.initialize([...oldKeyframes, ...newKeyframes]);
 
     return this;
-  }
-
-  static fromKeyframes(name: string, config: IAnimationKeyframes) {
-    const timeKeys = Object.keys(config);
-    const keyframes: Keyframe[] = [];
-    let lastKeyFramePercentage = 0;
-    timeKeys.sort(sortPercentages);
-
-    for (let index = 0; index < timeKeys.length - 1; index++) {
-      const key = timeKeys[index];
-      const nextKey = timeKeys[index + 1];
-      const currentAnimationKeyframe = config[key];
-      const nextAnimationKeyframe = config[nextKey] || null;
-      const startAt = lastKeyFramePercentage;
-      const endAt = getDecimalFromPercentage(timeKeys[index + 1]);
-
-      lastKeyFramePercentage = endAt;
-
-      Object.keys(currentAnimationKeyframe).forEach((key) => {
-        const currentValue = currentAnimationKeyframe[key];
-        const nextValue = nextAnimationKeyframe[key];
-
-        if (nextValue == null) {
-          throw new Error(
-            `All keyframe declarations need to have the same properties. Missing: '${key}'`
-          );
-        }
-
-        const easingIn =
-          typeof currentValue === "string"
-            ? "linear"
-            : currentValue.easeOut || "linear";
-        const easingOut =
-          typeof nextValue === "string"
-            ? "linear"
-            : nextValue.easeIn || "linear";
-
-        const easing = createDynamicEasing(easingIn, easingOut);
-
-        const controlsIn =
-          typeof currentValue === "string" ? [] : currentValue.controlsIn || [];
-        const controlsOut =
-          typeof nextValue === "string" ? [] : nextValue.controlsOut || [];
-
-        const controls = [...controlsIn, ...controlsOut];
-
-        const from =
-          typeof currentValue === "string" ? currentValue : currentValue.value;
-
-        const to = typeof nextValue === "string" ? nextValue : nextValue.value;
-
-        const keyframeConfig: SimpleKeyframeConfig = {
-          name,
-          property: key,
-          from,
-          to,
-          controls,
-          easing,
-          startAt,
-          endAt,
-        };
-
-        keyframes.push(Keyframe.fromSimpleConfig(keyframeConfig));
-      });
-    }
-
-    return new Animation(keyframes);
   }
 }

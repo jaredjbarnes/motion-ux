@@ -1,9 +1,6 @@
 import Observable from "./Observable";
 import DefaultClock from "./DefaultClock";
-import SlopeAnimationBuilder from "./SlopeAnimationBuilder";
-import BlendedAnimation from "./BlendedAnimation";
 import { IClock } from "./IClock";
-import easings, { EasingFunction } from "./easings";
 import Animation from "./Animation";
 
 const defaultClock = new DefaultClock();
@@ -31,7 +28,7 @@ function defaultRender() {}
 export type RepeatDirection = 0 | 1;
 export type PlayerState = 1 | -1 | 0;
 
-export default class Player extends Observable {
+export default class Player<T> extends Observable {
   private _timeScale: number;
   private _time: number;
   private _step: any;
@@ -40,11 +37,10 @@ export default class Player extends Observable {
   private _iterations: any;
   private _repeat: any;
   private _repeatDirection: any;
-  private _animation: Animation | null = null;
+  private _animation: Animation<T> | null = null;
   private _clock: IClock;
   private _state: any;
   private _render: any;
-  private _slopeAnimationBuilder: SlopeAnimationBuilder;
   private _delay: number;
 
   constructor() {
@@ -60,7 +56,6 @@ export default class Player extends Observable {
     this._clock = defaultClock;
     this._state = STOPPED;
     this._render = defaultRender;
-    this._slopeAnimationBuilder = new SlopeAnimationBuilder();
     this._delay = 0;
     this.tick = this.tick.bind(this);
   }
@@ -132,7 +127,7 @@ export default class Player extends Observable {
     return this._animation;
   }
 
-  set animation(animation: Animation | null) {
+  set animation(animation: Animation<T> | null) {
     this._animation = animation;
   }
 
@@ -140,7 +135,7 @@ export default class Player extends Observable {
     return this._render;
   }
 
-  set render(render: (animation: Animation) => void) {
+  set render(render: (animation: Animation<T>) => void) {
     this._render = render;
   }
 

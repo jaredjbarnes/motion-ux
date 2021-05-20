@@ -547,10 +547,10 @@
           this.value = value;
       }
       clone() {
-          return new ValueNode(this.type, this.name, this.value || "", this.startIndex, this.endIndex);
+          return new ValueNode(this.type, this.name, this.value, this.startIndex, this.endIndex);
       }
       toString() {
-          return this.value || "";
+          return this.value;
       }
   }
 
@@ -1503,7 +1503,7 @@
           this.selectedNodes.forEach((node) => {
               if (node.isComposite) {
                   const children = [];
-                  this.walkUp(node, (descendant) => {
+                  Visitor.walkUp(node, (descendant) => {
                       if (!descendant.isComposite) {
                           children.push(descendant);
                       }
@@ -1548,7 +1548,7 @@
           if (this.root == null) {
               return this;
           }
-          this.walkDown(this.root, (node, stack) => {
+          Visitor.walkDown(this.root, (node, stack) => {
               if (this.selectedNodes.includes(node)) {
                   const parent = stack[stack.length - 1];
                   const grandParent = stack[stack.length - 2];
@@ -1566,7 +1566,7 @@
           if (this.root == null) {
               return this;
           }
-          this.walkUp(this.root, (node, stack) => {
+          Visitor.walkUp(this.root, (node, stack) => {
               if (this.selectedNodes.includes(node)) {
                   const parent = stack[stack.length - 1];
                   if (parent != null) {
@@ -1583,7 +1583,7 @@
           if (this.root == null) {
               return this;
           }
-          this.walkDown(this.root, (node, stack) => {
+          Visitor.walkDown(this.root, (node, stack) => {
               if (this.selectedNodes.includes(node)) {
                   const parent = stack[stack.length - 1];
                   if (parent != null) {
@@ -1611,26 +1611,6 @@
           }
           return callback(node);
       }
-      walkUp(node, callback, ancestors = []) {
-          ancestors.push(node);
-          if (node.isComposite && Array.isArray(node.children)) {
-              const children = node.children.slice();
-              children.forEach((c) => this.walkUp(c, callback, ancestors));
-          }
-          ancestors.pop();
-          callback(node, ancestors);
-          return this;
-      }
-      walkDown(node, callback, ancestors = []) {
-          callback(node, ancestors);
-          ancestors.push(node);
-          if (node.isComposite && Array.isArray(node.children)) {
-              const children = node.children.slice();
-              children.forEach((c) => this.walkDown(c, callback, ancestors));
-          }
-          ancestors.pop();
-          return this;
-      }
       selectAll() {
           return this.select((n) => true);
       }
@@ -1648,7 +1628,7 @@
           const node = this.root;
           const selectedNodes = [];
           if (node.isComposite) {
-              this.walkDown(node, (descendant) => {
+              Visitor.walkDown(node, (descendant) => {
                   if (callback(descendant)) {
                       selectedNodes.push(descendant);
                   }
@@ -1691,6 +1671,7 @@
       }
       setRoot(root) {
           this.root = root;
+          return this;
       }
       static select(root, callback) {
           if (callback != null) {
@@ -1699,6 +1680,26 @@
           else {
               return new Visitor(root);
           }
+      }
+      static walkUp(node, callback, ancestors = []) {
+          ancestors.push(node);
+          if (node.isComposite && Array.isArray(node.children)) {
+              const children = node.children.slice();
+              children.forEach((c) => this.walkUp(c, callback, ancestors));
+          }
+          ancestors.pop();
+          callback(node, ancestors);
+          return this;
+      }
+      static walkDown(node, callback, ancestors = []) {
+          callback(node, ancestors);
+          ancestors.push(node);
+          if (node.isComposite && Array.isArray(node.children)) {
+              const children = node.children.slice();
+              children.forEach((c) => this.walkDown(c, callback, ancestors));
+          }
+          ancestors.pop();
+          return this;
       }
   }
 
@@ -1839,7 +1840,6 @@
   class TreeNormalizer {
       constructor() {
           this.visitNode = this.visitNode.bind(this);
-          this.visitor = new Visitor();
       }
       visitNode(node) {
           if (node.isComposite) {
@@ -1858,7 +1858,7 @@
       }
       removeSpacesAroundDividers(node) {
           if (node.name === "divider") {
-              node.value = node.value.trim() + " ";
+              node.value = node.value.trim();
           }
       }
       removeUnnecessaryDividers(node) {
@@ -1889,9 +1889,8 @@
           });
       }
       normalize(node) {
-          this.visitor.setRoot(node);
-          this.visitor.flatten();
-          //this.visitor.forEach(this.visitNode);
+          new Visitor(node, [node]).flatten();
+          Visitor.walkDown(node, this.visitNode);
           return node;
       }
   }

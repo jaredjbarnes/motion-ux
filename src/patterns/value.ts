@@ -1,4 +1,4 @@
-import { OrComposite } from "clarity-pattern-parser";
+import { Cursor, OrComposite } from "clarity-pattern-parser";
 import unit from "./unit";
 import hex from "./hex";
 import number from "./number";

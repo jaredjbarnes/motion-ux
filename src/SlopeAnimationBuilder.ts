@@ -1,5 +1,4 @@
 import easings from "./easings";
-import GraphOperator from "./GraphOperator";
 import Keyframe from "./Keyframe";
 import Animation from "./Animation";
 import { PlayerState } from "./Player";
@@ -22,7 +21,6 @@ export default class SlopeAnimationBuilder {
   public diffValues: any;
   public derivativeValues: any;
   public toValues: any;
-  public graphOperator: any;
   public scaleValues: any;
 
   constructor() {
@@ -41,7 +39,6 @@ export default class SlopeAnimationBuilder {
     this.derivativeValues = null;
     this.scaledValues = null;
     this.toValues = null;
-    this.graphOperator = new GraphOperator();
   }
 
   private cloneValues(values: any) {

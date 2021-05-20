@@ -2,12 +2,10 @@ import { IClock, TickCallback } from "./IClock";
 
 export default class MockClock implements IClock {
   private requests: any;
-  private idCount: any;
   private time: any;
 
   constructor() {
     this.requests = new Map();
-    this.idCount = 1;
     this.time = 0;
   }
 
