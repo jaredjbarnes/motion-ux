@@ -1,6 +1,8 @@
+const defaultPoints: number[] = [];
+
 export default class BezierCurve {
-  points: any;
-  reducedPoints: any;
+  points: number[] = defaultPoints;
+  reducedPoints: number[] = defaultPoints;
 
   constructor(points: number[]) {
     this.setPoints(points);

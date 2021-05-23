@@ -2,13 +2,13 @@ import Animation from "./Animation";
 import Keyframe from "./Keyframe";
 import easings, { EasingFunction } from "./easings";
 
-export default class BlendedAnimation extends Animation {
+export default class BlendedAnimation<T> extends Animation<T> {
   public fromAnimation: any;
   public toAnimation: any;
 
   constructor(
-    fromAnimation: Animation,
-    toAnimation: Animation,
+    fromAnimation: Animation<T>,
+    toAnimation: Animation<T>,
     easing: EasingFunction
   ) {
     const fromValues = fromAnimation.getCurrentValues();

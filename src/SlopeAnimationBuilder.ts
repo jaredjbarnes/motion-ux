@@ -1,6 +1,7 @@
 import easings from "./easings";
 import Keyframe from "./Keyframe";
 import Animation from "./Animation";
+import ObjectOperator from "./ObjectOperator";
 import { PlayerState } from "./Player";
 
 const FORWARD = 1;
@@ -22,6 +23,7 @@ export default class SlopeAnimationBuilder {
   public derivativeValues: any;
   public toValues: any;
   public scaleValues: any;
+  public objectOperator = new ObjectOperator();
 
   constructor() {
     this.animation = null;
@@ -42,17 +44,11 @@ export default class SlopeAnimationBuilder {
   }
 
   private cloneValues(values: any) {
-    return Object.keys(values).reduce((clone: any, name) => {
-      clone[name] = Object.keys(values[name]).reduce((clone: any, property) => {
-        clone[property] = values[name][property].clone();
-        return clone;
-      }, {});
-      return clone;
-    }, {});
+    return JSON.parse(JSON.stringify(values));
   }
 
-  build(
-    animation: Animation,
+  build<T>(
+    animation: Animation<T>,
     offset: number,
     duration: number,
     newDuration: number,
@@ -68,7 +64,7 @@ export default class SlopeAnimationBuilder {
     this.calculate();
     this.createSlopeTimeline();
 
-    return this.slopeAnimation;
+    return this.slopeAnimation as Animation<T>;
   }
 
   private cacheValues() {
@@ -97,8 +93,8 @@ export default class SlopeAnimationBuilder {
   private cacheDeltaStepValues() {
     Object.keys(this.deltaStepValues).forEach((name) => {
       Object.keys(this.deltaStepValues[name]).forEach((property) => {
-        this.graphOperator.assign(
-          this.deltaStepValues[name][property].graph,
+        this.objectOperator.assign(
+          this.deltaStepValues[name][property],
           this.delta
         );
       });
@@ -110,8 +106,8 @@ export default class SlopeAnimationBuilder {
 
     Object.keys(this.scaleValues).forEach((name) => {
       Object.keys(this.scaleValues[name]).forEach((property) => {
-        this.graphOperator.assign(
-          this.scaleValues[name][property].graph,
+        this.objectOperator.assign(
+          this.scaleValues[name][property],
           scale
         );
       });
@@ -136,25 +132,47 @@ export default class SlopeAnimationBuilder {
   private calculate() {
     Object.keys(this.nowValues).forEach((name) => {
       Object.keys(this.nowValues[name]).forEach((property) => {
-        const now = this.nowValues[name][property].graph;
-        const delta = this.deltaValues[name][property].graph;
-        const diff = this.diffValues[name][property].graph;
+        const value = this.nowValues[name][property];
 
-        const deltaStep = this.deltaStepValues[name][property].graph;
-        const derivative = this.derivativeValues[name][property].graph;
-        const scale = this.scaleValues[name][property].graph;
-        const scaled = this.scaledValues[name][property].graph;
-        const to = this.toValues[name][property].graph;
-
-        this.graphOperator.subtract([delta, now, diff]);
-        this.graphOperator.divide([diff, deltaStep, derivative]);
-        this.graphOperator.multiply([derivative, scale, scaled]);
-        this.graphOperator.add([now, scaled, to]);
-
-        // Lets update the ParsedValue.value.
-        this.toValues[name][property].value = to.toString();
+        if (typeof value === "object" && value != null) {
+          this.calculateObject(name, property);
+        } else {
+          this.calculatePrimitive(name, property);
+        }
       });
     });
+  }
+
+  private calculatePrimitive(name: string, property: string) {
+    const now = this.nowValues[name][property];
+    const delta = this.deltaValues[name][property];
+
+    const scale = this.newDuration / this.duration;
+    const diff = delta - now;
+    const derivative = diff / this.delta;
+    const scaled = derivative * scale;
+    const to = now + scaled;
+
+    this.toValues[name][property] = to;
+  }
+
+  private calculateObject(name: string, property: string) {
+    const now = this.nowValues[name][property];
+    const delta = this.deltaValues[name][property];
+    const diff = this.diffValues[name][property];
+
+    const deltaStep = this.deltaStepValues[name][property];
+    const derivative = this.derivativeValues[name][property];
+    const scale = this.scaleValues[name][property];
+    const scaled = this.scaledValues[name][property];
+    const to = this.toValues[name][property];
+
+    this.objectOperator.subtract(delta, now, diff);
+    this.objectOperator.divide(diff, deltaStep, derivative);
+    this.objectOperator.multiply(derivative, scale, scaled);
+    this.objectOperator.add(now, scaled, to);
+
+    this.toValues[name][property] = to;
   }
 
   private createSlopeTimeline() {

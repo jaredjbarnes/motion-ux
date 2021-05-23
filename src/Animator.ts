@@ -72,7 +72,7 @@ export default class Animator<T> {
         this.keyframe.from,
         this.keyframe.controls,
         this.keyframe.to
-      );
+      ) as any as T;
     } else if (
       typeof this.keyframe.from === "object" &&
       this.keyframe.from != null
