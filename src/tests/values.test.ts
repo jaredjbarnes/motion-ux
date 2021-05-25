@@ -1,4 +1,4 @@
-import { Cursor } from "clarity-pattern-parser";
+import { Cursor, Visitor } from "clarity-pattern-parser";
 import values from "../patterns/values";
 
 describe("Patterns", () => {
@@ -63,7 +63,7 @@ describe("Patterns", () => {
     expect(node?.children[0].value).toBe("left");
   });
 
-  test("mulitple name string", () => {
+  test("multiple name string", () => {
     const cursor = new Cursor("top left");
 
     const node = values.parse(cursor);
@@ -108,7 +108,7 @@ describe("Patterns", () => {
     ).toBe("unit-type");
   });
 
-  test("method, mulitple arguments", () => {
+  test("method, multiple arguments", () => {
     const cursor = new Cursor("translate(0px, 0px)");
     const node = values.parse(cursor);
 
@@ -130,21 +130,21 @@ describe("Patterns", () => {
     ).toBe("unit-type");
   });
 
-  test("method, mulitple arguments", () => {
+  test("method, multiple arguments", () => {
     const cursor = new Cursor(
       "linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)"
     );
     const node = values.parse(cursor);
   });
 
-  test("multiple methods, mulitple arguments", () => {
+  test("multiple methods, multiple arguments", () => {
     const cursor = new Cursor(
       "linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%) linear-gradient(to bottom, #555, #555 50%, #eee 75%, #555 75%)"
     );
     const node = values.parse(cursor);
   });
 
-  test("multiple methods, mulitple arguments, with other values", () => {
+  test("multiple methods, multiple arguments, with other values", () => {
     const cursor = new Cursor(
       "#222 linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%) linear-gradient(to bottom, #555, #555 50%, #eee 75%, #555 75%)"
     );
@@ -161,6 +161,16 @@ describe("Patterns", () => {
       "radial-gradient(at 40% 40%, rgba(187,202,218,1) 0%, rgba(187,202,218,1) 20%, rgba(187,202,218,1) 100%)"
     );
     const node = values.parse(cursor);
+    if (node != null) {
+      const visitor = new Visitor(node, [node]);
+
+      visitor.flatten();
+
+      const result = node.children.map((n) => n.value).join("");
+      expect(result).toBe(
+        "radial-gradient(at 40% 40%, rgba(187,202,218,1) 0%, rgba(187,202,218,1) 20%, rgba(187,202,218,1) 100%)"
+      );
+    }
   });
 
   test("array", () => {

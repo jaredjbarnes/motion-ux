@@ -2,6 +2,7 @@ import { Visitor } from "clarity-pattern-parser";
 import easings, { EasingNames } from "./easings";
 import Keyframe from "./Keyframe";
 import cssValue from "./patterns/cssValue";
+import KeyframesGenerator, { IAnimationKeyframes } from "./KeyframesGenerator";
 
 export interface CssKeyframeConfig {
   name: string;
@@ -15,6 +16,11 @@ export interface CssKeyframeConfig {
 }
 
 const visitor = new Visitor();
+const keyframesGenerator = new KeyframesGenerator();
+
+keyframesGenerator.setTransformValue((value) => {
+  return convertToValue(value);
+});
 
 const convertToValue = (value: string) => {
   const node = cssValue.exec(value);
@@ -26,9 +32,15 @@ const convertToValue = (value: string) => {
     .setRoot(node)
     .selectRoot()
     .flatten()
-    .deselectNode(node)
+    .clear()
+    .select((n) => n.name === "optional-spaces")
+    .remove()
+    .clear()
     .select((n) => n.name === "spaces")
-    .remove();
+    .transform((n) => {
+      n.value = " ";
+      return n;
+    });
 
   return node.children.map((n) => {
     if (n.name === "number") {
@@ -59,5 +71,12 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
       controls: controlsValues,
       easing: easingValue,
     });
+  }
+
+  static createKeyframes(
+    keyframeName: string,
+    animationKeyframes: IAnimationKeyframes
+  ) {
+    return keyframesGenerator.generate(keyframeName, animationKeyframes);
   }
 }

@@ -28,19 +28,19 @@ function defaultRender() {}
 export type RepeatDirection = 0 | 1;
 export type PlayerState = 1 | -1 | 0;
 
-export default class Player<T> extends Observable {
+export default class Player extends Observable {
   private _timeScale: number;
   private _time: number;
-  private _step: any;
+  private _step: number;
   private _duration: number;
   private _lastTimestamp: number;
-  private _iterations: any;
-  private _repeat: any;
-  private _repeatDirection: any;
-  private _animation: Animation<T> | null = null;
+  private _iterations: number;
+  private _repeat: number;
+  private _repeatDirection: RepeatDirection;
+  private _animation: Animation<any> | null = null;
   private _clock: IClock;
-  private _state: any;
-  private _render: any;
+  private _state: PlayerState;
+  private _render: (animation: Animation<any>) => void;
   private _delay: number;
 
   constructor() {
@@ -127,7 +127,7 @@ export default class Player<T> extends Observable {
     return this._animation;
   }
 
-  set animation(animation: Animation<T> | null) {
+  set animation(animation: Animation<any> | null) {
     this._animation = animation;
   }
 
@@ -135,7 +135,7 @@ export default class Player<T> extends Observable {
     return this._render;
   }
 
-  set render(render: (animation: Animation<T>) => void) {
+  set render(render: (animation: Animation<any>) => void) {
     this._render = render;
   }
 

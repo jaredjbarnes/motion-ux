@@ -40,8 +40,8 @@ describe("Animation", () => {
 
     animation.update(0.5);
 
-    const result = animation.getCurrentValues().css.path.join(" ");
-    expect(result).toBe("M 5 5 C 75 75 , 15 15 , 10 10");
+    const result = animation.getCurrentValues().css.path.join("");
+    expect(result).toBe("M 5 5 C 75 75,15 15,10 10");
   });
 
   test("Multiple startAts on same property.", () => {

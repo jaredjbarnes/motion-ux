@@ -11,8 +11,8 @@ type AnimationState<T> = {
 
 export default class Animation<T> {
   public animators: Animator<T>[] = [];
-  public _time: number = 0;
-  public _currentValues!: AnimationState<T>;
+  private _time: number = 0;
+  private _currentValues!: AnimationState<T>;
 
   constructor(keyframes: Keyframe<T>[]) {
     this.initialize(keyframes);

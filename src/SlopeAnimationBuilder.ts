@@ -83,8 +83,6 @@ export default class SlopeAnimationBuilder {
 
     if (this.direction === FORWARD) {
       this.cacheDeltaValueForward();
-    } else if (this.direction === BACKWARD) {
-      this.cacheDeltaValueBackward();
     } else {
       this.cacheDeltaValueStopped();
     }
@@ -106,21 +104,13 @@ export default class SlopeAnimationBuilder {
 
     Object.keys(this.scaleValues).forEach((name) => {
       Object.keys(this.scaleValues[name]).forEach((property) => {
-        this.objectOperator.assign(
-          this.scaleValues[name][property],
-          scale
-        );
+        this.objectOperator.assign(this.scaleValues[name][property], scale);
       });
     });
   }
 
   private cacheDeltaValueForward() {
     this.animation.update(this.offset + this.delta);
-    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
-  }
-
-  private cacheDeltaValueBackward() {
-    this.animation.update(this.offset - this.delta);
     this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
   }
 

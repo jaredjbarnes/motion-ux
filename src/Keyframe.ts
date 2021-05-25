@@ -1,4 +1,14 @@
 import easings, { EasingFunction } from "./easings";
+import { DynamicEasingNames } from "./createDynamicEasing";
+import KeyframesGenerator, { IAnimationKeyframes } from "./KeyframesGenerator";
+
+export interface IComplexKeyframeValue<T> {
+  value: T;
+  controlsIn?: T[];
+  controlsOut?: T[];
+  easeIn?: DynamicEasingNames;
+  easeOut?: DynamicEasingNames;
+}
 
 export interface KeyframeConfig<T> {
   name: string;
@@ -10,6 +20,8 @@ export interface KeyframeConfig<T> {
   controls?: T[];
   easing?: EasingFunction;
 }
+
+const keyframesGenerator = new KeyframesGenerator();
 
 export default class Keyframe<T> {
   public name: string;
@@ -33,5 +45,12 @@ export default class Keyframe<T> {
     this.controls = Array.isArray(config.controls) ? config.controls : [];
     this.easing =
       typeof config.easing === "function" ? config.easing : easings.linear;
+  }
+
+  static createKeyframes(
+    keyframeName: string,
+    animationKeyframes: IAnimationKeyframes
+  ) {
+    return keyframesGenerator.generate(keyframeName, animationKeyframes);
   }
 }

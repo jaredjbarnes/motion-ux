@@ -24,7 +24,7 @@ const easingInMap = {
   elastic: [0, 0, 0, 0.15, -0.25, 0.25, -0.5, -0.5, 2, -1, -1],
 };
 
-export type IEasingNames =
+export type DynamicEasingNames =
   | "quad"
   | "cubic"
   | "quart"
@@ -36,8 +36,8 @@ export type IEasingNames =
   | "linear";
 
 export default function createDynamicEasing(
-  easingIn: IEasingNames,
-  easingOut: IEasingNames
+  easingIn: DynamicEasingNames,
+  easingOut: DynamicEasingNames
 ) {
   const points = [...easingInMap[easingIn], ...easingOutMap[easingOut]];
   const bezierCurve = new BezierCurve(points);
