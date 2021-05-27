@@ -1,44 +1,19 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
-import { SimpleKeyframeConfig } from "./KeyframeUtility";
-import ParsedValue from "./ParsedValue";
-import { IEasingNames } from "./createDynamicEasing";
-declare type AnimationState = {
-    [key: string]: {
-        [key: string]: ParsedValue;
-    };
+declare type AnimationState<T> = {
+    [key: string]: T;
 };
-export interface IComplexKeyframeValue {
-    value: string;
-    controlsIn?: string[];
-    controlsOut?: string[];
-    easeIn?: IEasingNames;
-    easeOut?: IEasingNames;
-}
-export declare type IAnimationKeyframeValue = string | IComplexKeyframeValue;
-export interface IAnimationKeyframes {
-    [key: string]: {
-        [key: string]: IAnimationKeyframeValue;
-    };
-    from: {
-        [key: string]: IAnimationKeyframeValue;
-    };
-    to: {
-        [key: string]: IAnimationKeyframeValue;
-    };
-}
-export default class Animation {
-    animators: Animator[];
-    _time: number;
-    _currentValues: AnimationState;
-    constructor(keyframes: Keyframe[] | SimpleKeyframeConfig[]);
-    initialize(keyframes: Keyframe[] | SimpleKeyframeConfig[]): void;
+export default class Animation<T> {
+    private _time;
+    private _currentValues;
+    name: string;
+    animators: Animator<T>[];
+    constructor(name: string, keyframes: Keyframe<T>[]);
+    initialize(keyframes: Keyframe<T>[]): void;
     private _createCurrentValues;
-    private _assignValue;
     private _saveCurrentValues;
     update(time: number): this;
-    getCurrentValues(): AnimationState;
-    merge(animation: Animation): this;
-    static fromKeyframes(name: string, config: IAnimationKeyframes): Animation;
+    getCurrentValues(): AnimationState<T>;
+    merge(animation: Animation<T>): this;
 }
 export {};

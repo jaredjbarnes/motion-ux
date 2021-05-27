@@ -149,7 +149,7 @@ export default class KeyframesGenerator {
     }
   }
 
-  generate(keyframeName: string, animationKeyframes: IAnimationKeyframes) {
+  generate(animationKeyframes: IAnimationKeyframes) {
     const timeKeys = Object.keys(animationKeyframes);
     const keyframes: Keyframe<any>[] = [];
     let lastKeyFramePercentage = 0;
@@ -185,7 +185,6 @@ export default class KeyframesGenerator {
         const to = this.getTo(nextValue);
 
         const keyframe = new Keyframe<any>({
-          name: keyframeName,
           property: key,
           from,
           to,
@@ -200,4 +199,5 @@ export default class KeyframesGenerator {
     }
     return keyframes;
   }
+
 }

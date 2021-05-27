@@ -32,7 +32,6 @@ export default class BlendedAnimation<T> extends Animation<T> {
           const to = toValue[property];
 
           return new Keyframe({
-            name,
             property,
             startAt: 0,
             endAt: 1,
@@ -45,7 +44,7 @@ export default class BlendedAnimation<T> extends Animation<T> {
       })
       .flat();
 
-    super(animations);
+    super(`blended`, animations);
 
     this.fromAnimation = fromAnimation;
     this.toAnimation = toAnimation;

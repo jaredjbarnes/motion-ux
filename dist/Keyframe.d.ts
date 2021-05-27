@@ -1,26 +1,31 @@
 import { EasingFunction } from "./easings";
-import { SimpleKeyframeConfig } from "./KeyframeUtility";
-import ParsedValue from "./ParsedValue";
-export interface KeyframeConfig {
-    name: string;
+import { DynamicEasingNames } from "./createDynamicEasing";
+import { IAnimationKeyframes } from "./KeyframesGenerator";
+export interface IComplexKeyframeValue<T> {
+    value: T;
+    controlsIn?: T[];
+    controlsOut?: T[];
+    easeIn?: DynamicEasingNames;
+    easeOut?: DynamicEasingNames;
+}
+export interface KeyframeConfig<T> {
     property: string;
-    to: ParsedValue;
-    from: ParsedValue;
-    endAt: number;
-    startAt: number;
-    controls?: ParsedValue[];
+    to: T;
+    from: T;
+    endAt?: number;
+    startAt?: number;
+    controls?: T[];
     easing?: EasingFunction;
 }
-export default class Keyframe {
-    name: string;
+export default class Keyframe<T> {
     property: string;
-    to: ParsedValue;
-    from: ParsedValue;
-    result: ParsedValue;
+    to: T;
+    from: T;
+    result: T;
     startAt: number;
     endAt: number;
-    controls: ParsedValue[];
+    controls: T[];
     easing: EasingFunction;
-    constructor(config: KeyframeConfig);
-    static fromSimpleConfig(config: SimpleKeyframeConfig): Keyframe;
+    constructor(config: KeyframeConfig<T>);
+    static createKeyframes(animationKeyframes: IAnimationKeyframes): Keyframe<any>[];
 }

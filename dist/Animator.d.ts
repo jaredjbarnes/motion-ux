@@ -1,13 +1,12 @@
-import { Node } from "clarity-pattern-parser";
 import BezierCurve from "./BezierCurve";
 import Keyframe from "./Keyframe";
-export default class Animator {
-    keyframe: Keyframe;
-    time: number;
+export default class Animator<T> {
+    keyframe: Keyframe<T>;
     bezierCurve: BezierCurve;
-    keyframeGraphs: Node[];
-    constructor(keyframe: Keyframe);
-    private updateKeyframeGraphs;
-    visit(nodes: Node[]): void;
-    update(time: number): any;
+    time: number;
+    constructor(keyframe: Keyframe<T>);
+    getNumberValue(from: any, controls: any[] | undefined, to: any): number;
+    getStringValue(from: any, to: any): any;
+    traverse(fromObject: any, controlsObject: any, toObject: any, resultObject: any): void;
+    update(time: number): T;
 }

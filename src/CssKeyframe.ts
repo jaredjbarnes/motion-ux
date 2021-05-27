@@ -5,7 +5,6 @@ import cssValue from "./patterns/cssValue";
 import KeyframesGenerator, { IAnimationKeyframes } from "./KeyframesGenerator";
 
 export interface CssKeyframeConfig {
-  name: string;
   property: string;
   to: string;
   from: string;
@@ -73,10 +72,7 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
     });
   }
 
-  static createKeyframes(
-    keyframeName: string,
-    animationKeyframes: IAnimationKeyframes
-  ) {
-    return keyframesGenerator.generate(keyframeName, animationKeyframes);
+  static createKeyframes(animationKeyframes: IAnimationKeyframes) {
+    return keyframesGenerator.generate(animationKeyframes);
   }
 }

@@ -5,9 +5,8 @@ import Keyframe from "../Keyframe";
 
 describe("SlopeAnimationBuilder", () => {
   test("Forward", () => {
-    const animation = new Animation([
+    const animation = new Animation("position", [
       new Keyframe({
-        name: "test",
         property: "left",
         from: 100,
         to: 200,
@@ -22,13 +21,12 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.getCurrentValues();
 
-    expect(values.test.left).toBe(249.99999999990905);
+    expect(values.left).toBe(249.99999999990905);
   });
 
   test("Forward with longer duration.", () => {
-    const animation = new Animation([
+    const animation = new Animation("position", [
       new Keyframe({
-        name: "test",
         property: "left",
         from: 100,
         to: 200,
@@ -43,13 +41,12 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.getCurrentValues();
 
-    expect(values.test.left).toBe(349.9999999998181);
+    expect(values.left).toBe(349.9999999998181);
   });
 
   test("Stopped", () => {
-    const animation = new Animation([
+    const animation = new Animation("position", [
       new Keyframe({
-        name: "test",
         property: "left",
         from: 100,
         to: 200,
@@ -64,6 +61,6 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.getCurrentValues();
 
-    expect(values.test.left).toBe(150);
+    expect(values.left).toBe(150);
   });
 });

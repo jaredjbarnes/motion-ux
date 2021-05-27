@@ -5,7 +5,6 @@ import Keyframe from "../Keyframe";
 describe("Animator", () => {
   test("Get value at 0.5.", () => {
     const keyframe = new Keyframe({
-      name: "my-keyframe",
       property: "property",
       from: [0],
       to: [1],
@@ -23,7 +22,6 @@ describe("Animator", () => {
 
   test("Get value at 0.5 with quad easing.", () => {
     const keyframe = new Keyframe({
-      name: "my-keyframe",
       property: "property",
       from: [0],
       to: [1],
@@ -41,7 +39,6 @@ describe("Animator", () => {
 
   test("Get value at 0.5 with control.", () => {
     const keyframe = new Keyframe({
-      name: "my-keyframe",
       property: "property",
       from: 0,
       to: 1,

@@ -11,7 +11,6 @@ export interface IComplexKeyframeValue<T> {
 }
 
 export interface KeyframeConfig<T> {
-  name: string;
   property: string;
   to: T;
   from: T;
@@ -24,7 +23,6 @@ export interface KeyframeConfig<T> {
 const keyframesGenerator = new KeyframesGenerator();
 
 export default class Keyframe<T> {
-  public name: string;
   public property: string;
   public to: T;
   public from: T;
@@ -35,7 +33,6 @@ export default class Keyframe<T> {
   public easing: EasingFunction;
 
   constructor(config: KeyframeConfig<T>) {
-    this.name = config.name;
     this.property = config.property;
     this.to = config.to;
     this.from = config.from;
@@ -47,10 +44,7 @@ export default class Keyframe<T> {
       typeof config.easing === "function" ? config.easing : easings.linear;
   }
 
-  static createKeyframes(
-    keyframeName: string,
-    animationKeyframes: IAnimationKeyframes
-  ) {
-    return keyframesGenerator.generate(keyframeName, animationKeyframes);
+  static createKeyframes(animationKeyframes: IAnimationKeyframes) {
+    return keyframesGenerator.generate(animationKeyframes);
   }
 }

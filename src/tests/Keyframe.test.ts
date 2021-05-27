@@ -3,7 +3,7 @@ import Animation from "../Animation";
 
 describe("Keyframe", () => {
   test("createKeyframes: Many Steps.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: 0,
       },
@@ -43,7 +43,7 @@ describe("Keyframe", () => {
   });
 
   test("createKeyframes: simple values.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: 0,
         display: "none",
@@ -54,25 +54,25 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.5);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.5);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.5);
+    expect(currentValues.display).toBe("block");
 
     animation.update(1);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(1);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(1);
+    expect(currentValues.display).toBe("block");
   });
 
   test("createKeyframes: Both controls.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: { value: 0, controlsOut: [-0.5] },
         display: "none",
@@ -86,32 +86,32 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(-0.08);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(-0.08);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.984375);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.984375);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.99);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(1.014255);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(1.014255);
+    expect(currentValues.display).toBe("block");
   });
 
   test("createKeyframes: Control out.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: { value: 0, controlsOut: [-0.5] },
         display: "none",
@@ -122,32 +122,32 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(-0.08);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(-0.08);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.375);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.375);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.99);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.9702000000000001);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.9702000000000001);
+    expect(currentValues.display).toBe("block");
   });
 
   test("createKeyframes: Control in.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: 0,
         display: "none",
@@ -158,32 +158,32 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.28);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.28);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(1.125);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(1.125);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.99);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(1.0097999999999998);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(1.0097999999999998);
+    expect(currentValues.display).toBe("block");
   });
 
   test("createKeyframes: Both easings.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: { value: 0, easeOut: "quad" },
         display: "none",
@@ -197,32 +197,32 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.028);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.028);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.84375);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.84375);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.99);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.999702);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.999702);
+    expect(currentValues.display).toBe("block");
   });
 
   test("createKeyframes: Ease out.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: { value: 0, easeOut: "quad" },
         display: "none",
@@ -233,32 +233,32 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.010000000000000002);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.010000000000000002);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.5625);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.5625);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.99);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.9801);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.9801);
+    expect(currentValues.display).toBe("block");
   });
 
   test("createKeyframes: Ease in.", () => {
-    const keyframes = Keyframe.createKeyframes("name", {
+    const keyframes = Keyframe.createKeyframes({
       from: {
         opacity: 0,
         display: "none",
@@ -269,27 +269,27 @@ describe("Keyframe", () => {
       },
     });
 
-    const animation = new Animation(keyframes);
+    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
     let currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.19);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.19);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.9375);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.9375);
+    expect(currentValues.display).toBe("block");
 
     animation.update(0.99);
 
     currentValues = animation.getCurrentValues();
 
-    expect(currentValues.name.opacity).toBe(0.9999);
-    expect(currentValues.name.display).toBe("block");
+    expect(currentValues.opacity).toBe(0.9999);
+    expect(currentValues.display).toBe("block");
   });
 });

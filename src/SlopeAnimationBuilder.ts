@@ -5,7 +5,6 @@ import ObjectOperator from "./ObjectOperator";
 import { PlayerState } from "./Player";
 
 const FORWARD = 1;
-const BACKWARD = -1;
 
 export default class SlopeAnimationBuilder {
   public animation: any;
@@ -89,23 +88,16 @@ export default class SlopeAnimationBuilder {
   }
 
   private cacheDeltaStepValues() {
-    Object.keys(this.deltaStepValues).forEach((name) => {
-      Object.keys(this.deltaStepValues[name]).forEach((property) => {
-        this.objectOperator.assign(
-          this.deltaStepValues[name][property],
-          this.delta
-        );
-      });
+    Object.keys(this.deltaStepValues).forEach((property) => {
+      this.objectOperator.assign(this.deltaStepValues[property], this.delta);
     });
   }
 
   private cacheScaleValues() {
     const scale = this.newDuration / this.duration;
 
-    Object.keys(this.scaleValues).forEach((name) => {
-      Object.keys(this.scaleValues[name]).forEach((property) => {
-        this.objectOperator.assign(this.scaleValues[name][property], scale);
-      });
+    Object.keys(this.scaleValues).forEach((property) => {
+      this.objectOperator.assign(this.scaleValues[property], scale);
     });
   }
 
@@ -120,22 +112,20 @@ export default class SlopeAnimationBuilder {
   }
 
   private calculate() {
-    Object.keys(this.nowValues).forEach((name) => {
-      Object.keys(this.nowValues[name]).forEach((property) => {
-        const value = this.nowValues[name][property];
+    Object.keys(this.nowValues).forEach((property) => {
+      const value = this.nowValues[property];
 
-        if (typeof value === "object" && value != null) {
-          this.calculateObject(name, property);
-        } else {
-          this.calculatePrimitive(name, property);
-        }
-      });
+      if (typeof value === "object" && value != null) {
+        this.calculateObject(property);
+      } else {
+        this.calculatePrimitive(property);
+      }
     });
   }
 
-  private calculatePrimitive(name: string, property: string) {
-    const now = this.nowValues[name][property];
-    const delta = this.deltaValues[name][property];
+  private calculatePrimitive(property: string) {
+    const now = this.nowValues[property];
+    const delta = this.deltaValues[property];
 
     const scale = this.newDuration / this.duration;
     const diff = delta - now;
@@ -143,46 +133,43 @@ export default class SlopeAnimationBuilder {
     const scaled = derivative * scale;
     const to = now + scaled;
 
-    this.toValues[name][property] = to;
+    this.toValues[property] = to;
   }
 
-  private calculateObject(name: string, property: string) {
-    const now = this.nowValues[name][property];
-    const delta = this.deltaValues[name][property];
-    const diff = this.diffValues[name][property];
+  private calculateObject(property: string) {
+    const now = this.nowValues[property];
+    const delta = this.deltaValues[property];
+    const diff = this.diffValues[property];
 
-    const deltaStep = this.deltaStepValues[name][property];
-    const derivative = this.derivativeValues[name][property];
-    const scale = this.scaleValues[name][property];
-    const scaled = this.scaledValues[name][property];
-    const to = this.toValues[name][property];
+    const deltaStep = this.deltaStepValues[property];
+    const derivative = this.derivativeValues[property];
+    const scale = this.scaleValues[property];
+    const scaled = this.scaledValues[property];
+    const to = this.toValues[property];
 
     this.objectOperator.subtract(delta, now, diff);
     this.objectOperator.divide(diff, deltaStep, derivative);
     this.objectOperator.multiply(derivative, scale, scaled);
     this.objectOperator.add(now, scaled, to);
 
-    this.toValues[name][property] = to;
+    this.toValues[property] = to;
   }
 
   private createSlopeTimeline() {
     const keyframes = Object.keys(this.nowValues)
-      .map((name) => {
-        return Object.keys(this.nowValues[name]).map((property) => {
-          return new Keyframe({
-            name,
-            property,
-            from: this.nowValues[name][property],
-            controls: [],
-            to: this.toValues[name][property],
-            startAt: 0,
-            endAt: 1,
-            easing: easings.linear,
-          });
+      .map((property) => {
+        return new Keyframe({
+          property,
+          from: this.nowValues[property],
+          controls: [],
+          to: this.toValues[property],
+          startAt: 0,
+          endAt: 1,
+          easing: easings.linear,
         });
       })
       .flat();
 
-    this.slopeAnimation = new Animation(keyframes);
+    this.slopeAnimation = new Animation("slope", keyframes);
   }
 }

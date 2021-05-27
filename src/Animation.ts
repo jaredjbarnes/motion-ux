@@ -5,16 +5,16 @@ const sortAsc = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 
-type AnimationState<T> = {
-  [key: string]: { [key: string]: T };
-};
+type AnimationState<T> = { [key: string]: T };
 
 export default class Animation<T> {
-  public animators: Animator<T>[] = [];
   private _time: number = 0;
   private _currentValues!: AnimationState<T>;
+  public name: string;
+  public animators: Animator<T>[] = [];
 
-  constructor(keyframes: Keyframe<T>[]) {
+  constructor(name: string, keyframes: Keyframe<T>[]) {
+    this.name = name;
     this.initialize(keyframes);
   }
 
@@ -30,18 +30,9 @@ export default class Animation<T> {
   private _createCurrentValues() {
     this._currentValues = this.animators.reduce(
       (results: AnimationState<T>, animator) => {
-        const name = animator.keyframe.name;
-        const property = animator.keyframe.property;
-
-        let keyframe = results[name];
-
-        if (keyframe == null) {
-          keyframe = results[name] = {};
-        }
-
-        if (keyframe[property] == null) {
-          keyframe[property] = animator.keyframe.result;
-        }
+        const keyframe = animator.keyframe;
+        const property = keyframe.property;
+        results[property] = keyframe.result;
 
         return results;
       },
@@ -58,11 +49,11 @@ export default class Animation<T> {
     // This initials values beyond the time we are at.
     for (let x = 0; x < length; x++) {
       const keyframe = animators[x].keyframe;
-      const key = `${keyframe.name}|${keyframe.property}`;
+      const key = keyframe.property;
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this._currentValues[keyframe.name][keyframe.property] = keyframe.result;
+        this._currentValues[keyframe.property] = keyframe.result;
       }
     }
 
@@ -72,7 +63,7 @@ export default class Animation<T> {
       const keyframe = animators[x].keyframe;
 
       if (keyframe.startAt <= this._time) {
-        this._currentValues[keyframe.name][keyframe.property] = keyframe.result;
+        this._currentValues[keyframe.property] = keyframe.result;
       }
     }
   }
