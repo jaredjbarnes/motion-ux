@@ -78,7 +78,6 @@ const statefulMotion = {
     duration: 1000,
     iterationCount: Infinity,
     transitionEasing: "easeOutBack",
-    // direction: "alternate" | "default"
   },
 };
 ```

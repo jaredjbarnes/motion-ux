@@ -97,8 +97,8 @@ const sortAsc = (animatorA, animatorB) => {
 class Animation {
     constructor(name, keyframes) {
         this._time = 0;
-        this.name = "";
         this.animators = [];
+        this.name = name;
         this.initialize(keyframes);
     }
     initialize(keyframes) {
@@ -158,7 +158,7 @@ class Animation {
     }
 }
 
-const states$1 = {
+const states = {
     ACTIVE: 1,
     STOPPED: 0,
     DISPOSED: -1,
@@ -168,7 +168,7 @@ class Observer {
         this.type = type;
         this.callback = callback;
         this.unbind = unbind;
-        this.state = states$1.ACTIVE;
+        this.state = states.ACTIVE;
     }
     notify(event) {
         if (event.type === this.type) {
@@ -176,17 +176,17 @@ class Observer {
         }
     }
     stop() {
-        if (this.state === states$1.ACTIVE) {
-            this.state = states$1.STOPPED;
+        if (this.state === states.ACTIVE) {
+            this.state = states.STOPPED;
         }
     }
     start() {
-        if (this.state !== states$1.DISPOSED) {
-            this.state = states$1.ACTIVE;
+        if (this.state !== states.DISPOSED) {
+            this.state = states.ACTIVE;
         }
     }
     dispose() {
-        this.state = states$1.DISPOSED;
+        this.state = states.DISPOSED;
         this.unbind();
     }
 }
@@ -273,21 +273,18 @@ class DefaultClock {
 }
 
 const defaultClock = new DefaultClock();
-const DEFAULT = 0;
-const ALTERNATE = 1;
-const FORWARD = 1;
-const REVERSE = -1;
-const STOPPED = 0;
-const repeatDirections = {
-    DEFAULT,
-    ALTERNATE,
-};
-const states = {
-    FORWARD,
-    REVERSE,
-    STOPPED,
-};
 function defaultRender() { }
+var PlayerState;
+(function (PlayerState) {
+    PlayerState[PlayerState["REVERSE"] = -1] = "REVERSE";
+    PlayerState[PlayerState["STOPPED"] = 0] = "STOPPED";
+    PlayerState[PlayerState["FORWARD"] = 1] = "FORWARD";
+})(PlayerState || (PlayerState = {}));
+var RepeatDirection;
+(function (RepeatDirection) {
+    RepeatDirection[RepeatDirection["DEFAULT"] = 0] = "DEFAULT";
+    RepeatDirection[RepeatDirection["ALTERNATE"] = 1] = "ALTERNATE";
+})(RepeatDirection || (RepeatDirection = {}));
 class Player extends Observable {
     constructor() {
         super();
@@ -299,9 +296,9 @@ class Player extends Observable {
         this._lastTimestamp = 0;
         this._iterations = 0;
         this._repeat = 1;
-        this._repeatDirection = DEFAULT;
+        this._repeatDirection = RepeatDirection.DEFAULT;
         this._clock = defaultClock;
-        this._state = STOPPED;
+        this._state = PlayerState.STOPPED;
         this._render = defaultRender;
         this._delay = 0;
         this.tick = this.tick.bind(this);
@@ -392,10 +389,10 @@ class Player extends Observable {
         if (deltaTime <= 0) {
             return;
         }
-        if (this._state === REVERSE) {
+        if (this._state === PlayerState.REVERSE) {
             this.stepBackward();
         }
-        else if (this._state === FORWARD) {
+        else if (this._state === PlayerState.FORWARD) {
             this.stepForward();
         }
         this._lastTimestamp = timestamp;
@@ -417,11 +414,11 @@ class Player extends Observable {
                 this.stop();
                 return;
             }
-            if (repeatDirection === ALTERNATE) {
+            if (repeatDirection === RepeatDirection.ALTERNATE) {
                 const adjustedTime = 1 - (time - 1);
                 this._time = 1;
                 this.seek(adjustedTime);
-                this._state = REVERSE;
+                this._state = PlayerState.REVERSE;
             }
             else {
                 const adjustedTime = time - 1;
@@ -433,7 +430,7 @@ class Player extends Observable {
                 });
                 this._time = 0;
                 this.seek(adjustedTime);
-                this._state = FORWARD;
+                this._state = PlayerState.FORWARD;
             }
         }
         else {
@@ -457,11 +454,11 @@ class Player extends Observable {
                 this.stop();
                 return;
             }
-            if (repeatDirection === ALTERNATE) {
+            if (repeatDirection === RepeatDirection.ALTERNATE) {
                 const adjustedTime = time * -1;
                 this._time = 0;
                 this.seek(adjustedTime);
-                this._state = FORWARD;
+                this._state = PlayerState.FORWARD;
             }
             else {
                 const adjustedTime = 1 + time;
@@ -473,7 +470,7 @@ class Player extends Observable {
                 });
                 this._time = 1;
                 this.seek(adjustedTime);
-                this._state = REVERSE;
+                this._state = PlayerState.REVERSE;
             }
         }
         else {
@@ -497,8 +494,8 @@ class Player extends Observable {
         return this;
     }
     stop() {
-        if (this._state !== STOPPED) {
-            this._state = STOPPED;
+        if (this._state !== PlayerState.STOPPED) {
+            this._state = PlayerState.STOPPED;
             this._clock.unregister(this.tick);
             this.notify({
                 type: "STOPPED",
@@ -508,9 +505,9 @@ class Player extends Observable {
         return this;
     }
     play() {
-        if (this._state !== FORWARD) {
+        if (this._state !== PlayerState.FORWARD) {
             this._lastTimestamp = this._clock.now() + this._delay;
-            this._state = FORWARD;
+            this._state = PlayerState.FORWARD;
             this._clock.register(this.tick);
             this.notify({
                 type: "PLAYED",
@@ -520,9 +517,9 @@ class Player extends Observable {
         return this;
     }
     reverse() {
-        if (this._state !== REVERSE) {
+        if (this._state !== PlayerState.REVERSE) {
             this._lastTimestamp = this._clock.now() + this._delay;
-            this._state = REVERSE;
+            this._state = PlayerState.REVERSE;
             this._clock.register(this.tick);
             this.notify({
                 type: "REVERSED",
@@ -534,12 +531,6 @@ class Player extends Observable {
     dispose() {
         this.stop();
         super.dispose();
-    }
-    static get repeatDirections() {
-        return repeatDirections;
-    }
-    static get states() {
-        return states;
     }
 }
 

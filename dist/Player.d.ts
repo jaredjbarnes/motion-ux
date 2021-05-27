@@ -1,8 +1,15 @@
 import Observable from "./Observable";
 import { IClock } from "./IClock";
 import Animation from "./Animation";
-export declare type RepeatDirection = 0 | 1;
-export declare type PlayerState = 1 | -1 | 0;
+export declare enum PlayerState {
+    REVERSE = -1,
+    STOPPED = 0,
+    FORWARD = 1
+}
+export declare enum RepeatDirection {
+    DEFAULT = 0,
+    ALTERNATE = 1
+}
 export default class Player extends Observable {
     private _timeScale;
     private _time;
@@ -46,13 +53,4 @@ export default class Player extends Observable {
     play(): this;
     reverse(): this;
     dispose(): void;
-    static get repeatDirections(): {
-        DEFAULT: number;
-        ALTERNATE: number;
-    };
-    static get states(): {
-        FORWARD: number;
-        REVERSE: number;
-        STOPPED: number;
-    };
 }
