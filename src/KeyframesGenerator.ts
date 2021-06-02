@@ -9,18 +9,16 @@ export interface IComplexKeyframeValue {
   easeOut?: DynamicEasingNames;
 }
 
+interface IAnimatableObject {
+  [key: string]: IAnimationKeyframeValue;
+}
+
 export type IAnimationKeyframeValue = string | number | IComplexKeyframeValue;
 
 export interface IAnimationKeyframes {
-  [key: string]: {
-    [key: string]: IAnimationKeyframeValue;
-  };
-  from: {
-    [key: string]: IAnimationKeyframeValue;
-  };
-  to: {
-    [key: string]: IAnimationKeyframeValue;
-  };
+  [key: string]: IAnimatableObject;
+  from: IAnimatableObject;
+  to: IAnimatableObject;
 }
 
 const complexFrameKeys = ["controlsIn", "controlsOut", "easeIn", "easeOut"];
@@ -199,5 +197,4 @@ export default class KeyframesGenerator {
     }
     return keyframes;
   }
-
 }

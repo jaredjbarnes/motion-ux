@@ -4,16 +4,13 @@ declare type AnimationState<T> = {
     [key: string]: T;
 };
 export default class Animation<T> {
-    private _time;
-    private _currentValues;
+    protected _time: number;
+    protected animators: Animator<T>[];
     name: string;
-    animators: Animator<T>[];
+    currentValues: AnimationState<T>;
     constructor(name: string, keyframes: Keyframe<T>[]);
-    initialize(keyframes: Keyframe<T>[]): void;
-    private _createCurrentValues;
+    protected _createCurrentValues(): void;
     private _saveCurrentValues;
     update(time: number): this;
-    getCurrentValues(): AnimationState<T>;
-    merge(animation: Animation<T>): this;
 }
 export {};

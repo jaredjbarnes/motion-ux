@@ -15,7 +15,7 @@ describe("Animation", () => {
       }),
     ]);
 
-    const values = animation.update(0).getCurrentValues();
+    const values = animation.update(0).currentValues;
 
     const array = values.opacity;
 
@@ -38,7 +38,7 @@ describe("Animation", () => {
 
     animation.update(0.5);
 
-    const result = animation.getCurrentValues().path.join("");
+    const result = animation.currentValues.path.join("");
     expect(result).toBe("M 5 5 C 75 75,15 15,10 10");
   });
 
@@ -84,7 +84,7 @@ describe("Animation", () => {
 
     animation.update(1);
 
-    let values = animation.getCurrentValues();
+    let values = animation.currentValues;
     let opacity = values.opacity;
     let display = values.display;
 
@@ -92,7 +92,7 @@ describe("Animation", () => {
     expect(opacity).toBe(0);
 
     animation.update(0.3);
-    values = animation.getCurrentValues();
+    values = animation.currentValues;
 
     opacity = values.opacity;
     display = values.display;
@@ -101,7 +101,7 @@ describe("Animation", () => {
     expect(opacity).toBe(0.7);
 
     animation.update(0.49);
-    values = animation.getCurrentValues();
+    values = animation.currentValues;
 
     opacity = values.opacity;
     display = values.display;
@@ -110,7 +110,7 @@ describe("Animation", () => {
     expect(opacity).toBe(0.51);
 
     animation.update(0.75);
-    values = animation.getCurrentValues();
+    values = animation.currentValues;
 
     opacity = values.opacity;
     display = values.display;
@@ -119,7 +119,7 @@ describe("Animation", () => {
     expect(opacity).toBe(0.25);
 
     animation.update(0);
-    values = animation.getCurrentValues();
+    values = animation.currentValues;
 
     opacity = values.opacity;
     display = values.display;

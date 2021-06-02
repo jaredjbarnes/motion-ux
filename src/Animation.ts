@@ -1,5 +1,6 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
+import IAnimation from "./IAnimation";
 
 const sortAsc = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
@@ -7,19 +8,16 @@ const sortAsc = (animatorA: Animator<any>, animatorB: Animator<any>) => {
 
 type AnimationState<T> = { [key: string]: T };
 
-export default class Animation<T> {
-  private _time: number = 0;
-  private _currentValues!: AnimationState<T>;
+export default class Animation<T> implements IAnimation<T> {
+  protected _time: number = 0;
+  protected animators: Animator<T>[] = [];
+
   public name: string;
-  public animators: Animator<T>[] = [];
+  public currentValues: AnimationState<T>;
 
   constructor(name: string, keyframes: Keyframe<T>[]) {
     this.name = name;
-    this.initialize(keyframes);
-  }
-
-  initialize(keyframes: Keyframe<T>[]) {
-    this._currentValues = {};
+    this.currentValues = {};
     this.animators = keyframes.map((keyframe) => new Animator(keyframe));
     this._createCurrentValues();
 
@@ -27,8 +25,8 @@ export default class Animation<T> {
     this.animators.sort(sortAsc);
   }
 
-  private _createCurrentValues() {
-    this._currentValues = this.animators.reduce(
+  protected _createCurrentValues() {
+    this.currentValues = this.animators.reduce(
       (results: AnimationState<T>, animator) => {
         const keyframe = animator.keyframe;
         const property = keyframe.property;
@@ -53,7 +51,7 @@ export default class Animation<T> {
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this._currentValues[keyframe.property] = keyframe.result;
+        this.currentValues[keyframe.property] = keyframe.result;
       }
     }
 
@@ -63,7 +61,7 @@ export default class Animation<T> {
       const keyframe = animators[x].keyframe;
 
       if (keyframe.startAt <= this._time) {
-        this._currentValues[keyframe.property] = keyframe.result;
+        this.currentValues[keyframe.property] = keyframe.result;
       }
     }
   }
@@ -76,19 +74,6 @@ export default class Animation<T> {
     });
 
     this._saveCurrentValues();
-
-    return this;
-  }
-
-  getCurrentValues() {
-    return this._currentValues;
-  }
-
-  merge(animation: Animation<T>) {
-    const oldKeyframes = this.animators.map((a) => a.keyframe);
-    const newKeyframes = animation.animators.map((a) => a.keyframe);
-
-    this.initialize([...oldKeyframes, ...newKeyframes]);
 
     return this;
   }

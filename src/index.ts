@@ -1,4 +1,5 @@
 import Animation from "./Animation";
+import IAnimation from "./IAnimation";
 import Player from "./Player";
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
@@ -7,9 +8,10 @@ import BezierCurve from "./BezierCurve";
 import createDynamicEasing from "./createDynamicEasing";
 
 export {
-  Animation,
+  IAnimation,
   Player,
   Animator,
+  Animation,
   Keyframe,
   BezierCurve,
   easings,

@@ -1,5 +1,5 @@
 ```ts
-const pulse = Animation.fromKeyframes({
+const pulsing = {
   from: {
     transform: {
       value: "scale(1) translate(0px, 0px)",
@@ -19,9 +19,9 @@ const pulse = Animation.fromKeyframes({
       easeIn: "quad",
     },
   },
-});
+};
 
-const pulse = Animation.fromKeyframes({
+const pacing ={
   from: {
     transform: {
       value: "scale(1) translate(0px, 0px)",
@@ -41,9 +41,9 @@ const pulse = Animation.fromKeyframes({
       easeIn: "quad",
     },
   },
-});
+};
 
-const shake = Animation.fromKeyframes({
+const shake = {
   from: {
     transform: {
       value: "scale(1) translate(0px, 0px)",
@@ -56,7 +56,14 @@ const shake = Animation.fromKeyframes({
       easeIn: "elastic",
     },
   },
-});
+};
+
+// Static example
+const stationary = {
+  static: {
+    transform: "translate(0,0)"
+  }
+}
 
 // This could be react-motion-ux interface.
 const statefulMotion = {
@@ -81,6 +88,3 @@ const statefulMotion = {
   },
 };
 ```
-
-Need to make a Animator of an object or an array of numbers. This can by-pass the parsing
-which is the most expensive part of animation.

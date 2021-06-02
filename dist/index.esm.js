@@ -95,17 +95,14 @@ class Animation {
         this._time = 0;
         this.animators = [];
         this.name = name;
-        this.initialize(keyframes);
-    }
-    initialize(keyframes) {
-        this._currentValues = {};
+        this.currentValues = {};
         this.animators = keyframes.map((keyframe) => new Animator(keyframe));
         this._createCurrentValues();
         // Sort by time.
         this.animators.sort(sortAsc);
     }
     _createCurrentValues() {
-        this._currentValues = this.animators.reduce((results, animator) => {
+        this.currentValues = this.animators.reduce((results, animator) => {
             const keyframe = animator.keyframe;
             const property = keyframe.property;
             results[property] = keyframe.result;
@@ -123,7 +120,7 @@ class Animation {
             const key = keyframe.property;
             if (!visitedMap.has(key)) {
                 visitedMap.set(key, true);
-                this._currentValues[keyframe.property] = keyframe.result;
+                this.currentValues[keyframe.property] = keyframe.result;
             }
         }
         // Assign if the value of the start at was before the time now.
@@ -131,7 +128,7 @@ class Animation {
         for (let x = 0; x < length; x++) {
             const keyframe = animators[x].keyframe;
             if (keyframe.startAt <= this._time) {
-                this._currentValues[keyframe.property] = keyframe.result;
+                this.currentValues[keyframe.property] = keyframe.result;
             }
         }
     }
@@ -141,15 +138,6 @@ class Animation {
             animator.update(time);
         });
         this._saveCurrentValues();
-        return this;
-    }
-    getCurrentValues() {
-        return this._currentValues;
-    }
-    merge(animation) {
-        const oldKeyframes = this.animators.map((a) => a.keyframe);
-        const newKeyframes = animation.animators.map((a) => a.keyframe);
-        this.initialize([...oldKeyframes, ...newKeyframes]);
         return this;
     }
 }

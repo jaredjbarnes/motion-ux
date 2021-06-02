@@ -19,9 +19,9 @@ describe("SlopeAnimationBuilder", () => {
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 1);
     slopeAnimation.update(1);
-    const values = slopeAnimation.getCurrentValues();
+    const values = slopeAnimation.currentValues;
 
-    expect(values.left).toBe(249.99999999990905);
+    expect(parseInt(values.left.toString(),10)).toBe(249);
   });
 
   test("Forward with longer duration.", () => {
@@ -39,9 +39,9 @@ describe("SlopeAnimationBuilder", () => {
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 0.5, 1000, 2000, 1);
     slopeAnimation.update(1);
-    const values = slopeAnimation.getCurrentValues();
+    const values = slopeAnimation.currentValues;
 
-    expect(values.left).toBe(349.9999999998181);
+    expect(parseInt(values.left.toString(),10)).toBe(349);
   });
 
   test("Stopped", () => {
@@ -59,8 +59,134 @@ describe("SlopeAnimationBuilder", () => {
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build<number>(animation, 0.5, 1000, 1000, 0);
     slopeAnimation.update(1);
-    const values = slopeAnimation.getCurrentValues();
+    const values = slopeAnimation.currentValues;
 
-    expect(values.left).toBe(150);
+    expect(parseInt(values.left.toString(),10)).toBe(150);
+  });
+
+  test("Forward Array", () => {
+    const animation = new Animation("position", [
+      new Keyframe({
+        property: "left",
+        from: [100],
+        to: [200],
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
+
+    const builder = new SlopeAnimationBuilder();
+    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 1);
+    slopeAnimation.update(1);
+    const values = slopeAnimation.currentValues;
+
+    expect(parseInt(values.left[0].toString(),10)).toBe(249);
+  });
+
+  test("Forward Array with longer duration.", () => {
+    const animation = new Animation("position", [
+      new Keyframe({
+        property: "left",
+        from: [100],
+        to: [200],
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
+
+    const builder = new SlopeAnimationBuilder();
+    const slopeAnimation = builder.build(animation, 0.5, 1000, 2000, 1);
+    slopeAnimation.update(1);
+    const values = slopeAnimation.currentValues;
+
+    expect(parseInt(values.left[0].toString(),10)).toBe(349);
+  });
+
+  test("Stopped Array", () => {
+    const animation = new Animation("position", [
+      new Keyframe({
+        property: "left",
+        from: [100],
+        to: [200],
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
+
+    const builder = new SlopeAnimationBuilder();
+    const slopeAnimation = builder.build<number[]>(
+      animation,
+      0.5,
+      1000,
+      1000,
+      0
+    );
+    slopeAnimation.update(1);
+    const values = slopeAnimation.currentValues;
+
+    expect(parseInt(values.left[0].toString(),10)).toBe(150);
+  });
+
+  test("Forward Object", () => {
+    const animation = new Animation("position", [
+      new Keyframe({
+        property: "left",
+        from: { property: 100 },
+        to: { property: 200 },
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
+
+    const builder = new SlopeAnimationBuilder();
+    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 1);
+    slopeAnimation.update(1);
+    const values = slopeAnimation.currentValues;
+
+    expect(parseInt(values.left.property.toString(),10)).toBe(249);
+  });
+
+  test("Forward Object with longer duration.", () => {
+    const animation = new Animation("position", [
+      new Keyframe({
+        property: "left",
+        from: { property: 100 },
+        to: { property: 200 },
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
+
+    const builder = new SlopeAnimationBuilder();
+    const slopeAnimation = builder.build(animation, 0.5, 1000, 2000, 1);
+    slopeAnimation.update(1);
+    const values = slopeAnimation.currentValues;
+
+    expect(parseInt(values.left.property.toString(),10)).toBe(349);
+  });
+
+  test("Stopped Object", () => {
+    const animation = new Animation("position", [
+      new Keyframe({
+        property: "left",
+        from: { property: 100 },
+        to: { property: 200 },
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
+
+    const builder = new SlopeAnimationBuilder();
+    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 0);
+    slopeAnimation.update(1);
+    const values = slopeAnimation.currentValues;
+
+    expect(parseInt(values.left.property.toString(),10)).toBe(150);
   });
 });

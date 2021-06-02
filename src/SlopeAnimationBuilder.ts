@@ -1,53 +1,39 @@
 import easings from "./easings";
 import Keyframe from "./Keyframe";
+import IAnimation from "./IAnimation";
 import Animation from "./Animation";
 import ObjectOperator from "./ObjectOperator";
 import { PlayerState } from "./Player";
 
+const nullableAnimation = new Animation("null", [
+  new Keyframe({ from: 0, to: 0, property: "null" }),
+]);
+
+const objectOperator = new ObjectOperator();
+
 const FORWARD = 1;
 
 export default class SlopeAnimationBuilder {
-  public animation: any;
-  public slopeAnimation: any;
-  public direction: any;
-  public newDuration: any;
-  public duration: any;
-  public offset: any;
-  public delta: any;
+  public direction = 0;
+  public newDuration = 0;
+  public duration = 0;
+  public offset = 0;
+  public delta = 0.001;
+  public animation: IAnimation<any> = nullableAnimation;
+  public slopeAnimation!: IAnimation<any>;
   public deltaStepValues: any;
-  public scaledValues: any;
   public deltaValues: any;
   public nowValues: any;
-  public diffValues: any;
-  public derivativeValues: any;
   public toValues: any;
   public scaleValues: any;
-  public objectOperator = new ObjectOperator();
-
-  constructor() {
-    this.animation = null;
-    this.slopeAnimation = null;
-    this.direction = 0;
-    this.newDuration = 0;
-    this.duration = 0;
-    this.offset = 0;
-    this.delta = 0.0001;
-    this.deltaStepValues = null;
-    this.scaledValues = null;
-    this.deltaValues = null;
-    this.nowValues = null;
-    this.diffValues = null;
-    this.derivativeValues = null;
-    this.scaledValues = null;
-    this.toValues = null;
-  }
+  public dynamicValues: any;
 
   private cloneValues(values: any) {
     return JSON.parse(JSON.stringify(values));
   }
 
   build<T>(
-    animation: Animation<T>,
+    animation: IAnimation<T>,
     offset: number,
     duration: number,
     newDuration: number,
@@ -59,37 +45,29 @@ export default class SlopeAnimationBuilder {
     this.newDuration = newDuration;
     this.direction = direction;
 
-    this.cacheValues();
+    // If the offset is at or near the end get the last slope. We
+    if (this.offset + this.delta > 1) {
+      this.offset -= this.delta;
+    }
+
     this.calculate();
     this.createSlopeTimeline();
 
-    return this.slopeAnimation as Animation<T>;
+    return this.slopeAnimation as IAnimation<T>;
   }
 
   private cacheValues() {
-    this.animation.update(this.offset);
-    this.nowValues = this.cloneValues(this.animation.getCurrentValues());
-
     this.deltaStepValues = this.cloneValues(this.nowValues);
     this.scaleValues = this.cloneValues(this.nowValues);
-    this.diffValues = this.cloneValues(this.nowValues);
-    this.derivativeValues = this.cloneValues(this.nowValues);
-    this.scaledValues = this.cloneValues(this.nowValues);
-    this.toValues = this.cloneValues(this.nowValues);
+    this.dynamicValues = this.cloneValues(this.nowValues);
 
     this.cacheDeltaStepValues();
     this.cacheScaleValues();
-
-    if (this.direction === FORWARD) {
-      this.cacheDeltaValueForward();
-    } else {
-      this.cacheDeltaValueStopped();
-    }
   }
 
   private cacheDeltaStepValues() {
     Object.keys(this.deltaStepValues).forEach((property) => {
-      this.objectOperator.assign(this.deltaStepValues[property], this.delta);
+      objectOperator.assign(this.deltaStepValues[property], this.delta);
     });
   }
 
@@ -97,25 +75,36 @@ export default class SlopeAnimationBuilder {
     const scale = this.newDuration / this.duration;
 
     Object.keys(this.scaleValues).forEach((property) => {
-      this.objectOperator.assign(this.scaleValues[property], scale);
+      objectOperator.assign(this.scaleValues[property], scale);
     });
   }
 
   private cacheDeltaValueForward() {
     this.animation.update(this.offset + this.delta);
-    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
+    this.deltaValues = this.cloneValues(this.animation.currentValues);
   }
 
   private cacheDeltaValueStopped() {
     this.animation.update(this.offset);
-    this.deltaValues = this.cloneValues(this.animation.getCurrentValues());
+    this.deltaValues = this.cloneValues(this.animation.currentValues);
   }
 
   private calculate() {
+    this.animation.update(this.offset);
+    this.nowValues = this.cloneValues(this.animation.currentValues);
+    this.toValues = this.cloneValues(this.nowValues);
+
+    if (this.direction === FORWARD) {
+      this.cacheDeltaValueForward();
+    } else {
+      this.cacheDeltaValueStopped();
+    }
+
     Object.keys(this.nowValues).forEach((property) => {
       const value = this.nowValues[property];
 
       if (typeof value === "object" && value != null) {
+        this.cacheValues();
         this.calculateObject(property);
       } else {
         this.calculatePrimitive(property);
@@ -139,18 +128,15 @@ export default class SlopeAnimationBuilder {
   private calculateObject(property: string) {
     const now = this.nowValues[property];
     const delta = this.deltaValues[property];
-    const diff = this.diffValues[property];
-
     const deltaStep = this.deltaStepValues[property];
-    const derivative = this.derivativeValues[property];
     const scale = this.scaleValues[property];
-    const scaled = this.scaledValues[property];
+    const dynamicValue = this.dynamicValues[property];
     const to = this.toValues[property];
 
-    this.objectOperator.subtract(delta, now, diff);
-    this.objectOperator.divide(diff, deltaStep, derivative);
-    this.objectOperator.multiply(derivative, scale, scaled);
-    this.objectOperator.add(now, scaled, to);
+    objectOperator.subtract(delta, now, dynamicValue);
+    objectOperator.divide(dynamicValue, deltaStep, dynamicValue);
+    objectOperator.multiply(dynamicValue, scale, dynamicValue);
+    objectOperator.add(now, dynamicValue, to);
 
     this.toValues[property] = to;
   }

@@ -1,7 +1,7 @@
 import Observable from "./Observable";
 import DefaultClock from "./DefaultClock";
 import { IClock } from "./IClock";
-import Animation from "./Animation";
+import IAnimation from "./IAnimation";
 
 const defaultClock = new DefaultClock();
 function defaultRender() {}
@@ -26,10 +26,10 @@ export default class Player extends Observable {
   private _iterations: number;
   private _repeat: number;
   private _repeatDirection: RepeatDirection;
-  private _animation: Animation<any> | null = null;
+  private _animation: IAnimation<any> | null = null;
   private _clock: IClock;
   private _state: PlayerState;
-  private _render: (animation: Animation<any>) => void;
+  private _render: (animation: IAnimation<any>) => void;
   private _delay: number;
 
   constructor() {
@@ -116,7 +116,7 @@ export default class Player extends Observable {
     return this._animation;
   }
 
-  set animation(animation: Animation<any> | null) {
+  set animation(animation: IAnimation<any> | null) {
     this._animation = animation;
   }
 
@@ -124,7 +124,7 @@ export default class Player extends Observable {
     return this._render;
   }
 
-  set render(render: (animation: Animation<any>) => void) {
+  set render(render: (animation: IAnimation<any>) => void) {
     this._render = render;
   }
 

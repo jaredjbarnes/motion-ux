@@ -11,8 +11,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
     toAnimation: Animation<T>,
     easing: EasingFunction
   ) {
-    const fromValues = fromAnimation.getCurrentValues();
-    const toValues = toAnimation.getCurrentValues();
+    const fromValues = fromAnimation.currentValues;
+    const toValues = toAnimation.currentValues;
 
     const animations = Object.keys(fromValues)
       .map((name) => {
