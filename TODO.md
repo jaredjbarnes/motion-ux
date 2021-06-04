@@ -58,13 +58,6 @@ const shake = {
   },
 };
 
-// Static example
-const stationary = {
-  static: {
-    transform: "translate(0,0)"
-  }
-}
-
 // This could be react-motion-ux interface.
 const statefulMotion = {
   pulsing: {

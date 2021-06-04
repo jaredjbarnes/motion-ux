@@ -630,7 +630,7 @@ var easeInOutBounce = (percentage) => {
 };
 
 var easeInCubic = (percentage) => {
-    return 1 * (percentage /= 1) * percentage * percentage;
+    return percentage * percentage * percentage;
 };
 
 var easeOutCubic = (percentage) => {
@@ -693,7 +693,7 @@ var easeInOutSine = (percentage) => {
 };
 
 var easeInExpo = (percentage) => {
-    return percentage == 0 ? 0 : 1 * Math.pow(2, 10 * (percentage / 1 - 1));
+    return percentage == 0 ? 0 : Math.pow(2, 10 * (percentage - 1));
 };
 
 var easeOutExpo = (percentage) => {
@@ -711,7 +711,7 @@ var easeInOutExpo = (percentage) => {
 };
 
 var easeInCirc = (percentage) => {
-    return -1 * (Math.sqrt(1 - (percentage /= 1) * percentage) - 1);
+    return -(Math.sqrt(1 - percentage * percentage) - 1);
 };
 
 var easeOutCirc = (percentage) => {
@@ -726,7 +726,7 @@ var easeInOutCirc = (percentage) => {
 
 var easeInBack = (percentage) => {
     const s = 1.70158;
-    return 1 * (percentage /= 1) * percentage * ((s + 1) * percentage - s);
+    return percentage * percentage * ((s + 1) * percentage - s);
 };
 
 var easeOutBack = (percentage) => {

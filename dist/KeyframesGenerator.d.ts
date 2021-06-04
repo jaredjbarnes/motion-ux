@@ -7,17 +7,14 @@ export interface IComplexKeyframeValue {
     easeIn?: DynamicEasingNames;
     easeOut?: DynamicEasingNames;
 }
+interface IAnimatableObject {
+    [key: string]: IAnimationKeyframeValue;
+}
 export declare type IAnimationKeyframeValue = string | number | IComplexKeyframeValue;
 export interface IAnimationKeyframes {
-    [key: string]: {
-        [key: string]: IAnimationKeyframeValue;
-    };
-    from: {
-        [key: string]: IAnimationKeyframeValue;
-    };
-    to: {
-        [key: string]: IAnimationKeyframeValue;
-    };
+    [key: string]: IAnimatableObject;
+    from: IAnimatableObject;
+    to: IAnimatableObject;
 }
 export default class KeyframesGenerator {
     private transformValue;
@@ -33,3 +30,4 @@ export default class KeyframesGenerator {
     getTo(nextValue: any): any;
     generate(animationKeyframes: IAnimationKeyframes): Keyframe<any>[];
 }
+export {};

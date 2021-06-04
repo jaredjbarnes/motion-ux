@@ -18,7 +18,7 @@ export default class SlopeAnimationBuilder {
   public newDuration = 0;
   public duration = 0;
   public offset = 0;
-  public delta = 0.001;
+  public delta = 0.01;
   public animation: IAnimation<any> = nullableAnimation;
   public slopeAnimation!: IAnimation<any>;
   public deltaStepValues: any;
@@ -114,10 +114,10 @@ export default class SlopeAnimationBuilder {
 
   private calculatePrimitive(property: string) {
     const now = this.nowValues[property];
-    const delta = this.deltaValues[property];
+    const dxNow = this.deltaValues[property];
 
     const scale = this.newDuration / this.duration;
-    const diff = delta - now;
+    const diff = dxNow - now;
     const derivative = diff / this.delta;
     const scaled = derivative * scale;
     const to = now + scaled;

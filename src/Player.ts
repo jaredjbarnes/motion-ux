@@ -132,6 +132,12 @@ export default class Player extends Observable {
     return this._iterations;
   }
 
+  set iterations(value: number) {
+    if (value >= 0) {
+      this._iterations = value;
+    }
+  }
+
   get clock() {
     return this._clock;
   }

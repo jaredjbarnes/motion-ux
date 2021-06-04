@@ -1,4 +1,5 @@
 import Animation from "./Animation";
+import IAnimation from "./IAnimation";
 import Keyframe from "./Keyframe";
 import easings, { EasingFunction } from "./easings";
 
@@ -7,8 +8,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
   public toAnimation: any;
 
   constructor(
-    fromAnimation: Animation<T>,
-    toAnimation: Animation<T>,
+    fromAnimation: IAnimation<T>,
+    toAnimation: IAnimation<T>,
     easing: EasingFunction
   ) {
     const fromValues = fromAnimation.currentValues;

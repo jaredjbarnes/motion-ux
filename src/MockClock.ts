@@ -29,8 +29,9 @@ export default class MockClock implements IClock {
 
   tick(time: number) {
     this.setTime(time);
+    const values = this.requests.values() as any[];
 
-    this.requests.values().forEach((callback) => {
+    values.forEach((callback) => {
       callback();
     });
   }

@@ -1,48 +1,30 @@
-import "../../dist/main.js";
+import "../../dist/index.browser.js";
 
-const { easings, BlendedEasing, Timeline } = motionUX;
+const { easings } = motionUX;
 
 export default class TransitionDisplay {
   constructor(document) {
     this.document = document;
-    this.fromEasingInput = null;
-    this.toEasingInput = null;
-    this.offsetInput = null;
+    this.easingInput = null;
     this.transitionSpanInput = null;
     this.ball = null;
-    this.fromCanvas = new EasingCanvas(document);
-    this.toCanvas = new EasingCanvas(document);
-    this.blendCanvas = new EasingCanvas(document);
+    this.easingCanvas = new EasingCanvas(document);
     this.timeline = null;
     this.blendedEasing = easings.linear;
 
-    this.createFromDropDown();
-    this.createToDropDown();
-    this.createOffetRange();
-    this.createTransitionSpanRange();
+    this.createDropDown();
 
     this.build();
     this.update();
   }
 
-  createFromDropDown() {
-    this.fromEasingInput = this.document.createElement("select");
+  createDropDown() {
+    this.easingInput = this.document.createElement("select");
     const options = this.createEasingOptions();
 
-    options.forEach((o) => this.fromEasingInput.appendChild(o));
+    options.forEach((o) => this.easingInput.appendChild(o));
 
-    this.fromEasingInput.addEventListener("change", () => {
-      this.update();
-    });
-  }
-
-  createToDropDown() {
-    this.toEasingInput = this.document.createElement("select");
-    const options = this.createEasingOptions();
-
-    options.forEach((o) => this.toEasingInput.appendChild(o));
-
-    this.toEasingInput.addEventListener("change", () => {
+    this.easingInput.addEventListener("change", () => {
       this.update();
     });
   }
@@ -59,59 +41,14 @@ export default class TransitionDisplay {
     });
   }
 
-  createOffetRange() {
-    this.offsetInput = document.createElement("input");
-    this.offsetInput.type = "range";
-    this.offsetInput.min = 0;
-    this.offsetInput.max = 1;
-    this.offsetInput.step = 0.01;
-
-    this.offsetInput.addEventListener("input", () => {
-      this.update();
-    });
-  }
-
-  createTransitionSpanRange() {
-    this.transitionSpanInput = document.createElement("input");
-    this.transitionSpanInput.type = "range";
-    this.transitionSpanInput.min = 0;
-    this.transitionSpanInput.max = 1;
-    this.transitionSpanInput.step = 0.01;
-
-    this.transitionSpanInput.addEventListener("input", () => {
-      this.update();
-    });
-  }
-
   build() {
-    this.document.body.appendChild(this.fromEasingInput);
+    this.document.body.appendChild(this.easingInput);
     this.document.body.appendChild(this.document.createElement("br"));
-    this.document.body.appendChild(this.toEasingInput);
-    this.document.body.appendChild(this.document.createElement("br"));
-    this.document.body.appendChild(this.offsetInput);
-    this.document.body.appendChild(this.document.createElement("br"));
-    this.document.body.appendChild(this.transitionSpanInput);
-    this.document.body.appendChild(this.document.createElement("br"));
-    this.document.body.appendChild(this.fromCanvas.getCanvas());
-    this.document.body.appendChild(this.toCanvas.getCanvas());
-    this.document.body.appendChild(this.document.createElement("br"));
-    this.document.body.appendChild(this.blendCanvas.getCanvas());
+    this.document.body.appendChild(this.easingCanvas.getCanvas());
   }
 
-  getFromEasing() {
-    return easings[this.fromEasingInput.value];
-  }
-
-  getToEasing() {
-    return easings[this.toEasingInput.value];
-  }
-
-  getFromEasingName() {
-    return this.fromEasingInput.value;
-  }
-
-  getToEasingName() {
-    return this.toEasingInput.value;
+  getEasing() {
+    return easings[this.easingInput.value];
   }
 
   getOffset() {
@@ -123,46 +60,14 @@ export default class TransitionDisplay {
   }
 
   update() {
-    this.updateFromCanvas();
-    this.updateToCanvas();
-    this.updateBlendCanvas();
+    this.updateEasingCanvas();
   }
 
-  updateFromCanvas() {
-    const easing = this.getFromEasing();
-
-    this.fromCanvas.clear();
-    this.fromCanvas.draw(easing);
-  }
-
-  updateToCanvas() {
-    const easing = this.getToEasing();
-
-    this.toCanvas.clear();
-    this.toCanvas.draw(easing);
-  }
-
-  updateBlendCanvas() {
+  updateEasingCanvas() {
     const size = 100;
-    const offset = this.getOffset();
 
-    const fromEasing = this.getFromEasing();
-    const toEasing = this.getToEasing();
-    const transitionDuration = this.getTransitionSpan();
-    const blendedEasing = (this.blendedEasing = new BlendedEasing({
-      from: fromEasing,
-      to: toEasing,
-      offset,
-      transitionDuration,
-    }));
-
-    const xOffset = offset * size;
-    const yOffset = fromEasing.valueAt(offset) * size;
-
-    this.blendCanvas.setSize(100 + Math.max(xOffset, yOffset));
-    this.blendCanvas.draw(fromEasing, 0, 0, 100, offset);
-    this.blendCanvas.draw(toEasing, xOffset, yOffset, 100, 0);
-    this.blendCanvas.draw(blendedEasing, xOffset, yOffset, 100, 1);
+    this.easingCanvas.setSize(size);
+    this.easingCanvas.draw(this.getEasing(), 0, 0, size, 1);
   }
 }
 
@@ -250,7 +155,7 @@ class EasingCanvas {
       }
 
       const x = size * i + xOffset + bufferSize;
-      const y = fullSize - (size * easing.valueAt(i) + yOffset + bufferSize);
+      const y = fullSize - (size * easing(i) + yOffset + bufferSize);
 
       if (i === 0) {
         context.moveTo(x, y);
@@ -260,7 +165,7 @@ class EasingCanvas {
     }
 
     const x = size * 1 + xOffset + bufferSize;
-    const y = fullSize - (size * easing.valueAt(1) + yOffset + bufferSize);
+    const y = fullSize - (size * easing(1) + yOffset + bufferSize);
     context.lineTo(x, y);
 
     context.stroke();

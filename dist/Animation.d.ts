@@ -1,9 +1,10 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
+import IAnimation from "./IAnimation";
 declare type AnimationState<T> = {
     [key: string]: T;
 };
-export default class Animation<T> {
+export default class Animation<T> implements IAnimation<T> {
     protected _time: number;
     protected animators: Animator<T>[];
     name: string;

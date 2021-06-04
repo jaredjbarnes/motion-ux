@@ -8,6 +8,18 @@ export default class Observable {
     this.observers = [];
   }
 
+  observeTimeOnce<TEvent extends ITimeEvent>(
+    time: number,
+    callback: (event: TEvent) => void
+  ) {
+    const observer = this.observeTime<TEvent>(time, (event) => {
+      callback(event);
+      observer.dispose();
+    });
+
+    return observer;
+  }
+
   observeTime<TEvent extends ITimeEvent>(
     time: number,
     callback: (event: TEvent) => void
@@ -20,6 +32,18 @@ export default class Observable {
     });
 
     this.observers.push(observer);
+    return observer;
+  }
+
+  observeOnce<TEvent extends IEvent>(
+    type: string,
+    callback: (event: IEvent) => void
+  ) {
+    const observer = this.observe(type, (event) => {
+      callback(event);
+      observer.dispose();
+    });
+
     return observer;
   }
 
@@ -44,7 +68,11 @@ export default class Observable {
     });
   }
 
-  dispose() {
+  clearObservers() {
     this.observers = [];
+  }
+
+  dispose() {
+    this.clearObservers();
   }
 }

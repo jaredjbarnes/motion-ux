@@ -21,7 +21,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left.toString(),10)).toBe(249);
+    expect(parseInt(values.left.toString(), 10)).toBe(250);
   });
 
   test("Forward with longer duration.", () => {
@@ -41,7 +41,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left.toString(),10)).toBe(349);
+    expect(parseInt(values.left.toString(), 10)).toBe(350);
   });
 
   test("Stopped", () => {
@@ -61,7 +61,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left.toString(),10)).toBe(150);
+    expect(parseInt(values.left.toString(), 10)).toBe(150);
   });
 
   test("Forward Array", () => {
@@ -81,7 +81,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left[0].toString(),10)).toBe(249);
+    expect(parseInt(values.left[0].toString(), 10)).toBe(250);
   });
 
   test("Forward Array with longer duration.", () => {
@@ -101,7 +101,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left[0].toString(),10)).toBe(349);
+    expect(parseInt(values.left[0].toString(), 10)).toBe(350);
   });
 
   test("Stopped Array", () => {
@@ -127,7 +127,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left[0].toString(),10)).toBe(150);
+    expect(parseInt(values.left[0].toString(), 10)).toBe(150);
   });
 
   test("Forward Object", () => {
@@ -147,7 +147,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left.property.toString(),10)).toBe(249);
+    expect(parseInt(values.left.property.toString(), 10)).toBe(250);
   });
 
   test("Forward Object with longer duration.", () => {
@@ -167,7 +167,7 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left.property.toString(),10)).toBe(349);
+    expect(parseInt(values.left.property.toString(), 10)).toBe(350);
   });
 
   test("Stopped Object", () => {
@@ -187,6 +187,6 @@ describe("SlopeAnimationBuilder", () => {
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
-    expect(parseInt(values.left.property.toString(),10)).toBe(150);
+    expect(parseInt(values.left.property.toString(), 10)).toBe(150);
   });
 });
