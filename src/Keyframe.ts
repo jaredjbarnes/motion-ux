@@ -47,4 +47,8 @@ export default class Keyframe<T> {
   static createKeyframes(animationKeyframes: IAnimationKeyframes) {
     return keyframesGenerator.generate(animationKeyframes);
   }
+
+  clone(){
+    return new Keyframe(this);
+  }
 }

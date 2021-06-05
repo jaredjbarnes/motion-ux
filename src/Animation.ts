@@ -77,4 +77,9 @@ export default class Animation<T> implements IAnimation<T> {
 
     return this;
   }
+
+  clone() {
+    const keyframes = this.animators.map((a) => a.keyframe.clone());
+    return new Animation(this.name, keyframes);
+  }
 }

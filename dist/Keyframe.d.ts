@@ -28,4 +28,5 @@ export default class Keyframe<T> {
     easing: EasingFunction;
     constructor(config: KeyframeConfig<T>);
     static createKeyframes(animationKeyframes: IAnimationKeyframes): Keyframe<any>[];
+    clone(): Keyframe<T>;
 }

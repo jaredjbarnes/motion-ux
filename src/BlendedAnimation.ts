@@ -7,11 +7,12 @@ export default class BlendedAnimation<T> extends Animation<T> {
   public fromAnimation: any;
   public toAnimation: any;
   public properties: string[];
+  private easing: EasingFunction;
 
   constructor(
     fromAnimation: IAnimation<T>,
     toAnimation: IAnimation<T>,
-    easing: EasingFunction
+    easing: EasingFunction = easings.linear
   ) {
     const fromValues = fromAnimation.currentValues;
     const toValues = toAnimation.currentValues;
@@ -44,6 +45,7 @@ export default class BlendedAnimation<T> extends Animation<T> {
 
     super(`blended`, keyframes);
 
+    this.easing = easing;
     this.properties = properties;
     this.fromAnimation = fromAnimation;
     this.toAnimation = toAnimation;
@@ -69,5 +71,13 @@ export default class BlendedAnimation<T> extends Animation<T> {
 
     super.update(time);
     return this;
+  }
+
+  clone() {
+    return new BlendedAnimation<T>(
+      this.fromAnimation.clone(),
+      this.toAnimation(),
+      this.easing
+    );
   }
 }

@@ -144,6 +144,10 @@ class Animation {
         this._saveCurrentValues();
         return this;
     }
+    clone() {
+        const keyframes = this.animators.map((a) => a.keyframe.clone());
+        return new Animation(this.name, keyframes);
+    }
 }
 
 const states = {
@@ -993,6 +997,9 @@ class Keyframe {
     }
     static createKeyframes(animationKeyframes) {
         return keyframesGenerator$1.generate(animationKeyframes);
+    }
+    clone() {
+        return new Keyframe(this);
     }
 }
 
@@ -2547,27 +2554,22 @@ class SlopeAnimationBuilder {
 
 const slopeAnimationBuilder = new SlopeAnimationBuilder();
 class ExtendedAnimation {
-    constructor(player, extendedDuration = 0) {
-        if (player.animation == null) {
-            throw new Error("Cannot make an extension without an animation.");
-        }
-        this.player = player;
-        this.animation = player.animation;
-        this.offset = player.time;
+    constructor(animation, animationDuration, offset, playerState, extendedDuration = 0) {
+        this.animation = animation;
+        this.animationDuration = animationDuration;
+        this.offset = offset;
+        this.playerState = playerState;
+        this.extendedDuration = extendedDuration;
         this.currentValues = this.animation.currentValues;
         this.name = this.animation.name;
-        this.slopeAnimation = slopeAnimationBuilder.build(this.animation, 1, this.player.duration, extendedDuration, this.player.state);
+        this.slopeAnimation = slopeAnimationBuilder.build(this.animation, 1, animationDuration, extendedDuration, playerState);
     }
     update(time) {
         const offsetTime = this.offset + time;
-        if (time >= 1) {
-            this.slopeAnimation = null;
-        }
         if (offsetTime + slopeAnimationBuilder.delta > 1) {
             if (this.slopeAnimation == null) {
                 return this;
             }
-            this.animation = null;
             const overflowTime = offsetTime + slopeAnimationBuilder.delta - 1;
             this.slopeAnimation.update(overflowTime);
             this.currentValues = this.slopeAnimation.currentValues;
@@ -2581,10 +2583,13 @@ class ExtendedAnimation {
         }
         return this;
     }
+    clone() {
+        return new ExtendedAnimation(this.animation.clone(), this.animationDuration, this.offset, this.playerState, this.extendedDuration);
+    }
 }
 
 class BlendedAnimation extends Animation {
-    constructor(fromAnimation, toAnimation, easing) {
+    constructor(fromAnimation, toAnimation, easing = easings.linear) {
         const fromValues = fromAnimation.currentValues;
         const toValues = toAnimation.currentValues;
         const properties = Object.keys(fromValues);
@@ -2607,6 +2612,7 @@ class BlendedAnimation extends Animation {
         })
             .flat();
         super(`blended`, keyframes);
+        this.easing = easing;
         this.properties = properties;
         this.fromAnimation = fromAnimation;
         this.toAnimation = toAnimation;
@@ -2627,6 +2633,9 @@ class BlendedAnimation extends Animation {
         this.updateKeyframes();
         super.update(time);
         return this;
+    }
+    clone() {
+        return new BlendedAnimation(this.fromAnimation.clone(), this.toAnimation(), this.easing);
     }
 }
 
@@ -2651,7 +2660,7 @@ class StatefulMotion {
         }
         this.currentState = name;
         if (this.player.animation == null) {
-            this.player.animation = state.animation;
+            this.player.animation = state.animation.clone();
         }
         else {
             (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
@@ -2660,12 +2669,12 @@ class StatefulMotion {
             const extendedDuration = state.transitionDuration - remainingDuration;
             let from;
             if (extendedDuration > 0) {
-                from = new ExtendedAnimation(this.player, extendedDuration);
+                from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
             }
             else {
                 from = previousAnimation;
             }
-            this.player.animation = new BlendedAnimation(from, state.animation, easings[state.transitionEasing]);
+            this.player.animation = new BlendedAnimation(from, state.animation.clone(), easings[state.transitionEasing]);
         }
         this.observer = this.player.observeTimeOnce(1, () => {
             this.player.animation = state.animation;

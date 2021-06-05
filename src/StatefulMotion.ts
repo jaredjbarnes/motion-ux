@@ -40,25 +40,32 @@ export default class StatefulMotion<T> {
     this.currentState = name;
 
     if (this.player.animation == null) {
-      this.player.animation = state.animation;
+      this.player.animation = state.animation.clone();
     } else {
       this.observer?.dispose();
 
       const previousAnimation = this.player.animation;
-      const remainingDuration = (1 - this.player.time) * this.states[this.currentState].duration;
+      const remainingDuration =
+        (1 - this.player.time) * this.states[this.currentState].duration;
       const extendedDuration = state.transitionDuration - remainingDuration;
 
       let from: IAnimation<T>;
 
       if (extendedDuration > 0) {
-        from = new ExtendedAnimation(this.player, extendedDuration);
+        from = new ExtendedAnimation(
+          this.player.animation,
+          this.player.duration,
+          this.player.time,
+          this.player.state,
+          extendedDuration
+        );
       } else {
         from = previousAnimation;
       }
 
       this.player.animation = new BlendedAnimation(
         from,
-        state.animation,
+        state.animation.clone(),
         easings[state.transitionEasing]
       );
     }

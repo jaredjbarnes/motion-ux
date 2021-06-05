@@ -5,47 +5,48 @@ import SlopeAnimationBuilder from "./SlopeAnimationBuilder";
 const slopeAnimationBuilder = new SlopeAnimationBuilder();
 
 export default class ExtendedAnimation<T> implements IAnimation<T> {
-  private animation: IAnimation<T> | null;
-  private slopeAnimation: IAnimation<T> | null;
+  private animation: IAnimation<T>;
+  private animationDuration: number;
+  private playerState: PlayerState;
+  private extendedDuration: number;
+  private slopeAnimation: IAnimation<T>;
   private offset: number;
-  private player: Player;
 
   public currentValues: AnimationState<T>;
   public name: string;
 
-  constructor(player: Player, extendedDuration = 0) {
-    if (player.animation == null) {
-      throw new Error("Cannot make an extension without an animation.");
-    }
-
-    this.player = player;
-    this.animation = player.animation;
-    this.offset = player.time;
+  constructor(
+    animation: IAnimation<T>,
+    animationDuration: number,
+    offset: number,
+    playerState: PlayerState,
+    extendedDuration = 0
+  ) {
+    this.animation = animation;
+    this.animationDuration = animationDuration;
+    this.offset = offset;
+    this.playerState = playerState;
+    this.extendedDuration = extendedDuration;
     this.currentValues = this.animation.currentValues;
 
     this.name = this.animation.name;
     this.slopeAnimation = slopeAnimationBuilder.build(
       this.animation,
       1,
-      this.player.duration,
+      animationDuration,
       extendedDuration,
-      this.player.state
+      playerState
     );
   }
 
   update(time: number) {
     const offsetTime = this.offset + time;
 
-    if (time >= 1) {
-      this.slopeAnimation = null;
-    }
-
     if (offsetTime + slopeAnimationBuilder.delta > 1) {
       if (this.slopeAnimation == null) {
         return this;
       }
 
-      this.animation = null;
       const overflowTime = offsetTime + slopeAnimationBuilder.delta - 1;
       this.slopeAnimation.update(overflowTime);
       this.currentValues = this.slopeAnimation.currentValues;
@@ -59,5 +60,15 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
     }
 
     return this;
+  }
+
+  clone() {
+    return new ExtendedAnimation(
+      this.animation.clone(),
+      this.animationDuration,
+      this.offset,
+      this.playerState,
+      this.extendedDuration
+    );
   }
 }

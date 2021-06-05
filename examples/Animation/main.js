@@ -68,6 +68,43 @@ const rightToLeft = new Animation(
   })
 );
 
+const upToDown = new Animation(
+  "third",
+  CssKeyframe.createKeyframes({
+    from: {
+      transform: {
+        value: "translate(250px, 0px)",
+        easeOut: "quad",
+      },
+    },
+    "50%": {
+      transform: {
+        value: "translate(250px, 500px)",
+        easeIn: "quad",
+        easeOut: "quad",
+      },
+    },
+    to: {
+      transform: {
+        value: "translate(250px, 0px)",
+        easeIn: "quad",
+      },
+    },
+  })
+);
+
+const stationary = new Animation(
+  "fourth",
+  CssKeyframe.createKeyframes({
+    from: {
+      transform: "translate(250px, 250px)",
+    },
+    to: {
+      transform: "translate(250px, 250px)",
+    },
+  })
+);
+
 function render(animation) {
   const values = animation.currentValues;
   Object.keys(values).forEach((key) => {
@@ -75,25 +112,53 @@ function render(animation) {
   });
 }
 
+const ANIMATION_DURATION = 1000;
+
 const statefulMotion = new StatefulMotion();
 statefulMotion.player.render = render;
 statefulMotion.registerStates({
   first: {
     animation: leftToRight,
     iterationCount: Infinity,
-    duration: 3000,
-    transitionEasing: "linear",
-    transitionDuration: 3000,
+    duration: ANIMATION_DURATION,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION,
   },
   second: {
     animation: rightToLeft,
     iterationCount: Infinity,
-    duration: 3000,
-    transitionEasing: "linear",
-    transitionDuration: 3000,
+    duration: ANIMATION_DURATION,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION,
+  },
+  third: {
+    animation: upToDown,
+    iterationCount: Infinity,
+    duration: ANIMATION_DURATION,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION,
+  },
+  fourth: {
+    animation: stationary,
+    iterationCount: Infinity,
+    duration: ANIMATION_DURATION,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION,
   },
 });
 
 statefulMotion.changeState("first");
 
 window.statefulMotion = statefulMotion;
+const states = ["first", "second", "third", "fourth"];
+
+function change() {
+  const delay = Math.random() * 3000;
+  setTimeout(() => {
+    const index = Math.round(Math.random() * states.length - 1);
+    statefulMotion.changeState(states[index]);
+    change();
+  }, delay);
+}
+
+change();
