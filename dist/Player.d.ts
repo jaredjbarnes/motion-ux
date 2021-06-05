@@ -41,6 +41,7 @@ export default class Player extends Observable {
     get render(): (animation: IAnimation<any>) => void;
     set render(render: (animation: IAnimation<any>) => void);
     get iterations(): number;
+    set iterations(value: number);
     get clock(): IClock;
     set clock(value: IClock);
     get delay(): number;

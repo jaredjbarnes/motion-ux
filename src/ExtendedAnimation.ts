@@ -13,7 +13,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   public currentValues: AnimationState<T>;
   public name: string;
 
-  constructor(player: Player, time = 0) {
+  constructor(player: Player, extendedDuration = 0) {
     if (player.animation == null) {
       throw new Error("Cannot make an extension without an animation.");
     }
@@ -28,7 +28,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
       this.animation,
       1,
       this.player.duration,
-      time,
+      extendedDuration,
       this.player.state
     );
   }
@@ -46,7 +46,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
       }
 
       this.animation = null;
-      const overflowTime = offsetTime - 1;
+      const overflowTime = offsetTime + slopeAnimationBuilder.delta - 1;
       this.slopeAnimation.update(overflowTime);
       this.currentValues = this.slopeAnimation.currentValues;
     } else {

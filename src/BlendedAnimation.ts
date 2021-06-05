@@ -6,6 +6,7 @@ import easings, { EasingFunction } from "./easings";
 export default class BlendedAnimation<T> extends Animation<T> {
   public fromAnimation: any;
   public toAnimation: any;
+  public properties: string[];
 
   constructor(
     fromAnimation: IAnimation<T>,
@@ -14,49 +15,59 @@ export default class BlendedAnimation<T> extends Animation<T> {
   ) {
     const fromValues = fromAnimation.currentValues;
     const toValues = toAnimation.currentValues;
+    const properties = Object.keys(fromValues);
 
-    const animations = Object.keys(fromValues)
+    const keyframes = properties
       .map((name) => {
-        const fromValue = fromValues[name];
-        const toValue = toValues[name];
+        const from = fromValues[name] as any;
+        const to = toValues[name] as any;
 
-        if (toValue == null) {
+        if (to == null) {
           throw new Error(
             `Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(
-              Object.keys(fromValues)
-            )}, To Animation: ${JSON.stringify(Object.keys(toValues))}`
+              Object.keys(from)
+            )}, To Animation: ${JSON.stringify(Object.keys(to))}`
           );
         }
 
-        return Object.keys(fromValue).map((property) => {
-          const from = fromValue[property];
-          const to = toValue[property];
-
-          return new Keyframe({
-            property,
-            startAt: 0,
-            endAt: 1,
-            from,
-            to,
-            controls: [],
-            easing: easing || easings.linear,
-          });
+        return new Keyframe({
+          property: name,
+          startAt: 0,
+          endAt: 1,
+          from,
+          to,
+          controls: [],
+          easing: easing || easings.linear,
         });
       })
       .flat();
 
-    super(`blended`, animations);
+    super(`blended`, keyframes);
 
+    this.properties = properties;
     this.fromAnimation = fromAnimation;
     this.toAnimation = toAnimation;
+  }
+
+  updateKeyframes() {
+    const length = this.properties.length;
+
+    for (let x = 0; x < length; x++) {
+      const animator = this.animators[x];
+      const property = animator.keyframe.property;
+      const keyframe = animator.keyframe;
+
+      keyframe.to = this.toAnimation.currentValues[property];
+      keyframe.from = this.fromAnimation.currentValues[property];
+    }
   }
 
   update(time: number) {
     this.fromAnimation.update(time);
     this.toAnimation.update(time);
+    this.updateKeyframes();
 
     super.update(time);
-
     return this;
   }
 }

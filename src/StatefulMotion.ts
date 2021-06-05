@@ -5,7 +5,6 @@ import ExtendedAnimation from "./ExtendedAnimation";
 import BlendedAnimation from "./BlendedAnimation";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 
-
 export interface IState<T> {
   animation: IAnimation<T>;
   duration: number;
@@ -15,10 +14,11 @@ export interface IState<T> {
 }
 
 export default class StatefulMotion<T> {
-  private states: { [key: string]: IState<T> };
-  private observer: TimeObserver<ITimeEvent>;
+  private currentState: string | null = null;
+  private states: { [key: string]: IState<T> } = {};
+  private observer: TimeObserver<ITimeEvent> | null = null;
 
-  public player: Player = new Player();
+  public player = new Player();
 
   registerState(name: string, state: IState<T>) {
     this.states[name] = state;
@@ -33,22 +33,25 @@ export default class StatefulMotion<T> {
   changeState(name: string) {
     const state = this.states[name];
 
-    if (state == null) {
+    if (state == null || this.currentState === name) {
       return this;
     }
+
+    this.currentState = name;
 
     if (this.player.animation == null) {
       this.player.animation = state.animation;
     } else {
-      this.observer.dispose();
+      this.observer?.dispose();
 
       const previousAnimation = this.player.animation;
-      const remainingTime = 1 - this.player.time;
-      const difference = state.transitionDuration - remainingTime;
+      const remainingDuration = (1 - this.player.time) * this.states[this.currentState].duration;
+      const extendedDuration = state.transitionDuration - remainingDuration;
+
       let from: IAnimation<T>;
 
-      if (difference > 0) {
-        from = new ExtendedAnimation(this.player, difference);
+      if (extendedDuration > 0) {
+        from = new ExtendedAnimation(this.player, extendedDuration);
       } else {
         from = previousAnimation;
       }
@@ -60,13 +63,14 @@ export default class StatefulMotion<T> {
       );
     }
 
-    this.observer = this.player.observeTimeOnce(1, ()=>{
+    this.observer = this.player.observeTimeOnce(1, () => {
       this.player.animation = state.animation;
       this.player.duration = state.duration;
       this.player.repeat = state.iterationCount;
-      this.player.iterations = 1;
     });
 
+    this.player.duration = state.transitionDuration;
+    this.player.iterations = 0;
     this.player.seek(0);
     this.player.play();
 
