@@ -908,7 +908,7 @@ class KeyframesGenerator {
     getControlsIn(currentValue) {
         if (this.isComplexKeyframe(currentValue) &&
             Array.isArray(currentValue.controlsOut)) {
-            return currentValue.controlsOut;
+            return currentValue.controlsOut.map((v) => this.transformValue(v));
         }
         else {
             return [];
@@ -917,7 +917,7 @@ class KeyframesGenerator {
     getControlsOut(nextValue) {
         if (this.isComplexKeyframe(nextValue) &&
             Array.isArray(nextValue.controlsIn)) {
-            return nextValue.controlsIn;
+            return nextValue.controlsIn.map((v) => this.transformValue(v));
         }
         else {
             return [];

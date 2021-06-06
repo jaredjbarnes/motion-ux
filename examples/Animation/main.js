@@ -93,6 +93,31 @@ const upToDown = new Animation(
   })
 );
 
+const sideToSide = new Animation(
+  "sixth",
+  CssKeyframe.createKeyframes({
+    from: {
+      transform: {
+        value: "translate(0px, 250px)",
+        easeOut: "quad",
+      },
+    },
+    "50%": {
+      transform: {
+        value: "translate(500px, 250px)",
+        easeIn: "quad",
+        easeOut: "quad",
+      },
+    },
+    to: {
+      transform: {
+        value: "translate(0px, 250px)",
+        easeIn: "quad",
+      },
+    },
+  })
+);
+
 const stationary = new Animation(
   "fourth",
   CssKeyframe.createKeyframes({
@@ -129,6 +154,40 @@ const rightUpToDown = new Animation(
     },
   })
 );
+
+const quarterCircle = new Animation(
+  "seven",
+  CssKeyframe.createKeyframes({
+    from: {
+      transform: {
+        value: "translate(250px, 0px)",
+        controlsOut: ["translate(500px, 0px)"],
+      },
+    },
+    "25%": {
+      transform: {
+        value: "translate(500px, 250px)",
+        controlsOut: ["translate(500px, 500px)"],
+      },
+    },
+    "50%": {
+      transform: {
+        value: "translate(250px, 500px)",
+        controlsOut: ["translate(0px, 500px)"],
+      },
+    },
+    "75%": {
+      transform: {
+        value: "translate(0px, 250px)",
+        controlsOut: ["translate(0px, 0px)"],
+      },
+    },
+    to: {
+      transform: "translate(250px, 0px)",
+    },
+  })
+);
+
 function render(animation) {
   const values = animation.currentValues;
   Object.keys(values).forEach((key) => {
@@ -176,12 +235,34 @@ statefulMotion.registerStates({
     transitionEasing: "easeOutQuad",
     transitionDuration: ANIMATION_DURATION,
   },
+  sixth: {
+    animation: sideToSide,
+    iterationCount: Infinity,
+    duration: ANIMATION_DURATION,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION,
+  },
+  seven: {
+    animation: quarterCircle,
+    iterationCount: Infinity,
+    duration: ANIMATION_DURATION * 1.5,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION ,
+  },
 });
 
-statefulMotion.changeState("first");
+statefulMotion.changeState("seven");
 
 window.statefulMotion = statefulMotion;
-const states = ["first", "second", "third", "fourth", "fifth"];
+const states = [
+  "first",
+  "second",
+  "third",
+  "fourth",
+  "fifth",
+  "sixth",
+  "seven",
+];
 
 function change() {
   const delay = Math.random() * 3000;

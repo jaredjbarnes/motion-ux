@@ -114,7 +114,7 @@ export default class KeyframesGenerator {
       this.isComplexKeyframe(currentValue) &&
       Array.isArray(currentValue.controlsOut)
     ) {
-      return currentValue.controlsOut;
+      return currentValue.controlsOut.map((v: any) => this.transformValue(v));
     } else {
       return [];
     }
@@ -125,7 +125,7 @@ export default class KeyframesGenerator {
       this.isComplexKeyframe(nextValue) &&
       Array.isArray(nextValue.controlsIn)
     ) {
-      return nextValue.controlsIn;
+      return nextValue.controlsIn.map((v: any) => this.transformValue(v));
     } else {
       return [];
     }
