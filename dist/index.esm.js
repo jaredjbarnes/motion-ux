@@ -995,7 +995,15 @@ class Keyframe {
         return keyframesGenerator$1.generate(animationKeyframes);
     }
     clone() {
-        return new Keyframe(this);
+        return new Keyframe({
+            property: this.property,
+            to: JSON.parse(JSON.stringify(this.to)),
+            from: JSON.parse(JSON.stringify(this.from)),
+            startAt: this.startAt,
+            endAt: this.endAt,
+            controls: this.controls.map((c) => JSON.parse(JSON.stringify(c))),
+            easing: this.easing,
+        });
     }
 }
 
@@ -2631,7 +2639,7 @@ class BlendedAnimation extends Animation {
         return this;
     }
     clone() {
-        return new BlendedAnimation(this.fromAnimation.clone(), this.toAnimation(), this.easing);
+        return new BlendedAnimation(this.fromAnimation.clone(), this.toAnimation.clone(), this.easing);
     }
 }
 
@@ -2660,26 +2668,20 @@ class StatefulMotion {
         }
         else {
             (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
-            const previousAnimation = this.player.animation;
             const remainingDuration = (1 - this.player.time) * this.states[this.currentState].duration;
             const extendedDuration = state.transitionDuration - remainingDuration;
-            let from;
-            if (extendedDuration > 0) {
-                from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
-            }
-            else {
-                from = previousAnimation;
-            }
+            const from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
             this.player.animation = new BlendedAnimation(from, state.animation.clone(), easings[state.transitionEasing]);
         }
+        this.player.seek(0);
+        this.player.duration = state.transitionDuration;
+        this.player.iterations = 0;
+        this.player.repeat = Infinity;
         this.observer = this.player.observeTimeOnce(1, () => {
-            this.player.animation = state.animation;
+            this.player.animation = state.animation.clone();
             this.player.duration = state.duration;
             this.player.repeat = state.iterationCount;
         });
-        this.player.duration = state.transitionDuration;
-        this.player.iterations = 0;
-        this.player.seek(0);
         this.player.play();
         return this;
     }

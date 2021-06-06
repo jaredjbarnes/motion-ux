@@ -1,6 +1,7 @@
 import easings, { EasingFunction } from "./easings";
 import { DynamicEasingNames } from "./createDynamicEasing";
 import KeyframesGenerator, { IAnimationKeyframes } from "./KeyframesGenerator";
+import TimeObserver from "./TimeObserver";
 
 export interface IComplexKeyframeValue<T> {
   value: T;
@@ -48,7 +49,15 @@ export default class Keyframe<T> {
     return keyframesGenerator.generate(animationKeyframes);
   }
 
-  clone(){
-    return new Keyframe(this);
+  clone() {
+    return new Keyframe({
+      property: this.property,
+      to: JSON.parse(JSON.stringify(this.to)),
+      from: JSON.parse(JSON.stringify(this.from)),
+      startAt: this.startAt,
+      endAt: this.endAt,
+      controls: this.controls.map((c) => JSON.parse(JSON.stringify(c))),
+      easing: this.easing,
+    });
   }
 }

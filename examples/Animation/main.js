@@ -105,6 +105,30 @@ const stationary = new Animation(
   })
 );
 
+const rightUpToDown = new Animation(
+  "fifth",
+  CssKeyframe.createKeyframes({
+    from: {
+      transform: {
+        value: "translate(500px, 0px)",
+        easeOut: "quad",
+      },
+    },
+    "50%": {
+      transform: {
+        value: "translate(500px, 500px)",
+        easeIn: "quad",
+        easeOut: "quad",
+      },
+    },
+    to: {
+      transform: {
+        value: "translate(500px, 0px)",
+        easeIn: "quad",
+      },
+    },
+  })
+);
 function render(animation) {
   const values = animation.currentValues;
   Object.keys(values).forEach((key) => {
@@ -140,6 +164,13 @@ statefulMotion.registerStates({
   },
   fourth: {
     animation: stationary,
+    iterationCount: 1,
+    duration: ANIMATION_DURATION,
+    transitionEasing: "easeOutQuad",
+    transitionDuration: ANIMATION_DURATION,
+  },
+  fifth: {
+    animation: rightUpToDown,
     iterationCount: Infinity,
     duration: ANIMATION_DURATION,
     transitionEasing: "easeOutQuad",
@@ -150,12 +181,12 @@ statefulMotion.registerStates({
 statefulMotion.changeState("first");
 
 window.statefulMotion = statefulMotion;
-const states = ["first", "second", "third", "fourth"];
+const states = ["first", "second", "third", "fourth", "fifth"];
 
 function change() {
   const delay = Math.random() * 3000;
   setTimeout(() => {
-    const index = Math.round(Math.random() * states.length - 1);
+    const index = Math.floor(Math.random() * states.length);
     statefulMotion.changeState(states[index]);
     change();
   }, delay);

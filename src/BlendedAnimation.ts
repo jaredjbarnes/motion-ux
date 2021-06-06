@@ -4,8 +4,8 @@ import Keyframe from "./Keyframe";
 import easings, { EasingFunction } from "./easings";
 
 export default class BlendedAnimation<T> extends Animation<T> {
-  public fromAnimation: any;
-  public toAnimation: any;
+  public fromAnimation: IAnimation<T>;
+  public toAnimation: IAnimation<T>;
   public properties: string[];
   private easing: EasingFunction;
 
@@ -76,7 +76,7 @@ export default class BlendedAnimation<T> extends Animation<T> {
   clone() {
     return new BlendedAnimation<T>(
       this.fromAnimation.clone(),
-      this.toAnimation(),
+      this.toAnimation.clone(),
       this.easing
     );
   }
