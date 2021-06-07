@@ -208,17 +208,19 @@ statefulMotion.player.render = render;
 statefulMotion.registerStates({
   first: {
     animation: leftToRight,
-    iterationCount: Infinity,
+    iterationCount: 3,
     duration: ANIMATION_DURATION,
     transitionEasing: "easeOutQuad",
     transitionDuration: ANIMATION_DURATION,
+    segueTo: "second",
   },
   second: {
     animation: rightToLeft,
-    iterationCount: Infinity,
+    iterationCount: 4,
     duration: ANIMATION_DURATION,
     transitionEasing: "easeOutQuad",
     transitionDuration: ANIMATION_DURATION,
+    segueTo: "third",
   },
   third: {
     animation: upToDown,
@@ -257,7 +259,7 @@ statefulMotion.registerStates({
   },
 });
 
-statefulMotion.changeState("seven");
+statefulMotion.changeState("first");
 
 window.statefulMotion = statefulMotion;
 const states = [
@@ -270,19 +272,13 @@ const states = [
   "seven",
 ];
 
-statefulMotion.player.observeTime("1", () => {
-  if (statefulMotion.player.animation.name === "seven") {
-    statefulMotion.changeState("six");
-  }
-});
-
 function change() {
-  const delay = Math.random() * 3000;
-  setTimeout(() => {
-    const index = Math.floor(Math.random() * states.length);
-    statefulMotion.changeState(states[index]);
-    change();
-  }, delay);
+  // const delay = Math.random() * 3000;
+  // setTimeout(() => {
+  //   const index = Math.floor(Math.random() * states.length);
+  //   statefulMotion.changeState(states[index]);
+  //   change();
+  // }, delay);
 }
 
 change();

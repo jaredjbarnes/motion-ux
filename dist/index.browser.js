@@ -2654,6 +2654,7 @@
           this.currentState = null;
           this.states = {};
           this.observer = null;
+          this.segueObserver = null;
           this.player = new Player();
       }
       registerState(name, state) {
@@ -2663,17 +2664,18 @@
           Object.keys(states).forEach((name) => this.registerState(name, states[name]));
       }
       changeState(name) {
-          var _a;
+          var _a, _b;
           const state = this.states[name];
           if (state == null || this.currentState === name) {
               return this;
           }
           this.currentState = name;
+          (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
+          (_b = this.segueObserver) === null || _b === void 0 ? void 0 : _b.dispose();
           if (this.player.animation == null) {
               this.player.animation = state.animation.clone();
           }
           else {
-              (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
               const remainingDuration = (1 - this.player.time) * this.states[this.currentState].duration;
               const extendedDuration = state.transitionDuration - remainingDuration;
               const from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
@@ -2687,6 +2689,13 @@
               this.player.animation = state.animation.clone();
               this.player.duration = state.duration;
               this.player.repeat = state.iterationCount;
+          });
+          this.segueObserver = this.player.observeTime(1, () => {
+              if (this.player.iterations >= state.iterationCount &&
+                  typeof state.segueTo === "string" &&
+                  this.states[state.segueTo]) {
+                  this.changeState(state.segueTo);
+              }
           });
           this.player.play();
           return this;

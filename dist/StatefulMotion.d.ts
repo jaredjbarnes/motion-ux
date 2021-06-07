@@ -7,11 +7,13 @@ export interface IState<T> {
     iterationCount: number;
     transitionDuration: number;
     transitionEasing: keyof typeof easings;
+    segueTo?: string;
 }
 export default class StatefulMotion<T> {
     private currentState;
     private states;
     private observer;
+    private segueObserver;
     player: Player;
     registerState(name: string, state: IState<T>): void;
     registerStates(states: {

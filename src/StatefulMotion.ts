@@ -11,12 +11,14 @@ export interface IState<T> {
   iterationCount: number; // Defaults to 1
   transitionDuration: number; // Defaults to the duration of the animation
   transitionEasing: keyof typeof easings; // Defaults to linear
+  segueTo?: string;
 }
 
 export default class StatefulMotion<T> {
   private currentState: string | null = null;
   private states: { [key: string]: IState<T> } = {};
   private observer: TimeObserver<ITimeEvent> | null = null;
+  private segueObserver: TimeObserver<ITimeEvent> | null = null;
 
   public player = new Player();
 
@@ -38,12 +40,12 @@ export default class StatefulMotion<T> {
     }
 
     this.currentState = name;
+    this.observer?.dispose();
+    this.segueObserver?.dispose();
 
     if (this.player.animation == null) {
       this.player.animation = state.animation.clone();
     } else {
-      this.observer?.dispose();
-
       const remainingDuration =
         (1 - this.player.time) * this.states[this.currentState].duration;
       const extendedDuration = state.transitionDuration - remainingDuration;
@@ -72,6 +74,16 @@ export default class StatefulMotion<T> {
       this.player.animation = state.animation.clone();
       this.player.duration = state.duration;
       this.player.repeat = state.iterationCount;
+    });
+
+    this.segueObserver = this.player.observeTime(1, () => {
+      if (
+        this.player.iterations >= state.iterationCount &&
+        typeof state.segueTo === "string" &&
+        this.states[state.segueTo]
+      ) {
+        this.changeState(state.segueTo);
+      }
     });
 
     this.player.play();
