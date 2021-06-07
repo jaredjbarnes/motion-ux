@@ -161,29 +161,35 @@ const quarterCircle = new Animation(
     from: {
       transform: {
         value: "translate(250px, 0px)",
-        controlsOut: ["translate(500px, 0px)"],
+        controlsOut: ["translate(338px, 0px)"],
       },
     },
     "25%": {
       transform: {
         value: "translate(500px, 250px)",
-        controlsOut: ["translate(500px, 500px)"],
+        controlsIn: ["translate(500px, 112px)"],
+        controlsOut: ["translate(500px, 388px)"],
       },
     },
     "50%": {
       transform: {
         value: "translate(250px, 500px)",
-        controlsOut: ["translate(0px, 500px)"],
+        controlsIn: ["translate(388px, 500px)"],
+        controlsOut: ["translate(112px, 500px)"],
       },
     },
     "75%": {
       transform: {
         value: "translate(0px, 250px)",
-        controlsOut: ["translate(0px, 0px)"],
+        controlsIn: ["translate(0px, 388px)"],
+        controlsOut: ["translate(0px, 112px)"],
       },
     },
     to: {
-      transform: "translate(250px, 0px)",
+      transform: {
+        value: "translate(250px, 0px)",
+        controlsIn: ["translate(112px, 0px)"],
+      },
     },
   })
 );
@@ -224,7 +230,7 @@ statefulMotion.registerStates({
   fourth: {
     animation: stationary,
     iterationCount: 1,
-    duration: ANIMATION_DURATION,
+    duration: 0,
     transitionEasing: "easeOutQuad",
     transitionDuration: ANIMATION_DURATION,
   },
@@ -245,9 +251,9 @@ statefulMotion.registerStates({
   seven: {
     animation: quarterCircle,
     iterationCount: Infinity,
-    duration: ANIMATION_DURATION * 1.5,
+    duration: ANIMATION_DURATION,
     transitionEasing: "easeOutQuad",
-    transitionDuration: ANIMATION_DURATION ,
+    transitionDuration: ANIMATION_DURATION,
   },
 });
 
@@ -263,6 +269,12 @@ const states = [
   "sixth",
   "seven",
 ];
+
+statefulMotion.player.observeTime("1", () => {
+  if (statefulMotion.player.animation.name === "seven") {
+    statefulMotion.changeState("six");
+  }
+});
 
 function change() {
   const delay = Math.random() * 3000;
