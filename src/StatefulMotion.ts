@@ -32,10 +32,35 @@ export default class StatefulMotion<T> {
     );
   }
 
+  private isFallThrough(name: string) {
+    if (this.currentState == null) {
+      return false;
+    }
+
+    const allFallThroughStates = this.getFallThrough(name, []);
+    return allFallThroughStates.includes(this.currentState);
+  }
+
+  private getFallThrough(name: string, stack: string[]) {
+    const state = this.states[name];
+
+    if (state != null && typeof state.segueTo === "string") {
+      stack.push(state.segueTo);
+
+      this.getFallThrough(state.segueTo, stack);
+    }
+
+    return stack;
+  }
+
   changeState(name: string) {
     const state = this.states[name];
 
-    if (state == null || this.currentState === name) {
+    if (
+      this.isFallThrough(name) ||
+      state == null ||
+      this.currentState === name
+    ) {
       return this;
     }
 

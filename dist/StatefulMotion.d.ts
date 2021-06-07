@@ -19,5 +19,7 @@ export default class StatefulMotion<T> {
     registerStates(states: {
         [key: string]: IState<T>;
     }): void;
+    private isFallThrough;
+    private getFallThrough;
     changeState(name: string): this;
 }

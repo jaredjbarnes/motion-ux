@@ -2661,10 +2661,27 @@ class StatefulMotion {
     registerStates(states) {
         Object.keys(states).forEach((name) => this.registerState(name, states[name]));
     }
+    isFallThrough(name) {
+        if (this.currentState == null) {
+            return false;
+        }
+        const allFallThroughStates = this.getFallThrough(name, []);
+        return allFallThroughStates.includes(this.currentState);
+    }
+    getFallThrough(name, stack) {
+        const state = this.states[name];
+        if (state != null && typeof state.segueTo === "string") {
+            stack.push(state.segueTo);
+            this.getFallThrough(state.segueTo, stack);
+        }
+        return stack;
+    }
     changeState(name) {
         var _a, _b;
         const state = this.states[name];
-        if (state == null || this.currentState === name) {
+        if (this.isFallThrough(name) ||
+            state == null ||
+            this.currentState === name) {
             return this;
         }
         this.currentState = name;
