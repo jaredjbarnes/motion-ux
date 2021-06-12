@@ -100,10 +100,16 @@ class Animation {
         this.animators = [];
         this.name = name;
         this.currentValues = {};
+        this.keyframes = keyframes;
+    }
+    set keyframes(keyframes) {
         this.animators = keyframes.map((keyframe) => new Animator(keyframe));
         this._createCurrentValues();
         // Sort by time.
         this.animators.sort(sortAsc);
+    }
+    get keyframes() {
+        return this.animators.map((a) => a.keyframe);
     }
     _createCurrentValues() {
         this.currentValues = this.animators.reduce((results, animator) => {
@@ -956,7 +962,7 @@ class KeyframesGenerator {
                 const currentValue = currentAnimationKeyframe[key];
                 const nextValue = nextAnimationKeyframe[key];
                 if (nextValue == null) {
-                    throw new Error(`All keyframe declarations need to have the same properties. Missing: '${key}'`);
+                    throw new Error(`All keyframe declarations need to have the same properties. Missing '${key}' from one of the keyframes. ${JSON.stringify(animationKeyframes)}`);
                 }
                 const easingIn = this.getEaseIn(currentValue);
                 const easingOut = this.getEaseOut(nextValue);

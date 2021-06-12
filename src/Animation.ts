@@ -18,11 +18,18 @@ export default class Animation<T> implements IAnimation<T> {
   constructor(name: string, keyframes: Keyframe<T>[]) {
     this.name = name;
     this.currentValues = {};
+    this.keyframes = keyframes;
+  }
+
+  set keyframes(keyframes: Keyframe<T>[]) {
     this.animators = keyframes.map((keyframe) => new Animator(keyframe));
     this._createCurrentValues();
-
     // Sort by time.
     this.animators.sort(sortAsc);
+  }
+
+  get keyframes() {
+    return this.animators.map((a) => a.keyframe);
   }
 
   protected _createCurrentValues() {

@@ -169,7 +169,7 @@ export default class KeyframesGenerator {
 
         if (nextValue == null) {
           throw new Error(
-            `All keyframe declarations need to have the same properties. Missing: '${key}'`
+            `All keyframe declarations need to have the same properties. Missing '${key}' from one of the keyframes. ${JSON.stringify(animationKeyframes)}`
           );
         }
 

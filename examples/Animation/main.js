@@ -273,12 +273,12 @@ const states = [
 ];
 
 function change() {
-  // const delay = Math.random() * 3000;
-  // setTimeout(() => {
-  //   const index = Math.floor(Math.random() * states.length);
-  //   statefulMotion.changeState(states[index]);
-  //   change();
-  // }, delay);
+  const delay = Math.random() * 3000;
+  setTimeout(() => {
+    const index = Math.floor(Math.random() * states.length);
+    statefulMotion.changeState(states[index]);
+    change();
+  }, delay);
 }
 
 change();

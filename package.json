@@ -6,6 +6,9 @@
   "module": "./dist/index.esm.js",
   "browser": "./dist/index.browser.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
   "directories": {
     "example": "examples"
   },
@@ -41,6 +44,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "clarity-pattern-parser": "3.0.8"
+    "clarity-pattern-parser": "3.0.8",
+    "lit": "^2.0.0-rc.2"
   }
 }
