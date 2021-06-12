@@ -935,16 +935,28 @@
           if (this.isComplexKeyframe(currentValue)) {
               return this.transformValue(currentValue.value);
           }
-          else {
+          else if (typeof currentValue === "string") {
               return this.transformValue(currentValue);
+          }
+          else {
+              if (typeof (currentValue === null || currentValue === void 0 ? void 0 : currentValue.value) === "string") {
+                  throw new Error("Invalid complex value, only found a value with no other complex settings.");
+              }
+              throw new Error(`Unknown from value: ${JSON.stringify(currentValue)}`);
           }
       }
       getTo(nextValue) {
           if (this.isComplexKeyframe(nextValue)) {
               return this.transformValue(nextValue.value);
           }
-          else {
+          else if (typeof nextValue === "string") {
               return this.transformValue(nextValue);
+          }
+          else {
+              if (typeof (nextValue === null || nextValue === void 0 ? void 0 : nextValue.value) === "string") {
+                  throw new Error("Invalid complex value, only found a value with no other complex settings.");
+              }
+              throw new Error(`Unknown to value: ${JSON.stringify(nextValue)}`);
           }
       }
       generate(animationKeyframes) {
@@ -2655,51 +2667,21 @@
       }
   }
 
-  class StatefulMotion {
+  class KeyframeTransition {
       constructor() {
-          this.currentState = null;
-          this.states = {};
-          this.observer = null;
-          this.segueObserver = null;
+          this._currentState = null;
+          this._observer = null;
           this.player = new Player();
       }
-      registerState(name, state) {
-          this.states[name] = state;
-      }
-      registerStates(states) {
-          Object.keys(states).forEach((name) => this.registerState(name, states[name]));
-      }
-      isFallThrough(name) {
-          if (this.currentState == null) {
-              return false;
-          }
-          const allFallThroughStates = this.getFallThrough(name, []);
-          return allFallThroughStates.includes(this.currentState);
-      }
-      getFallThrough(name, stack) {
-          const state = this.states[name];
-          if (state != null && typeof state.segueTo === "string") {
-              stack.push(state.segueTo);
-              this.getFallThrough(state.segueTo, stack);
-          }
-          return stack;
-      }
-      changeState(name) {
-          var _a, _b;
-          const state = this.states[name];
-          if (this.isFallThrough(name) ||
-              state == null ||
-              this.currentState === name) {
-              return this;
-          }
-          this.currentState = name;
-          (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
-          (_b = this.segueObserver) === null || _b === void 0 ? void 0 : _b.dispose();
-          if (this.player.animation == null) {
+      _transitionToState(state) {
+          var _a;
+          const lastState = this._currentState;
+          this._currentState = state;
+          if (this.player.animation == null || lastState == null) {
               this.player.animation = state.animation.clone();
           }
           else {
-              const remainingDuration = (1 - this.player.time) * this.states[this.currentState].duration;
+              const remainingDuration = (1 - this.player.time) * lastState.duration;
               const extendedDuration = state.transitionDuration - remainingDuration;
               const from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
               this.player.animation = new BlendedAnimation(from, state.animation.clone(), easings[state.transitionEasing]);
@@ -2708,15 +2690,64 @@
           this.player.duration = state.transitionDuration;
           this.player.iterations = 0;
           this.player.repeat = Infinity;
-          this.observer = this.player.observeTimeOnce(1, () => {
+          (_a = this._observer) === null || _a === void 0 ? void 0 : _a.dispose();
+          this._observer = this.player.observeTimeOnce(1, () => {
               this.player.animation = state.animation.clone();
               this.player.duration = state.duration;
               this.player.repeat = state.iterationCount;
           });
-          this.segueObserver = this.player.observeTime(1, () => {
+          return this;
+      }
+      transition(state) {
+          this._transitionToState(state);
+          this.player.play();
+          return this;
+      }
+  }
+
+  class StatefulMotion extends KeyframeTransition {
+      constructor() {
+          super(...arguments);
+          this._currentStateName = null;
+          this._states = {};
+          this._segueObserver = null;
+      }
+      registerState(name, state) {
+          this._states[name] = state;
+      }
+      registerStates(states) {
+          Object.keys(states).forEach((name) => this.registerState(name, states[name]));
+      }
+      isFallThrough(name) {
+          if (this._currentStateName == null) {
+              return false;
+          }
+          const allFallThroughStates = this.getFallThrough(name, []);
+          return allFallThroughStates.includes(this._currentStateName);
+      }
+      getFallThrough(name, stack) {
+          const state = this._states[name];
+          if (state != null && typeof state.segueTo === "string") {
+              stack.push(state.segueTo);
+              this.getFallThrough(state.segueTo, stack);
+          }
+          return stack;
+      }
+      changeState(name) {
+          var _a;
+          const state = this._states[name];
+          if (this.isFallThrough(name) ||
+              state == null ||
+              this._currentStateName === name) {
+              return this;
+          }
+          this._currentStateName = name;
+          this._transitionToState(state);
+          (_a = this._segueObserver) === null || _a === void 0 ? void 0 : _a.dispose();
+          this._segueObserver = this.player.observeTime(1, () => {
               if (this.player.iterations >= state.iterationCount &&
                   typeof state.segueTo === "string" &&
-                  this.states[state.segueTo]) {
+                  this._states[state.segueTo]) {
                   this.changeState(state.segueTo);
               }
           });

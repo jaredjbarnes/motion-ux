@@ -8,17 +8,13 @@ const animation = new Animation(
   CssKeyframe.createKeyframes({
     from: {
       position: "absolute",
-      left: {
-        value: "25%",
-        easeOut: "quad",
-      },
-      top: "0px"
+      left:"25%",
     },
     to: {
       position: "absolute",
       left: {
         value: "75%",
-        easeIn: "quad",
+        easeIn: "elastic",
       },
     },
   })

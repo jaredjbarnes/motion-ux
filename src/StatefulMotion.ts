@@ -1,9 +1,7 @@
-import Player from "./Player";
 import IAnimation from "./IAnimation";
 import easings from "./easings";
-import ExtendedAnimation from "./ExtendedAnimation";
-import BlendedAnimation from "./BlendedAnimation";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
+import { KeyframeTransition } from "./KeyframeTransition";
 
 export interface IState<T> {
   animation: IAnimation<T>;
@@ -14,16 +12,13 @@ export interface IState<T> {
   segueTo?: string;
 }
 
-export default class StatefulMotion<T> {
-  private currentState: string | null = null;
-  private states: { [key: string]: IState<T> } = {};
-  private observer: TimeObserver<ITimeEvent> | null = null;
-  private segueObserver: TimeObserver<ITimeEvent> | null = null;
-
-  public player = new Player();
+export default class StatefulMotion<T> extends KeyframeTransition<T> {
+  protected _currentStateName: string | null = null;
+  protected _states: { [key: string]: IState<T> } = {};
+  protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
   registerState(name: string, state: IState<T>) {
-    this.states[name] = state;
+    this._states[name] = state;
   }
 
   registerStates(states: { [key: string]: IState<T> }) {
@@ -33,16 +28,16 @@ export default class StatefulMotion<T> {
   }
 
   private isFallThrough(name: string) {
-    if (this.currentState == null) {
+    if (this._currentStateName == null) {
       return false;
     }
 
     const allFallThroughStates = this.getFallThrough(name, []);
-    return allFallThroughStates.includes(this.currentState);
+    return allFallThroughStates.includes(this._currentStateName);
   }
 
   private getFallThrough(name: string, stack: string[]) {
-    const state = this.states[name];
+    const state = this._states[name];
 
     if (state != null && typeof state.segueTo === "string") {
       stack.push(state.segueTo);
@@ -54,58 +49,25 @@ export default class StatefulMotion<T> {
   }
 
   changeState(name: string) {
-    const state = this.states[name];
+    const state = this._states[name];
 
     if (
       this.isFallThrough(name) ||
       state == null ||
-      this.currentState === name
+      this._currentStateName === name
     ) {
       return this;
     }
 
-    this.currentState = name;
-    this.observer?.dispose();
-    this.segueObserver?.dispose();
+    this._currentStateName = name;
+    this._transitionToState(state);
 
-    if (this.player.animation == null) {
-      this.player.animation = state.animation.clone();
-    } else {
-      const remainingDuration =
-        (1 - this.player.time) * this.states[this.currentState].duration;
-      const extendedDuration = state.transitionDuration - remainingDuration;
-
-      const from = new ExtendedAnimation(
-        this.player.animation,
-        this.player.duration,
-        this.player.time,
-        this.player.state,
-        extendedDuration
-      );
-
-      this.player.animation = new BlendedAnimation(
-        from,
-        state.animation.clone(),
-        easings[state.transitionEasing]
-      );
-    }
-
-    this.player.seek(0);
-    this.player.duration = state.transitionDuration;
-    this.player.iterations = 0;
-    this.player.repeat = Infinity;
-
-    this.observer = this.player.observeTimeOnce(1, () => {
-      this.player.animation = state.animation.clone();
-      this.player.duration = state.duration;
-      this.player.repeat = state.iterationCount;
-    });
-
-    this.segueObserver = this.player.observeTime(1, () => {
+    this._segueObserver?.dispose();
+    this._segueObserver = this.player.observeTime(1, () => {
       if (
         this.player.iterations >= state.iterationCount &&
         typeof state.segueTo === "string" &&
-        this.states[state.segueTo]
+        this._states[state.segueTo]
       ) {
         this.changeState(state.segueTo);
       }

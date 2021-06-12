@@ -929,16 +929,28 @@ class KeyframesGenerator {
         if (this.isComplexKeyframe(currentValue)) {
             return this.transformValue(currentValue.value);
         }
-        else {
+        else if (typeof currentValue === "string") {
             return this.transformValue(currentValue);
+        }
+        else {
+            if (typeof (currentValue === null || currentValue === void 0 ? void 0 : currentValue.value) === "string") {
+                throw new Error("Invalid complex value, only found a value with no other complex settings.");
+            }
+            throw new Error(`Unknown from value: ${JSON.stringify(currentValue)}`);
         }
     }
     getTo(nextValue) {
         if (this.isComplexKeyframe(nextValue)) {
             return this.transformValue(nextValue.value);
         }
-        else {
+        else if (typeof nextValue === "string") {
             return this.transformValue(nextValue);
+        }
+        else {
+            if (typeof (nextValue === null || nextValue === void 0 ? void 0 : nextValue.value) === "string") {
+                throw new Error("Invalid complex value, only found a value with no other complex settings.");
+            }
+            throw new Error(`Unknown to value: ${JSON.stringify(nextValue)}`);
         }
     }
     generate(animationKeyframes) {
@@ -2600,17 +2612,13 @@ const player = new MuxPlayer();
 const animation = new Animation("first", CssKeyframe.createKeyframes({
     from: {
         position: "absolute",
-        left: {
-            value: "25%",
-            easeOut: "quad",
-        },
-        top: "0px"
+        left: "25%",
     },
     to: {
         position: "absolute",
         left: {
             value: "75%",
-            easeIn: "quad",
+            easeIn: "elastic",
         },
     },
 }));

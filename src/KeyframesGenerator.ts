@@ -134,16 +134,30 @@ export default class KeyframesGenerator {
   getFrom(currentValue: any) {
     if (this.isComplexKeyframe(currentValue)) {
       return this.transformValue(currentValue.value);
-    } else {
+    } else if (typeof currentValue === "string") {
       return this.transformValue(currentValue);
+    } else {
+      if (typeof currentValue?.value === "string") {
+        throw new Error(
+          "Invalid complex value, only found a value with no other complex settings."
+        );
+      }
+      throw new Error(`Unknown from value: ${JSON.stringify(currentValue)}`);
     }
   }
 
   getTo(nextValue: any) {
     if (this.isComplexKeyframe(nextValue)) {
       return this.transformValue(nextValue.value);
-    } else {
+    } else if (typeof nextValue === "string") {
       return this.transformValue(nextValue);
+    } else {
+      if (typeof nextValue?.value === "string") {
+        throw new Error(
+          "Invalid complex value, only found a value with no other complex settings."
+        );
+      }
+      throw new Error(`Unknown to value: ${JSON.stringify(nextValue)}`);
     }
   }
 
@@ -169,7 +183,9 @@ export default class KeyframesGenerator {
 
         if (nextValue == null) {
           throw new Error(
-            `All keyframe declarations need to have the same properties. Missing '${key}' from one of the keyframes. ${JSON.stringify(animationKeyframes)}`
+            `All keyframe declarations need to have the same properties. Missing '${key}' from one of the keyframes. ${JSON.stringify(
+              animationKeyframes
+            )}`
           );
         }
 
