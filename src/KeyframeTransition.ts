@@ -66,4 +66,8 @@ export class KeyframeTransition<T> {
     this.player.play();
     return this;
   }
+
+  dispose(){
+    this.player.dispose();
+  }
 }

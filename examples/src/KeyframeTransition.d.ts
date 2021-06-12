@@ -16,4 +16,5 @@ export declare class KeyframeTransition<T> {
     player: Player;
     protected _transitionToState(state: IState<T>): this;
     transition(state: IState<T>): this;
+    dispose(): void;
 }

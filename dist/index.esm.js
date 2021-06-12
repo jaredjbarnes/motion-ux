@@ -2697,6 +2697,9 @@ class KeyframeTransition {
         this.player.play();
         return this;
     }
+    dispose() {
+        this.player.dispose();
+    }
 }
 
 class StatefulMotion extends KeyframeTransition {
