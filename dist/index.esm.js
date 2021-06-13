@@ -2753,5 +2753,5 @@ class StatefulMotion extends KeyframeTransition {
     }
 }
 
-export { Animation, Animator, BezierCurve, CssKeyframe, Keyframe, Player, StatefulMotion, createDynamicEasing, easings };
+export { Animation, Animator, BezierCurve, CssKeyframe, Keyframe, Player, PlayerState, RepeatDirection, StatefulMotion, createDynamicEasing, easings };
 //# sourceMappingURL=index.esm.js.map

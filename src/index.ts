@@ -1,13 +1,13 @@
 import Animation from "./Animation";
-import IAnimation from "./IAnimation";
-import Player from "./Player";
+import IAnimation, { AnimationState } from "./IAnimation";
+import Player, { PlayerState, RepeatDirection } from "./Player";
 import Animator from "./Animator";
-import Keyframe from "./Keyframe";
-import CssKeyframe from "./CssKeyframe";
-import easings from "./easings";
+import Keyframe, { IComplexKeyframeValue, KeyframeConfig } from "./Keyframe";
+import CssKeyframe, { CssKeyframeConfig } from "./CssKeyframe";
+import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
-import createDynamicEasing from "./createDynamicEasing";
-import StatefulMotion from "./StatefulMotion";
+import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
+import StatefulMotion, { IState } from "./StatefulMotion";
 
 export {
   IAnimation,
@@ -20,4 +20,14 @@ export {
   easings,
   createDynamicEasing,
   StatefulMotion,
+  IState,
+  CssKeyframeConfig,
+  DynamicEasingNames,
+  EasingNames,
+  EasingFunction,
+  IComplexKeyframeValue,
+  KeyframeConfig,
+  PlayerState,
+  RepeatDirection,
+  AnimationState,
 };

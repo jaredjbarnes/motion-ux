@@ -289,17 +289,17 @@ class DefaultClock {
 
 const defaultClock = new DefaultClock();
 function defaultRender() { }
-var PlayerState;
+exports.PlayerState = void 0;
 (function (PlayerState) {
     PlayerState[PlayerState["REVERSE"] = -1] = "REVERSE";
     PlayerState[PlayerState["STOPPED"] = 0] = "STOPPED";
     PlayerState[PlayerState["FORWARD"] = 1] = "FORWARD";
-})(PlayerState || (PlayerState = {}));
-var RepeatDirection;
+})(exports.PlayerState || (exports.PlayerState = {}));
+exports.RepeatDirection = void 0;
 (function (RepeatDirection) {
     RepeatDirection[RepeatDirection["DEFAULT"] = 0] = "DEFAULT";
     RepeatDirection[RepeatDirection["ALTERNATE"] = 1] = "ALTERNATE";
-})(RepeatDirection || (RepeatDirection = {}));
+})(exports.RepeatDirection || (exports.RepeatDirection = {}));
 class Player extends Observable {
     constructor() {
         super();
@@ -311,9 +311,9 @@ class Player extends Observable {
         this._lastTimestamp = 0;
         this._iterations = 0;
         this._repeat = 1;
-        this._repeatDirection = RepeatDirection.DEFAULT;
+        this._repeatDirection = exports.RepeatDirection.DEFAULT;
         this._clock = defaultClock;
-        this._state = PlayerState.STOPPED;
+        this._state = exports.PlayerState.STOPPED;
         this._render = defaultRender;
         this._delay = 0;
         this.tick = this.tick.bind(this);
@@ -409,10 +409,10 @@ class Player extends Observable {
         if (deltaTime <= 0) {
             return;
         }
-        if (this._state === PlayerState.REVERSE) {
+        if (this._state === exports.PlayerState.REVERSE) {
             this.stepBackward();
         }
-        else if (this._state === PlayerState.FORWARD) {
+        else if (this._state === exports.PlayerState.FORWARD) {
             this.stepForward();
         }
         this._lastTimestamp = timestamp;
@@ -434,11 +434,11 @@ class Player extends Observable {
                 this.stop();
                 return;
             }
-            if (repeatDirection === RepeatDirection.ALTERNATE) {
+            if (repeatDirection === exports.RepeatDirection.ALTERNATE) {
                 const adjustedTime = 1 - (time - 1);
                 this._time = 1;
                 this.seek(adjustedTime);
-                this._state = PlayerState.REVERSE;
+                this._state = exports.PlayerState.REVERSE;
             }
             else {
                 const adjustedTime = time - 1;
@@ -450,7 +450,7 @@ class Player extends Observable {
                 });
                 this._time = 0;
                 this.seek(adjustedTime);
-                this._state = PlayerState.FORWARD;
+                this._state = exports.PlayerState.FORWARD;
             }
         }
         else {
@@ -474,11 +474,11 @@ class Player extends Observable {
                 this.stop();
                 return;
             }
-            if (repeatDirection === RepeatDirection.ALTERNATE) {
+            if (repeatDirection === exports.RepeatDirection.ALTERNATE) {
                 const adjustedTime = time * -1;
                 this._time = 0;
                 this.seek(adjustedTime);
-                this._state = PlayerState.FORWARD;
+                this._state = exports.PlayerState.FORWARD;
             }
             else {
                 const adjustedTime = 1 + time;
@@ -490,7 +490,7 @@ class Player extends Observable {
                 });
                 this._time = 1;
                 this.seek(adjustedTime);
-                this._state = PlayerState.REVERSE;
+                this._state = exports.PlayerState.REVERSE;
             }
         }
         else {
@@ -514,8 +514,8 @@ class Player extends Observable {
         return this;
     }
     stop() {
-        if (this._state !== PlayerState.STOPPED) {
-            this._state = PlayerState.STOPPED;
+        if (this._state !== exports.PlayerState.STOPPED) {
+            this._state = exports.PlayerState.STOPPED;
             this._clock.unregister(this.tick);
             this.notify({
                 type: "STOPPED",
@@ -525,9 +525,9 @@ class Player extends Observable {
         return this;
     }
     play() {
-        if (this._state !== PlayerState.FORWARD) {
+        if (this._state !== exports.PlayerState.FORWARD) {
             this._lastTimestamp = this._clock.now() + this._delay;
-            this._state = PlayerState.FORWARD;
+            this._state = exports.PlayerState.FORWARD;
             this._clock.register(this.tick);
             this.notify({
                 type: "PLAYED",
@@ -537,9 +537,9 @@ class Player extends Observable {
         return this;
     }
     reverse() {
-        if (this._state !== PlayerState.REVERSE) {
+        if (this._state !== exports.PlayerState.REVERSE) {
             this._lastTimestamp = this._clock.now() + this._delay;
-            this._state = PlayerState.REVERSE;
+            this._state = exports.PlayerState.REVERSE;
             this._clock.register(this.tick);
             this.notify({
                 type: "REVERSED",

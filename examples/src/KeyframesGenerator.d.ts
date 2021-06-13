@@ -28,6 +28,6 @@ export default class KeyframesGenerator {
     getControlsOut(nextValue: any): any;
     getFrom(currentValue: any): any;
     getTo(nextValue: any): any;
-    generate(animationKeyframes: IAnimationKeyframes): Keyframe<any>[];
+    generate<T = any>(animationKeyframes: IAnimationKeyframes): Keyframe<T>[];
 }
 export {};

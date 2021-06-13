@@ -12,5 +12,5 @@ export interface CssKeyframeConfig {
 }
 export default class CssKeyframe extends Keyframe<(string | number)[]> {
     constructor({ from, to, easing, controls, ...config }: CssKeyframeConfig);
-    static createKeyframes(animationKeyframes: IAnimationKeyframes): Keyframe<any>[];
+    static createKeyframes(animationKeyframes: IAnimationKeyframes): Keyframe<(string | number)[]>[];
 }
