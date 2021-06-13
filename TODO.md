@@ -81,3 +81,41 @@ const statefulMotion = {
   },
 };
 ```
+
+```ts
+const transition = {
+  open: {
+      opacity: {
+        value: 0,
+        controlsIn:[],
+        easeIn: "",
+        duration: 1000
+      },
+      display: {
+        value: 0,
+        controlsIn:[],
+        easeIn: "",
+        duration: 1000
+      }
+  },
+  close: {
+      opacity: {
+        value: 0,
+        controlsIn:[],
+        easeIn: "",
+        duration: 1000
+      },
+      display: {
+        value: 0,
+        controlsIn:[],
+        easeIn: "",
+        duration: 1000
+      }
+  }
+}
+
+makeAnimation({});
+makeTransition({});
+makeStatefulAnimation({});
+
+```

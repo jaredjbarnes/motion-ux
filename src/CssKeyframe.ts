@@ -73,6 +73,6 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
   }
 
   static createKeyframes(animationKeyframes: IAnimationKeyframes) {
-    return keyframesGenerator.generate(animationKeyframes);
+    return keyframesGenerator.generate<(string | number)[]>(animationKeyframes);
   }
 }
