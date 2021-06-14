@@ -89,12 +89,14 @@ const transition = {
         value: 0,
         controlsIn:[],
         easeIn: "",
+        delay: 0,
         duration: 1000
       },
       display: {
         value: 0,
         controlsIn:[],
         easeIn: "",
+        delay: 0,
         duration: 1000
       }
   },

@@ -2764,6 +2764,7 @@
   exports.BezierCurve = BezierCurve;
   exports.CssKeyframe = CssKeyframe;
   exports.Keyframe = Keyframe;
+  exports.KeyframeTransition = KeyframeTransition;
   exports.Player = Player;
   exports.StatefulMotion = StatefulMotion;
   exports.createDynamicEasing = createDynamicEasing;
