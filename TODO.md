@@ -59,7 +59,7 @@ const shake = {
 };
 
 // This could be react-motion-ux interface.
-const statefulMotion = {
+const animation = {
   pulsing: {
     animation: pulse,
     duration: 1000,
@@ -89,14 +89,12 @@ const transition = {
         value: 0,
         controlsIn:[],
         easeIn: "",
-        delay: 0,
         duration: 1000
       },
       display: {
         value: 0,
         controlsIn:[],
         easeIn: "",
-        delay: 0,
         duration: 1000
       }
   },
@@ -118,6 +116,5 @@ const transition = {
 
 makeAnimation({});
 makeTransition({});
-makeStatefulAnimation({});
 
 ```

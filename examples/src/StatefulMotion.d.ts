@@ -8,6 +8,7 @@ export interface IState<T> {
     iterationCount: number;
     transitionDuration: number;
     transitionEasing: keyof typeof easings;
+    delay: number;
     segueTo?: string;
 }
 export default class StatefulMotion<T> extends KeyframeTransition<T> {
