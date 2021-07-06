@@ -3,7 +3,16 @@ import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { KeyframeTransition } from "./KeyframeTransition";
 
-export interface IState<T> {
+export interface IMotionState<T> {
+  animation: IAnimation<T>;
+  duration: number;
+  iterationCount: number; // Defaults to 1
+  transitionDuration: number; // Defaults to the duration of the animation
+  transitionEasing: keyof typeof easings; // Defaults to linear
+  segueTo?: string;
+}
+
+export interface ITransitionState<T> {
   animation: IAnimation<T>;
   duration: number;
   iterationCount: number; // Defaults to 1
@@ -14,14 +23,14 @@ export interface IState<T> {
 
 export default class StatefulMotion<T> extends KeyframeTransition<T> {
   protected _currentStateName: string | null = null;
-  protected _states: { [key: string]: IState<T> } = {};
+  protected _states: { [key: string]: IMotionState<T> } = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
-  registerState(name: string, state: IState<T>) {
+  registerState(name: string, state: IMotionState<T>) {
     this._states[name] = state;
   }
 
-  registerStates(states: { [key: string]: IState<T> }) {
+  registerStates(states: { [key: string]: IMotionState<T> }) {
     Object.keys(states).forEach((name) =>
       this.registerState(name, states[name])
     );

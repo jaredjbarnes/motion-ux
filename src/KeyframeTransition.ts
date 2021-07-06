@@ -5,7 +5,7 @@ import ExtendedAnimation from "./ExtendedAnimation";
 import BlendedAnimation from "./BlendedAnimation";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 
-export interface IState<T> {
+export interface IMotionState<T> {
   animation: IAnimation<T>;
   duration: number;
   iterationCount: number; // Defaults to 1
@@ -15,12 +15,12 @@ export interface IState<T> {
 }
 
 export class KeyframeTransition<T> {
-  protected _currentState: IState<T> | null = null;
+  protected _currentState: IMotionState<T> | null = null;
   protected _observer: TimeObserver<ITimeEvent> | null = null;
 
   public player = new Player();
 
-  protected _transitionToState(state: IState<T>) {
+  protected _transitionToState(state: IMotionState<T>) {
     const lastState = this._currentState;
 
     this._currentState = state;
@@ -61,7 +61,7 @@ export class KeyframeTransition<T> {
     return this;
   }
 
-  transition(state: IState<T>) {
+  transition(state: IMotionState<T>) {
     this._transitionToState(state);
     this.player.play();
     return this;
