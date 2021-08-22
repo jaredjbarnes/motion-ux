@@ -56,7 +56,7 @@ class Animator {
         }
     }
     traverse(fromObject, controlsObject, toObject, resultObject) {
-        Object.keys(fromObject).forEach((key) => {
+        for (let key in fromObject) {
             const from = fromObject[key];
             const to = toObject[key];
             const controls = controlsObject.map((c) => c[key]);
@@ -69,7 +69,7 @@ class Animator {
             else if (typeof from === "object" && from != null) {
                 this.traverse(fromObject[key], controlsObject[key], toObject[key], resultObject[key]);
             }
-        });
+        }
     }
     update(time) {
         this.time = time;

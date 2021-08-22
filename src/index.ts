@@ -8,7 +8,7 @@ import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import StatefulMotion from "./StatefulMotion";
-import { IMotionState, KeyframeTransition } from "./KeyframeTransition";
+import { ITransitionState, KeyframeTransition } from "./KeyframeTransition";
 
 export {
   IAnimation,
@@ -31,5 +31,5 @@ export {
   RepeatDirection,
   AnimationState,
   KeyframeTransition,
-  IMotionState,
+  ITransitionState as IMotionState,
 };

@@ -1,10 +1,12 @@
-import IAnimation from "./IAnimation";
 import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
-import { KeyframeTransition } from "./KeyframeTransition";
+import { ITransitionState, KeyframeTransition } from "./KeyframeTransition";
+import { IAnimationKeyframes } from "./KeyframesGenerator";
+import CssKeyframe from "./CssKeyframe";
+import Animation from "./Animation";
 
 export interface IMotionState<T> {
-  animation: IAnimation<T>;
+  animation: IAnimationKeyframes;
   duration: number;
   iterationCount: number; // Defaults to 1
   transitionDuration: number; // Defaults to the duration of the animation
@@ -12,25 +14,20 @@ export interface IMotionState<T> {
   segueTo?: string;
 }
 
-export interface ITransitionState<T> {
-  animation: IAnimation<T>;
-  duration: number;
-  iterationCount: number; // Defaults to 1
-  transitionDuration: number; // Defaults to the duration of the animation
-  transitionEasing: keyof typeof easings; // Defaults to linear
-  segueTo?: string;
+export interface StatefulMotionConfig<T> {
+  [key: string]: IMotionState<T>;
 }
 
 export default class StatefulMotion<T> extends KeyframeTransition<T> {
   protected _currentStateName: string | null = null;
-  protected _states: { [key: string]: IMotionState<T> } = {};
+  protected _states: { [key: string]: ITransitionState<T> } = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
-  registerState(name: string, state: IMotionState<T>) {
+  registerState(name: string, state: ITransitionState<T>) {
     this._states[name] = state;
   }
 
-  registerStates(states: { [key: string]: IMotionState<T> }) {
+  registerStates(states: { [key: string]: ITransitionState<T> }) {
     Object.keys(states).forEach((name) =>
       this.registerState(name, states[name])
     );
@@ -84,5 +81,24 @@ export default class StatefulMotion<T> extends KeyframeTransition<T> {
 
     this.player.play();
     return this;
+  }
+
+  static createStatefulAnimation<T>(config: StatefulMotionConfig<T>) {
+    const statefulMotion = new StatefulMotion<(string | number)[]>();
+
+    Object.keys(config).forEach((name) => {
+      const { animation: keyframes, ...props } = config[name];
+      const animation = new Animation(
+        name,
+        CssKeyframe.createKeyframes(keyframes)
+      );
+
+      statefulMotion.registerState(name, {
+        animation,
+        ...props,
+      });
+    });
+
+    return statefulMotion;
   }
 }

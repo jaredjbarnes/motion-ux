@@ -60,7 +60,7 @@ class Animator {
         }
     }
     traverse(fromObject, controlsObject, toObject, resultObject) {
-        Object.keys(fromObject).forEach((key) => {
+        for (let key in fromObject) {
             const from = fromObject[key];
             const to = toObject[key];
             const controls = controlsObject.map((c) => c[key]);
@@ -73,7 +73,7 @@ class Animator {
             else if (typeof from === "object" && from != null) {
                 this.traverse(fromObject[key], controlsObject[key], toObject[key], resultObject[key]);
             }
-        });
+        }
     }
     update(time) {
         this.time = time;
@@ -2754,6 +2754,15 @@ class StatefulMotion extends KeyframeTransition {
         });
         this.player.play();
         return this;
+    }
+    static createStatefulAnimation(config) {
+        const statefulMotion = new StatefulMotion();
+        Object.keys(config).forEach((name) => {
+            const _a = config[name], { animation: keyframes } = _a, props = __rest(_a, ["animation"]);
+            const animation = new Animation(name, CssKeyframe.createKeyframes(keyframes));
+            statefulMotion.registerState(name, Object.assign({ animation }, props));
+        });
+        return statefulMotion;
     }
 }
 

@@ -8,5 +8,5 @@ import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import StatefulMotion from "./StatefulMotion";
-import { IMotionState, KeyframeTransition } from "./KeyframeTransition";
-export { IAnimation, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, StatefulMotion, CssKeyframeConfig, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, KeyframeTransition, IMotionState, };
+import { ITransitionState, KeyframeTransition } from "./KeyframeTransition";
+export { IAnimation, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, StatefulMotion, CssKeyframeConfig, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, KeyframeTransition, ITransitionState as IMotionState, };

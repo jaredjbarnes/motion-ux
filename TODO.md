@@ -85,36 +85,75 @@ const animation = {
 ```ts
 const transition = {
   open: {
-      opacity: {
-        value: 0,
-        controlsIn:[],
-        easeIn: "",
-        duration: 1000
-      },
-      display: {
-        value: 0,
-        controlsIn:[],
-        easeIn: "",
-        duration: 1000
-      }
+    opacity: {
+      value: 0,
+      controlsIn: [],
+      easeIn: "",
+      duration: 1000,
+    },
+    display: {
+      value: 0,
+      controlsIn: [],
+      easeIn: "",
+      duration: 1000,
+    },
   },
   close: {
-      opacity: {
-        value: 0,
-        controlsIn:[],
-        easeIn: "",
-        duration: 1000
-      },
-      display: {
-        value: 0,
-        controlsIn:[],
-        easeIn: "",
-        duration: 1000
-      }
-  }
-}
+    opacity: {
+      value: 0,
+      controlsIn: [],
+      easeIn: "",
+      duration: 1000,
+    },
+    display: {
+      value: 0,
+      controlsIn: [],
+      easeIn: "",
+      duration: 1000,
+    },
+  },
+};
 
 makeAnimation({});
+makeLoop({});
+makeStatefulMotion();
 makeTransition({});
 
+makeStatefulMotion({
+  open: {
+    in: {
+      keyframes: {
+        from: {
+          opacity: {
+            value: 0,
+            easeOut: "quad",
+            controlsOut: [1],
+          }
+        },
+        "50%": {
+          opacity: 1
+        },
+        to: {}
+      },
+      duration: 1000,
+    },
+    out: {
+      values: {
+        opacity: 1
+      },
+      duration: 1000
+    },
+  },
+  closed: {
+    opacity: 0
+  },
+  bounce: {
+    loop: {
+      keyframes: {
+        from: {},
+        to: {}
+      }
+    }
+  }
+});
 ```

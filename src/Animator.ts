@@ -39,7 +39,7 @@ export default class Animator<T> {
     toObject: any,
     resultObject: any
   ) {
-    Object.keys(fromObject).forEach((key) => {
+    for (let key in fromObject) {
       const from = fromObject[key];
       const to = toObject[key];
       const controls = controlsObject.map((c: any) => c[key]);
@@ -56,7 +56,7 @@ export default class Animator<T> {
           resultObject[key]
         );
       }
-    });
+    }
   }
 
   update(time: number) {
