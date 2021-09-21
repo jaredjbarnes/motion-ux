@@ -9,7 +9,6 @@ const leftToRight = new Animation(
         value: "translate(0px, 0px)",
         easeOut: "quad",
       },
-      opacity: "1",
     },
     "50%": {
       transform: {
@@ -17,14 +16,12 @@ const leftToRight = new Animation(
         easeIn: "quad",
         easeOut: "quad",
       },
-     opacity: "0.25",
     },
     to: {
       transform: {
         value: "translate(0px, 0px)",
         easeIn: "quad",
       },
-      opacity: "1",
     },
   })
 );
@@ -37,7 +34,6 @@ const rightToLeft = new Animation(
         value: "translate(500px, 0px)",
         easeOut: "quad",
       },
-     opacity: "0.25"
     },
     "50%": {
       transform: {
@@ -45,14 +41,12 @@ const rightToLeft = new Animation(
         easeIn: "quad",
         easeOut: "quad",
       },
-      opacity: "1"
     },
     to: {
       transform: {
         value: "translate(500px, 0px)",
         easeIn: "quad",
       },
-     opacity: "0.25"
     },
   })
 );
@@ -65,7 +59,6 @@ const upToDown = new Animation(
         value: "translate(250px, 0px)",
         easeOut: "quad",
       },
-      opacity: "1"
     },
     "50%": {
       transform: {
@@ -73,14 +66,12 @@ const upToDown = new Animation(
         easeIn: "quad",
         easeOut: "quad",
       },
-     opacity: "0.25"
     },
     to: {
       transform: {
         value: "translate(250px, 0px)",
         easeIn: "quad",
       },
-      opacity: "1"
     },
   })
 );
@@ -93,7 +84,6 @@ const sideToSide = new Animation(
         value: "translate(0px, 250px)",
         easeOut: "quad",
       },
-      opacity: "1"
     },
     "50%": {
       transform: {
@@ -101,14 +91,12 @@ const sideToSide = new Animation(
         easeIn: "quad",
         easeOut: "quad",
       },
-     opacity: "0.25"
     },
     to: {
       transform: {
         value: "translate(0px, 250px)",
         easeIn: "quad",
       },
-      opacity: "1"
     },
   })
 );
@@ -118,11 +106,9 @@ const stationary = new Animation(
   CssKeyframe.createKeyframes({
     from: {
       transform: "translate(250px, 250px)",
-      opacity: "1"
     },
     to: {
       transform: "translate(250px, 250px)",
-     opacity: "0.25"
     },
   })
 );
@@ -135,7 +121,6 @@ const rightUpToDown = new Animation(
         value: "translate(500px, 0px)",
         easeOut: "quad",
       },
-      opacity: "1"
     },
     "50%": {
       transform: {
@@ -143,14 +128,12 @@ const rightUpToDown = new Animation(
         easeIn: "quad",
         easeOut: "quad",
       },
-     opacity: "0.25"
     },
     to: {
       transform: {
         value: "translate(500px, 0px)",
         easeIn: "quad",
       },
-      opacity: "1"
     },
   })
 );
@@ -163,7 +146,6 @@ const quarterCircle = new Animation(
         value: "translate(250px, 0px)",
         controlsOut: ["translate(338px, 0px)"],
       },
-      opacity: "1"
     },
     "25%": {
       transform: {
@@ -171,7 +153,6 @@ const quarterCircle = new Animation(
         controlsIn: ["translate(500px, 112px)"],
         controlsOut: ["translate(500px, 388px)"],
       },
-      opacity: "0.75"
     },
     "50%": {
       transform: {
@@ -179,7 +160,6 @@ const quarterCircle = new Animation(
         controlsIn: ["translate(388px, 500px)"],
         controlsOut: ["translate(112px, 500px)"],
       },
-      opacity: "0.25"
     },
     "75%": {
       transform: {
@@ -187,14 +167,12 @@ const quarterCircle = new Animation(
         controlsIn: ["translate(0px, 388px)"],
         controlsOut: ["translate(0px, 112px)"],
       },
-     opacity: "0.25"
     },
     to: {
       transform: {
         value: "translate(250px, 0px)",
         controlsIn: ["translate(112px, 0px)"],
       },
-      opacity: "1"
     },
   })
 );
@@ -326,7 +304,7 @@ class StatefulAnimation {
   }
 }
 
-for (let x = 0; x < 200; x++) {
+for (let x = 0; x < 4; x++) {
   const animation = new StatefulAnimation();
   animation.start();
 }

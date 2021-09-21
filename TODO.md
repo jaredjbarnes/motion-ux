@@ -119,7 +119,7 @@ makeLoop({});
 makeStatefulMotion();
 makeTransition({});
 
-makeStatefulMotion({
+makeStatefulMotion({x
   open: {
     in: {
       keyframes: {
