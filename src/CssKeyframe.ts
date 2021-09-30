@@ -18,10 +18,10 @@ const visitor = new Visitor();
 const keyframesGenerator = new KeyframesGenerator();
 
 keyframesGenerator.setTransformValue((value) => {
-  return convertToValue(value);
+  return convertValue(value);
 });
 
-const convertToValue = (value: string) => {
+const convertValue = (value: string) => {
   const node = cssValue.exec(value);
   if (node == null) {
     return [];
@@ -58,9 +58,9 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
     controls = [],
     ...config
   }: CssKeyframeConfig) {
-    const toValue = convertToValue(to);
-    const fromValue = convertToValue(from);
-    const controlsValues = controls.map((c) => convertToValue(c));
+    const toValue = convertValue(to);
+    const fromValue = convertValue(from);
+    const controlsValues = controls.map((c) => convertValue(c));
     const easingValue = easings[easing];
 
     super({

@@ -1,4 +1,4 @@
-import {IClock, TickCallback} from "./IClock";
+import { IClock, TickCallback } from "./IClock";
 
 export default class DefaultClock implements IClock {
   public registeredCallbacks: Map<TickCallback, TickCallback>;

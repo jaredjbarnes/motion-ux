@@ -178,7 +178,7 @@ const quarterCircle = new Animation(
 );
 
 class StatefulAnimation {
-  constructor() {
+  constructor(id) {
     this.timeoutId = null;
 
     const circleWithBezier = document.createElement("div");
@@ -190,7 +190,7 @@ class StatefulAnimation {
     circleWithBezier.style.display = "flex";
     circleWithBezier.style.alignItems = "center";
     circleWithBezier.style.justifyContent = "center";
-    circleWithBezier.innerHTML = "0";
+    circleWithBezier.innerHTML = id;
     this.circleWithBezier = circleWithBezier;
 
     document.body.appendChild(circleWithBezier);
@@ -304,7 +304,7 @@ class StatefulAnimation {
   }
 }
 
-for (let x = 0; x < 4; x++) {
-  const animation = new StatefulAnimation();
+for (let x = 0; x < 400; x++) {
+  const animation = new StatefulAnimation(x);
   animation.start();
 }
