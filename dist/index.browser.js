@@ -2311,9 +2311,9 @@
   const visitor = new Visitor();
   const keyframesGenerator = new KeyframesGenerator();
   keyframesGenerator.setTransformValue((value) => {
-      return convertToValue(value);
+      return convertValue(value);
   });
-  const convertToValue = (value) => {
+  const convertValue = (value) => {
       const node = cssValue.exec(value);
       if (node == null) {
           return [];
@@ -2343,9 +2343,9 @@
   class CssKeyframe extends Keyframe {
       constructor(_a) {
           var { from, to, easing = "linear", controls = [] } = _a, config = __rest(_a, ["from", "to", "easing", "controls"]);
-          const toValue = convertToValue(to);
-          const fromValue = convertToValue(from);
-          const controlsValues = controls.map((c) => convertToValue(c));
+          const toValue = convertValue(to);
+          const fromValue = convertValue(from);
+          const controlsValues = controls.map((c) => convertValue(c));
           const easingValue = easings[easing];
           super(Object.assign(Object.assign({}, config), { from: fromValue, to: toValue, controls: controlsValues, easing: easingValue }));
       }
@@ -2715,11 +2715,17 @@
           this._states = {};
           this._segueObserver = null;
       }
-      registerState(name, state) {
+      addState(name, state) {
           this._states[name] = state;
       }
-      registerStates(states) {
-          Object.keys(states).forEach((name) => this.registerState(name, states[name]));
+      addStates(states) {
+          Object.keys(states).forEach((name) => this.addState(name, states[name]));
+      }
+      removeState(name, state) {
+          delete this._states[name];
+      }
+      removeAllStates() {
+          this._states = {};
       }
       isFallThrough(name) {
           if (this._currentStateName == null) {
@@ -2762,7 +2768,7 @@
           Object.keys(config).forEach((name) => {
               const _a = config[name], { animation: keyframes } = _a, props = __rest(_a, ["animation"]);
               const animation = new Animation(name, CssKeyframe.createKeyframes(keyframes));
-              statefulMotion.registerState(name, Object.assign({ animation }, props));
+              statefulMotion.addState(name, Object.assign({ animation }, props));
           });
           return statefulMotion;
       }

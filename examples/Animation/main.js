@@ -199,7 +199,7 @@ class StatefulAnimation {
 
     const statefulMotion = new StatefulMotion();
     statefulMotion.player.render = (animation) => this.render(animation);
-    statefulMotion.registerStates({
+    statefulMotion.addStates({
       first: {
         animation: leftToRight,
         iterationCount: 3,
@@ -304,7 +304,9 @@ class StatefulAnimation {
   }
 }
 
-for (let x = 0; x < 400; x++) {
+for (let x = 0; x < 1; x++) {
   const animation = new StatefulAnimation(x);
   animation.start();
+
+  window.animation = animation;
 }

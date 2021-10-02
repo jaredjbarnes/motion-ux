@@ -19,10 +19,12 @@ export default class StatefulMotion<T> extends KeyframeTransition<T> {
         [key: string]: ITransitionState<T>;
     };
     protected _segueObserver: TimeObserver<ITimeEvent> | null;
-    registerState(name: string, state: ITransitionState<T>): void;
-    registerStates(states: {
+    addState(name: string, state: ITransitionState<T>): void;
+    addStates(states: {
         [key: string]: ITransitionState<T>;
     }): void;
+    removeState(name: string, state: ITransitionState<T>): void;
+    removeAllStates(): void;
     private isFallThrough;
     private getFallThrough;
     changeState(name: string): this;

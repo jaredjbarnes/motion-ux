@@ -23,14 +23,20 @@ export default class StatefulMotion<T> extends KeyframeTransition<T> {
   protected _states: { [key: string]: ITransitionState<T> } = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
-  registerState(name: string, state: ITransitionState<T>) {
+  addState(name: string, state: ITransitionState<T>) {
     this._states[name] = state;
   }
 
-  registerStates(states: { [key: string]: ITransitionState<T> }) {
-    Object.keys(states).forEach((name) =>
-      this.registerState(name, states[name])
-    );
+  addStates(states: { [key: string]: ITransitionState<T> }) {
+    Object.keys(states).forEach((name) => this.addState(name, states[name]));
+  }
+
+  removeState(name: string, state: ITransitionState<T>) {
+    delete this._states[name];
+  }
+
+  removeAllStates() {
+    this._states = {};
   }
 
   private isFallThrough(name: string) {
@@ -93,7 +99,7 @@ export default class StatefulMotion<T> extends KeyframeTransition<T> {
         CssKeyframe.createKeyframes(keyframes)
       );
 
-      statefulMotion.registerState(name, {
+      statefulMotion.addState(name, {
         animation,
         ...props,
       });
