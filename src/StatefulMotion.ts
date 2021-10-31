@@ -1,9 +1,7 @@
 import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
-import { ITransitionState, KeyframeTransition } from "./KeyframeTransition";
+import { ITransitionConfig, Transition } from "./Transition";
 import { IAnimationConfig } from "./KeyframesGenerator";
-import CssKeyframe from "./CssKeyframe";
-import Animation from "./Animation";
 
 export interface IMotionState<T> {
   animation: IAnimationConfig<T>;
@@ -18,20 +16,20 @@ export interface StatefulMotionConfig<T> {
   [key: string]: IMotionState<T>;
 }
 
-export default class StatefulMotion<T> extends KeyframeTransition<T> {
+export default class StatefulMotion<T> extends Transition<T> {
   protected _currentStateName: string | null = null;
-  protected _states: { [key: string]: ITransitionState<T> } = {};
+  protected _states: { [key: string]: ITransitionConfig<T> } = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
-  addState(name: string, state: ITransitionState<T>) {
+  addState(name: string, state: ITransitionConfig<T>) {
     this._states[name] = state;
   }
 
-  addStates(states: { [key: string]: ITransitionState<T> }) {
+  addStates(states: { [key: string]: ITransitionConfig<T> }) {
     Object.keys(states).forEach((name) => this.addState(name, states[name]));
   }
 
-  removeState(name: string, state: ITransitionState<T>) {
+  removeState(name: string, state: ITransitionConfig<T>) {
     delete this._states[name];
   }
 
@@ -88,5 +86,4 @@ export default class StatefulMotion<T> extends KeyframeTransition<T> {
     this.player.play();
     return this;
   }
-
 }

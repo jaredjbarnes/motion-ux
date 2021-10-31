@@ -2,7 +2,7 @@ import Animator from "./Animator";
 import Keyframe from "./Keyframe";
 import IAnimation from "./IAnimation";
 
-const sortAsc = (animatorA: Animator<any>, animatorB: Animator<any>) => {
+const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 
@@ -24,8 +24,7 @@ export default class Animation<T> implements IAnimation<T> {
   set keyframes(keyframes: Keyframe<T>[]) {
     this.animators = keyframes.map((keyframe) => new Animator(keyframe));
     this._createCurrentValues();
-    // Sort by time.
-    this.animators.sort(sortAsc);
+    this.animators.sort(sortTime);
   }
 
   get keyframes() {
@@ -51,7 +50,7 @@ export default class Animation<T> implements IAnimation<T> {
     const length = animators.length;
 
     // Assign all values at least once.
-    // This initials values beyond the time we are at.
+    // These are the initials values beyond the time we are at.
     for (let x = 0; x < length; x++) {
       const keyframe = animators[x].keyframe;
       const key = keyframe.property;
