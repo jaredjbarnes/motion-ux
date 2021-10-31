@@ -51,7 +51,7 @@ export default class Animator<T> {
       } else if (typeof from === "object" && from != null) {
         this.traverse(
           fromObject[key],
-          controlsObject[key],
+          controls || emptyArray,
           toObject[key],
           resultObject[key]
         );

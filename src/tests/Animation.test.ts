@@ -24,6 +24,46 @@ describe("Animation", () => {
     }
   });
 
+  test("Nested Object Animation.", () => {
+    const name = "my-animation";
+    const animation = new Animation("css", [
+      new Keyframe({
+        property: "object",
+        startAt: 0,
+        endAt: 1,
+        from: {
+          scrollTop: 0,
+          viewport: {
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+        },
+        to: {
+          scrollTop: 10,
+          viewport: {
+            top: -100,
+            left: -100,
+            right: 100,
+            bottom: 100,
+          },
+        },
+      }),
+    ]);
+
+    let values = animation.update(0).currentValues;
+    const object = values.object;
+    expect(object.scrollTop).toBe(0);
+
+    values = animation.update(0.5).currentValues;
+    
+    expect(object.viewport.top).toBe(-50);
+    expect(object.viewport.left).toBe(-50);
+    expect(object.viewport.right).toBe(50);
+    expect(object.viewport.bottom).toBe(50);
+  });
+
   test("CssKeyframes", () => {
     const from = "M 0 0 C 0 0, 0 0, 0 0";
     const to = "M 10 10 C 150 150,30 30,20 20";

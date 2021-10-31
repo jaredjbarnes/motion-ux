@@ -157,3 +157,74 @@ makeStatefulMotion({x
   }
 });
 ```
+
+THIS IS THE NEWEST OCT 28
+This allows for the properties that need to be animated to be on different keyframes.
+This will reduce the redundancy that happens when you declare
+
+```ts
+const useMotion = makeMotion({
+  open: {
+    transitionDuration: 1000,
+    values: {
+      backgroundColor: "rgba(0,0,0,0)",
+      opacity: 1,
+    },
+  },
+  closed: {
+    transitionDuration: 2000,
+    values: {
+      backgroundColor: "rgba(255,255,255,0)",
+      opacity: 1,
+    },
+  },
+});
+```
+
+```ts
+export interface IKeyframeControls<T> {
+  value: T;
+  controlsIn?: T[];
+  controlsOut?: T[];
+  easeIn?: DynamicEasingNames;
+  easeOut?: DynamicEasingNames;
+}
+
+export interface IAnimationConfig<T> {
+  [key: string]: T | IKeyframes<T>;
+}
+export interface IKeyframes<T> {
+  [key: string]: T | IKeyframeControls<T>;
+  from: T | IKeyframeControls<T>;
+  to: T | IKeyframeControls<T>;
+}
+
+export interface IKeyframesConstrained<T> {
+  [key: string]: IKeyframeControls<T>;
+  from: IKeyframeControls<T>;
+  to: IKeyframeControls<T>;
+}
+
+interface IMotionStateBase {
+  transitionDuration: number;
+  transitionEasing: keyof typeof easings;
+  segueTo: string;
+}
+
+interface ILoopMotionState extends IMotionStateBase {
+  duration: number;
+  iterationCount: number; //Default Infinity
+  loop: IAnimationConfig;
+}
+
+interface IControlledMotionState extends IMotionStateBase {
+  enter: IAnimationConfig;
+  leave: IAnimationConfig;
+}
+
+interface IControlledMotionState<T> extends IMotionStateBase {
+  values: {
+    [key in keyof T]: T[key];
+  };
+}
+```

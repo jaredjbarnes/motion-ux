@@ -2,7 +2,7 @@ import { Visitor } from "clarity-pattern-parser";
 import easings, { EasingNames } from "./easings";
 import Keyframe from "./Keyframe";
 import cssValue from "./patterns/cssValue";
-import KeyframesGenerator, { IAnimationKeyframes } from "./KeyframesGenerator";
+import KeyframesGenerator, { IAnimationConfig, IKeyframeControls } from "./KeyframesGenerator";
 
 export interface CssKeyframeConfig {
   property: string;
@@ -72,7 +72,4 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
     });
   }
 
-  static createKeyframes(animationKeyframes: IAnimationKeyframes) {
-    return keyframesGenerator.generate<(string | number)[]>(animationKeyframes);
-  }
 }

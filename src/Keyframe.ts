@@ -1,6 +1,9 @@
 import easings, { EasingFunction } from "./easings";
 import { DynamicEasingNames } from "./createDynamicEasing";
-import KeyframesGenerator, { IAnimationKeyframes } from "./KeyframesGenerator";
+import KeyframesGenerator, {
+  IKeyframeControls,
+  IAnimationConfig,
+} from "./KeyframesGenerator";
 import TimeObserver from "./TimeObserver";
 
 export interface IComplexKeyframeValue<T> {
@@ -43,10 +46,6 @@ export default class Keyframe<T> {
     this.controls = Array.isArray(config.controls) ? config.controls : [];
     this.easing =
       typeof config.easing === "function" ? config.easing : easings.linear;
-  }
-
-  static createKeyframes(animationKeyframes: IAnimationKeyframes) {
-    return keyframesGenerator.generate(animationKeyframes);
   }
 
   clone() {

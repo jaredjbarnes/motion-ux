@@ -1,12 +1,12 @@
 import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { ITransitionState, KeyframeTransition } from "./KeyframeTransition";
-import { IAnimationKeyframes } from "./KeyframesGenerator";
+import { IAnimationConfig } from "./KeyframesGenerator";
 import CssKeyframe from "./CssKeyframe";
 import Animation from "./Animation";
 
 export interface IMotionState<T> {
-  animation: IAnimationKeyframes;
+  animation: IAnimationConfig<T>;
   duration: number;
   iterationCount: number; // Defaults to 1
   transitionDuration: number; // Defaults to the duration of the animation
@@ -89,22 +89,4 @@ export default class StatefulMotion<T> extends KeyframeTransition<T> {
     return this;
   }
 
-  static createStatefulAnimation<T>(config: StatefulMotionConfig<T>) {
-    const statefulMotion = new StatefulMotion<(string | number)[]>();
-
-    Object.keys(config).forEach((name) => {
-      const { animation: keyframes, ...props } = config[name];
-      const animation = new Animation(
-        name,
-        CssKeyframe.createKeyframes(keyframes)
-      );
-
-      statefulMotion.addState(name, {
-        animation,
-        ...props,
-      });
-    });
-
-    return statefulMotion;
-  }
 }

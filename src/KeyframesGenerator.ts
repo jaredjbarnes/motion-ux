@@ -1,24 +1,27 @@
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import Keyframe from "./Keyframe";
 
-export interface IComplexKeyframeValue {
-  value: any;
-  controlsIn?: any[];
-  controlsOut?: any[];
+export interface IKeyframeControls<T> {
+  value: T;
+  controlsIn?: T[];
+  controlsOut?: T[];
   easeIn?: DynamicEasingNames;
   easeOut?: DynamicEasingNames;
 }
 
-interface IAnimatableObject {
-  [key: string]: IAnimationKeyframeValue;
+export interface IAnimationConfig<T> {
+  [key: string]: T | IKeyframes<T>;
+}
+export interface IKeyframes<T> {
+  [key: string]: T | IKeyframeControls<T>;
+  from: T | IKeyframeControls<T>;
+  to: T | IKeyframeControls<T>;
 }
 
-export type IAnimationKeyframeValue = string | number | IComplexKeyframeValue;
-
-export interface IAnimationKeyframes {
-  [key: string]: IAnimatableObject;
-  from: IAnimatableObject;
-  to: IAnimatableObject;
+export interface IKeyframesConstrained<T> {
+  [key: string]: IKeyframeControls<T>;
+  from: IKeyframeControls<T>;
+  to: IKeyframeControls<T>;
 }
 
 const complexFrameKeys = ["controlsIn", "controlsOut", "easeIn", "easeOut"];
@@ -93,7 +96,7 @@ export default class KeyframesGenerator {
     return decimal;
   }
 
-  getEaseIn(currentValue: any) {
+  getEaseIn<T>(currentValue: IKeyframeControls<T>) {
     if (this.isComplexKeyframe(currentValue) && currentValue.easeOut != null) {
       return currentValue.easeOut || "linear";
     } else {
@@ -101,7 +104,7 @@ export default class KeyframesGenerator {
     }
   }
 
-  getEaseOut(nextValue: any) {
+  getEaseOut<T>(nextValue: IKeyframeControls<T>) {
     if (this.isComplexKeyframe(nextValue) && nextValue.easeIn != null) {
       return nextValue.easeIn || "linear";
     } else {
@@ -109,29 +112,29 @@ export default class KeyframesGenerator {
     }
   }
 
-  getControlsIn(currentValue: any) {
+  getControlsIn<T>(currentValue: IKeyframeControls<T>) {
     if (
       this.isComplexKeyframe(currentValue) &&
       Array.isArray(currentValue.controlsOut)
     ) {
-      return currentValue.controlsOut.map((v: any) => this.transformValue(v));
+      return currentValue.controlsOut.map((v) => this.transformValue(v));
     } else {
       return [];
     }
   }
 
-  getControlsOut(nextValue: any) {
+  getControlsOut<T>(nextValue: IKeyframeControls<T>) {
     if (
       this.isComplexKeyframe(nextValue) &&
       Array.isArray(nextValue.controlsIn)
     ) {
-      return nextValue.controlsIn.map((v: any) => this.transformValue(v));
+      return nextValue.controlsIn.map((v) => this.transformValue(v));
     } else {
       return [];
     }
   }
 
-  getFrom(currentValue: any) {
+  getFrom<T>(currentValue: IKeyframeControls<T>) {
     if (this.isComplexKeyframe(currentValue)) {
       return this.transformValue(currentValue.value);
     } else if (typeof currentValue === "string") {
@@ -146,7 +149,7 @@ export default class KeyframesGenerator {
     }
   }
 
-  getTo(nextValue: any) {
+  getTo<T>(nextValue: IKeyframeControls<T>) {
     if (this.isComplexKeyframe(nextValue)) {
       return this.transformValue(nextValue.value);
     } else if (typeof nextValue === "string") {
@@ -161,33 +164,65 @@ export default class KeyframesGenerator {
     }
   }
 
-  generate<T = any>(animationKeyframes: IAnimationKeyframes) {
-    const timeKeys = Object.keys(animationKeyframes);
+  normalizePrimitiveValue<T>(value: T): IKeyframeControls<T> {
+    return {
+      value,
+    };
+  }
+
+  normalizeValue<T>(value: T | IKeyframeControls<T>): IKeyframeControls<T> {
+    if (typeof value === "string" || typeof value === "number") {
+      return this.normalizePrimitiveValue(value);
+    } else {
+      return value as IKeyframeControls<T>;
+    }
+  }
+
+  normalizeKeyframeValue<T>(
+    value: T | IKeyframeControls<T> | IKeyframes<T>
+  ): IKeyframesConstrained<T> {
+    if (typeof value === "string" || typeof value === "number") {
+      return {
+        from: this.normalizePrimitiveValue(value),
+        to: this.normalizePrimitiveValue(value),
+      };
+    } else if (typeof value === "object" && value != null) {
+      const keyframes: any = value;
+      const keys = Object.keys(keyframes);
+      keys.forEach((key) => {
+        const keyframeValue = this.normalizeValue(keyframes[key]);
+        keyframeValue;
+      });
+
+      return value as IKeyframesConstrained<T>;
+    } else {
+      throw new Error("Unknown value type.");
+    }
+  }
+
+  generate<T>(animationConfig: IAnimationConfig<T>) {
+    const animatedProperties = Object.keys(animationConfig);
     const keyframes: Keyframe<T>[] = [];
-    let lastKeyFramePercentage = 0;
-    timeKeys.sort(this.sortPercentages);
 
-    for (let index = 0; index < timeKeys.length - 1; index++) {
-      const key = timeKeys[index];
-      const nextKey = timeKeys[index + 1];
-      const currentAnimationKeyframe = animationKeyframes[key];
-      const nextAnimationKeyframe = animationKeyframes[nextKey] || null;
-      const startAt = lastKeyFramePercentage;
-      const endAt = this.getDecimalFromPercentage(timeKeys[index + 1]);
+    for (let x = 0; x < animatedProperties.length; x++) {
+      const property = animatedProperties[x];
+      let lastKeyFramePercentage = 0;
+      const keyframeValue = this.normalizeKeyframeValue(
+        animationConfig[property]
+      );
+      const timeKeys = Object.keys(keyframeValue);
+      timeKeys.sort(this.sortPercentages);
 
-      lastKeyFramePercentage = endAt;
+      for (let index = 0; index < timeKeys.length - 1; index++) {
+        const key = timeKeys[index];
+        const nextKey = timeKeys[index + 1];
 
-      Object.keys(currentAnimationKeyframe).forEach((key) => {
-        const currentValue = currentAnimationKeyframe[key];
-        const nextValue = nextAnimationKeyframe[key];
+        const currentValue = keyframeValue[key];
+        const nextValue = keyframeValue[nextKey] || null;
+        const startAt = lastKeyFramePercentage;
+        const endAt = this.getDecimalFromPercentage(timeKeys[index + 1]);
 
-        if (nextValue == null) {
-          throw new Error(
-            `All keyframe declarations need to have the same properties. Missing '${key}' from one of the keyframes. ${JSON.stringify(
-              animationKeyframes
-            )}`
-          );
-        }
+        lastKeyFramePercentage = endAt;
 
         const easingIn = this.getEaseIn(currentValue);
         const easingOut = this.getEaseOut(nextValue);
@@ -209,7 +244,7 @@ export default class KeyframesGenerator {
         });
 
         keyframes.push(keyframe);
-      });
+      }
     }
     return keyframes;
   }
