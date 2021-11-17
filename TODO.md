@@ -182,49 +182,48 @@ const useMotion = makeMotion({
 ```
 
 ```ts
-export interface IKeyframeControls<T> {
-  value: T;
-  controlsIn?: T[];
-  controlsOut?: T[];
-  easeIn?: DynamicEasingNames;
-  easeOut?: DynamicEasingNames;
+export type IMotionState<T> =
+  | IValuesMotionState<T>
+  | IControlledMotionState<T>
+  | ILoopMotionState;
+
+export interface IMotionStateBase {
+  duration: number;
+  easing: keyof typeof easings;
+  segueTo: string;
+}
+
+export interface ILoopMotionState<T> extends IMotionStateBase {
+  iterationCount: number; //Default Infinity
+  loop: IAnimationConfig<T>;
+}
+
+export interface IControlledMotionState<T> extends IMotionStateBase {
+  enter: IAnimationConfig<T>;
+  leave: IAnimationConfig<T>;
+}
+
+export interface IValuesMotionState<T> extends IMotionStateBase {
+  values: {
+    [key in keyof T]: T[key];
+  };
 }
 
 export interface IAnimationConfig<T> {
   [key: string]: T | IKeyframes<T>;
 }
+
 export interface IKeyframes<T> {
   [key: string]: T | IKeyframeControls<T>;
   from: T | IKeyframeControls<T>;
   to: T | IKeyframeControls<T>;
 }
 
-export interface IKeyframesConstrained<T> {
-  [key: string]: IKeyframeControls<T>;
-  from: IKeyframeControls<T>;
-  to: IKeyframeControls<T>;
-}
-
-interface IMotionStateBase {
-  transitionDuration: number;
-  transitionEasing: keyof typeof easings;
-  segueTo: string;
-}
-
-interface ILoopMotionState extends IMotionStateBase {
-  duration: number;
-  iterationCount: number; //Default Infinity
-  loop: IAnimationConfig;
-}
-
-interface IControlledMotionState extends IMotionStateBase {
-  enter: IAnimationConfig;
-  leave: IAnimationConfig;
-}
-
-interface IControlledMotionState<T> extends IMotionStateBase {
-  values: {
-    [key in keyof T]: T[key];
-  };
+export interface IKeyframeControls<T> {
+  value: T;
+  controlsIn?: T[];
+  controlsOut?: T[];
+  easeIn?: DynamicEasingNames;
+  easeOut?: DynamicEasingNames;
 }
 ```
