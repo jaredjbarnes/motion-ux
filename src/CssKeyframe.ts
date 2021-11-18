@@ -2,7 +2,6 @@ import { Visitor } from "clarity-pattern-parser";
 import easings, { EasingNames } from "./easings";
 import Keyframe from "./Keyframe";
 import cssValue from "./patterns/cssValue";
-import KeyframesGenerator from "./KeyframesGenerator";
 
 export interface CssKeyframeConfig {
   property: string;
@@ -15,11 +14,6 @@ export interface CssKeyframeConfig {
 }
 
 const visitor = new Visitor();
-const keyframesGenerator = new KeyframesGenerator();
-
-keyframesGenerator.setTransformValue((value) => {
-  return convertValue(value);
-});
 
 const convertValue = (value: string) => {
   const node = cssValue.exec(value);
