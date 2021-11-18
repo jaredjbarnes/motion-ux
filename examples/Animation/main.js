@@ -107,8 +107,11 @@ const fifth = {
   transitionDuration: ANIMATION_DURATION,
   values: {
     transform: {
-      value: "translate(250px, 250px)",
-      easeIn: "expo",
+      from: "translate(250px, 250px)",
+      to: {
+        value: "translate(250px, 250px)",
+        easeIn: "expo",
+      },
     },
   },
 };
