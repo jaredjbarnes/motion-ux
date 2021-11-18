@@ -1,10 +1,7 @@
 import easings, { EasingFunction } from "./easings";
 import { DynamicEasingNames } from "./createDynamicEasing";
-import KeyframesGenerator, {
-  IKeyframeControls,
-  IAnimationConfig,
-} from "./KeyframesGenerator";
-import TimeObserver from "./TimeObserver";
+import KeyframesGenerator from "./KeyframesGenerator";
+import { deepClone } from "./deepClone";
 
 export interface IComplexKeyframeValue<T> {
   value: T;
@@ -24,8 +21,6 @@ export interface KeyframeConfig<T> {
   easing?: EasingFunction;
 }
 
-const keyframesGenerator = new KeyframesGenerator();
-
 export default class Keyframe<T> {
   public property: string;
   public to: T;
@@ -40,7 +35,7 @@ export default class Keyframe<T> {
     this.property = config.property;
     this.to = config.to;
     this.from = config.from;
-    this.result = JSON.parse(JSON.stringify(config.from));
+    this.result = deepClone(config.from);
     this.startAt = typeof config.startAt === "number" ? config.startAt : 0;
     this.endAt = typeof config.endAt === "number" ? config.endAt : 1;
     this.controls = Array.isArray(config.controls) ? config.controls : [];
@@ -51,11 +46,11 @@ export default class Keyframe<T> {
   clone() {
     return new Keyframe({
       property: this.property,
-      to: JSON.parse(JSON.stringify(this.to)),
-      from: JSON.parse(JSON.stringify(this.from)),
+      to: deepClone(this.to),
+      from: deepClone(this.from),
       startAt: this.startAt,
       endAt: this.endAt,
-      controls: this.controls.map((c) => JSON.parse(JSON.stringify(c))),
+      controls: this.controls.map((c) => deepClone(c)),
       easing: this.easing,
     });
   }

@@ -4,6 +4,7 @@ import IAnimation from "./IAnimation";
 import Animation from "./Animation";
 import ObjectOperator from "./ObjectOperator";
 import { PlayerState } from "./Player";
+import { deepClone } from "./deepClone";
 
 const nullableAnimation = new Animation("null", [
   new Keyframe({ from: 0, to: 0, property: "null" }),
@@ -29,7 +30,7 @@ export default class SlopeAnimationBuilder {
   public dynamicValues: any;
 
   private cloneValues(values: any) {
-    return JSON.parse(JSON.stringify(values));
+    return deepClone(values);
   }
 
   build<T>(

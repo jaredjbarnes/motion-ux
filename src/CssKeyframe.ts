@@ -2,7 +2,7 @@ import { Visitor } from "clarity-pattern-parser";
 import easings, { EasingNames } from "./easings";
 import Keyframe from "./Keyframe";
 import cssValue from "./patterns/cssValue";
-import KeyframesGenerator, { IAnimationConfig, IKeyframeControls } from "./KeyframesGenerator";
+import KeyframesGenerator, { IAnimatedProperties, IKeyframeControls } from "./KeyframesGenerator";
 
 export interface CssKeyframeConfig {
   property: string;

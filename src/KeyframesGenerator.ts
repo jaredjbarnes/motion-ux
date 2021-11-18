@@ -1,30 +1,23 @@
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import Keyframe from "./Keyframe";
 
-export interface IKeyframeControls<T> {
-  value: T;
-  controlsIn?: T[];
-  controlsOut?: T[];
+export type IAnimatedProperties<T> = {
+  [key in keyof T]: T[key] | IPercentageKeyframes<T[key]>;
+};
+
+export interface IPercentageKeyframes<TValue> {
+  [key: string]: TValue | IKeyframeControls<TValue>;
+  from: TValue | IKeyframeControls<TValue>;
+  to: TValue | IKeyframeControls<TValue>;
+}
+
+export interface IKeyframeControls<TValue> {
+  value: TValue;
+  controlsIn?: TValue[];
+  controlsOut?: TValue[];
   easeIn?: DynamicEasingNames;
   easeOut?: DynamicEasingNames;
 }
-
-export interface IAnimationConfig<T> {
-  [key: string]: T | IKeyframes<T>;
-}
-export interface IKeyframes<T> {
-  [key: string]: T | IKeyframeControls<T>;
-  from: T | IKeyframeControls<T>;
-  to: T | IKeyframeControls<T>;
-}
-
-export interface IKeyframesConstrained<T> {
-  [key: string]: IKeyframeControls<T>;
-  from: IKeyframeControls<T>;
-  to: IKeyframeControls<T>;
-}
-
-const complexFrameKeys = ["controlsIn", "controlsOut", "easeIn", "easeOut"];
 
 export default class KeyframesGenerator {
   private transformValue: (value: any) => any = (value) => value;
@@ -34,11 +27,7 @@ export default class KeyframesGenerator {
   }
 
   isComplexKeyframe(value: any) {
-    const keys = Object.keys(value);
-
-    return (
-      keys.includes("value") && keys.some((k) => complexFrameKeys.includes(k))
-    );
+    return value.hasOwnProperty("value");
   }
 
   sortPercentages = (keyA: string, keyB: string) => {
@@ -179,8 +168,8 @@ export default class KeyframesGenerator {
   }
 
   normalizeKeyframeValue<T>(
-    value: T | IKeyframeControls<T> | IKeyframes<T>
-  ): IKeyframesConstrained<T> {
+    value: T | IKeyframeControls<T> | IPercentageKeyframes<T>
+  ): IPercentageKeyframes<T> {
     if (typeof value === "string" || typeof value === "number") {
       return {
         from: this.normalizePrimitiveValue(value),
@@ -194,21 +183,23 @@ export default class KeyframesGenerator {
         keyframeValue;
       });
 
-      return value as IKeyframesConstrained<T>;
+      return value as IPercentageKeyframes<T>;
     } else {
       throw new Error("Unknown value type.");
     }
   }
 
-  generate<T>(animationConfig: IAnimationConfig<T>) {
-    const animatedProperties = Object.keys(animationConfig);
+  generate<T>(animatedProperties: IAnimatedProperties<T>) {
+    const animatedPropertyNames = Object.keys(
+      animatedProperties
+    ) as (keyof T)[];
     const keyframes: Keyframe<T>[] = [];
 
-    for (let x = 0; x < animatedProperties.length; x++) {
-      const property = animatedProperties[x];
+    for (let x = 0; x < animatedPropertyNames.length; x++) {
+      const property = animatedPropertyNames[x];
       let lastKeyFramePercentage = 0;
       const keyframeValue = this.normalizeKeyframeValue(
-        animationConfig[property]
+        animatedProperties[property]
       );
       const timeKeys = Object.keys(keyframeValue);
       timeKeys.sort(this.sortPercentages);
@@ -217,8 +208,8 @@ export default class KeyframesGenerator {
         const key = timeKeys[index];
         const nextKey = timeKeys[index + 1];
 
-        const currentValue = keyframeValue[key];
-        const nextValue = keyframeValue[nextKey] || null;
+        const currentValue = this.normalizeValue(keyframeValue[key]);
+        const nextValue = this.normalizeValue(keyframeValue[nextKey]);
         const startAt = lastKeyFramePercentage;
         const endAt = this.getDecimalFromPercentage(timeKeys[index + 1]);
 
@@ -234,7 +225,7 @@ export default class KeyframesGenerator {
         const to = this.getTo(nextValue);
 
         const keyframe = new Keyframe<T>({
-          property: key,
+          property: property.toString(),
           from,
           to,
           controls,

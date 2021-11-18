@@ -1,35 +1,80 @@
-import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { ITransitionConfig, Transition } from "./Transition";
-import { IAnimationConfig } from "./KeyframesGenerator";
-
-export interface IMotionState<T> {
-  animation: IAnimationConfig<T>;
-  duration: number;
-  iterationCount: number; // Defaults to 1
-  transitionDuration: number; // Defaults to the duration of the animation
-  transitionEasing: keyof typeof easings; // Defaults to linear
-  segueTo?: string;
-}
+import KeyframesGenerator, { IAnimatedProperties } from "./KeyframesGenerator";
+import Animation from "./Animation";
+import easings from "./easings";
 
 export interface StatefulMotionConfig<T> {
   [key: string]: IMotionState<T>;
 }
+
+export type IMotionState<T> =
+  | IValuesMotionState<T>
+  | IControlledMotionState<T>
+  | ILoopMotionState<T>;
+
+export interface IMotionStateBase {
+  transitionDuration: number;
+  transitionEasing: keyof typeof easings;
+  segueTo: string;
+}
+
+export interface ILoopMotionState<T> extends IMotionStateBase {
+  iterationCount: number; //Default Infinity
+  duration: number;
+  loop: IAnimatedProperties<T>;
+  enterDuration: never;
+  leaveDuration: never;
+  enter: never;
+  leave: never;
+  values: never;
+}
+
+export interface IControlledMotionState<T> extends IMotionStateBase {
+  enter: IAnimatedProperties<T>;
+  leave: IAnimatedProperties<T>;
+  enterDuration: number;
+  leaveDuration: number;
+  duration: never;
+  loop: never;
+  iterationCount: never;
+  values: never;
+}
+
+export interface IValuesMotionState<T> extends IMotionStateBase {
+  values: IAnimatedProperties<T>;
+  enter: never;
+  leave: never;
+  enterDuration: never;
+  leaveDuration: never;
+  loop: never;
+  duration: never;
+  iterationCount: never;
+}
+
+const keyframeGenerator = new KeyframesGenerator();
 
 export default class StatefulMotion<T> extends Transition<T> {
   protected _currentStateName: string | null = null;
   protected _states: { [key: string]: ITransitionConfig<T> } = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
-  addState(name: string, state: ITransitionConfig<T>) {
-    this._states[name] = state;
+  addState(name: string, state: IMotionState<T>) {
+    this._states[name] = {
+      animation: new Animation(name, keyframeGenerator.generate(state)),
+      duration: state.duration != null ? state.duration : 0,
+      segueTo: state.segueTo,
+      transitionDuration: state.transitionDuration,
+      iterationCount: state.iterationCount != null ? state.iterationCount : 1,
+      transitionEasing: state.transitionEasing,
+    };
   }
 
-  addStates(states: { [key: string]: ITransitionConfig<T> }) {
+  addStates(states: { [key: string]: IMotionState<T> }) {
     Object.keys(states).forEach((name) => this.addState(name, states[name]));
   }
 
-  removeState(name: string, state: ITransitionConfig<T>) {
+  removeState(name: string, state: IMotionState<T>) {
     delete this._states[name];
   }
 

@@ -195,6 +195,7 @@ export interface IMotionStateBase {
 
 export interface ILoopMotionState<T> extends IMotionStateBase {
   iterationCount: number; //Default Infinity
+  duration: number;
   loop: IAnimationConfig<T>;
 }
 
@@ -204,26 +205,110 @@ export interface IControlledMotionState<T> extends IMotionStateBase {
 }
 
 export interface IValuesMotionState<T> extends IMotionStateBase {
-  values: {
-    [key in keyof T]: T[key];
-  };
+  values: IAnimationConfig<T>;
 }
 
 export interface IAnimationConfig<T> {
-  [key: string]: T | IKeyframes<T>;
+  [key in keyof T]: T[key] | IKeyframes<T[key]>;
 }
 
-export interface IKeyframes<T> {
-  [key: string]: T | IKeyframeControls<T>;
-  from: T | IKeyframeControls<T>;
-  to: T | IKeyframeControls<T>;
+export interface IKeyframes<TValue> {
+  [key: string]: TValue | IKeyframeControls<TValue>;
+  from: TValue | IKeyframeControls<TValue>;
+  to: TValue | IKeyframeControls<TValue>;
 }
 
-export interface IKeyframeControls<T> {
-  value: T;
-  controlsIn?: T[];
-  controlsOut?: T[];
+export interface IKeyframeControls<TValue> {
+  value: TValue;
+  controlsIn?: TValue[];
+  controlsOut?: TValue[];
   easeIn?: DynamicEasingNames;
   easeOut?: DynamicEasingNames;
 }
+
+
+const config: IMotionState = {
+  opened: {
+    duration: 1000,
+    values: {
+      background: "rgba()",
+      opacity: 1,
+      color: "rgba()"
+    }
+  },
+  closed: {
+    duration: 1000
+    enter: {
+      background: "rgba(255, 255, 255, 0)",
+      opacity: {
+        from: 0.5,
+        to: 1
+      },
+      color: {
+        from: {
+          value: "rgba()",
+          controlsIn: ["rgba()"]
+        },
+        to: {
+
+        }
+      }
+    }
+  }
+}
+
+// Gets converted to
+const config: IMotionState = {
+  opened: {
+    duration: 1000,
+    values: {
+      background: {
+        from: {
+          value: "rgba()"
+        },
+        to: {
+          value: "rgba()"
+        }
+      },
+      opacity:  {
+        from: {
+          value: 1
+        },
+        to: {
+          value: 1
+        }
+      },
+      color: {
+        from: {
+          value: "rgba()"
+        },
+        to: {
+          value: "rgba()"
+        }
+      }Î
+    }
+  },
+  closed: {
+    duration: 1000
+    enter: {
+      background: "rgba(255, 255, 255, 0)",
+      opacity: {
+        from: 0.5,
+        to: 1
+      },
+      color: {
+        from: {
+          value: "rgba()",
+          controlsIn: ["rgba()"]
+        },
+        to: {
+
+        }
+      }
+    }
+  }
+}
+
+
+
 ```
