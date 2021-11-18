@@ -106,7 +106,10 @@ const fifth = {
   transitionEasing: "easeOutQuad",
   transitionDuration: ANIMATION_DURATION,
   values: {
-    transform: "translate(250px, 250px)",
+    transform: {
+      value: "translate(250px, 250px)",
+      easeIn: "expo",
+    },
   },
 };
 
@@ -168,6 +171,31 @@ const seven = {
   },
 };
 
+const eight = {
+  iterationCount: Infinity,
+  duration: ANIMATION_DURATION,
+  transitionEasing: "easeOutQuad",
+  transitionDuration: ANIMATION_DURATION,
+  enter: {
+    transform: {
+      from: "translate(300px, 300px)",
+      to: {
+        value: "translate(800px, 300px)",
+        easeIn: "expo",
+      },
+    },
+  },
+  leave: {
+    transform: {
+      from: {
+        value: "translate(800px, 300px)",
+        easeOut: "expo",
+      },
+      to: "translate(300px, 300px)",
+    },
+  },
+};
+
 class StatefulAnimation {
   constructor(id) {
     this.timeoutId = null;
@@ -196,6 +224,7 @@ class StatefulAnimation {
       fifth,
       sixth,
       seven,
+      eight,
     });
 
     statefulMotion.changeState("first");
@@ -209,6 +238,7 @@ class StatefulAnimation {
       "fifth",
       "sixth",
       "seven",
+      "eight",
     ];
   }
 
@@ -249,7 +279,7 @@ class StatefulAnimation {
   }
 }
 
-for (let x = 0; x < 400; x++) {
+for (let x = 0; x < 10; x++) {
   const animation = new StatefulAnimation(x);
   animation.start();
 

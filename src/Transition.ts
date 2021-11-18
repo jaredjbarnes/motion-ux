@@ -108,7 +108,7 @@ export class Transition<T> {
       } else {
         const leaveAnimation = new Animation(
           "leave",
-          keyframesGenerator.generate(state.leave)
+          keyframesGenerator.generate(lastState.leave)
         );
 
         this.player.animation = new BlendedAnimation(
@@ -126,9 +126,11 @@ export class Transition<T> {
 
     this._observer?.dispose();
     this._observer = this.player.observeTimeOnce(1, () => {
-      this.player.animation = animation.clone();
-      this.player.duration = state.duration;
-      this.player.repeat = state.iterationCount;
+      if (state.loop != null) {
+        this.player.animation = animation.clone();
+        this.player.duration = state.duration;
+        this.player.repeat = state.iterationCount;
+      }
     });
 
     return this;

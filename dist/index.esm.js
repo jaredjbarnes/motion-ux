@@ -2722,7 +2722,7 @@ class Transition {
                 this.player.animation = new BlendedAnimation(from, animation, easings[state.transitionEasing]);
             }
             else {
-                const leaveAnimation = new Animation("leave", keyframesGenerator.generate(state.leave));
+                const leaveAnimation = new Animation("leave", keyframesGenerator.generate(lastState.leave));
                 this.player.animation = new BlendedAnimation(leaveAnimation, animation, easings[state.transitionEasing]);
             }
         }
@@ -2732,9 +2732,11 @@ class Transition {
         this.player.repeat = 1;
         (_a = this._observer) === null || _a === void 0 ? void 0 : _a.dispose();
         this._observer = this.player.observeTimeOnce(1, () => {
-            this.player.animation = animation.clone();
-            this.player.duration = state.duration;
-            this.player.repeat = state.iterationCount;
+            if (state.loop != null) {
+                this.player.animation = animation.clone();
+                this.player.duration = state.duration;
+                this.player.repeat = state.iterationCount;
+            }
         });
         return this;
     }
