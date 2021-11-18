@@ -249,7 +249,7 @@ class StatefulAnimation {
   }
 }
 
-for (let x = 0; x < 10; x++) {
+for (let x = 0; x < 400; x++) {
   const animation = new StatefulAnimation(x);
   animation.start();
 
