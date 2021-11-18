@@ -1,6 +1,5 @@
 import { EasingNames } from "./easings";
 import Keyframe from "./Keyframe";
-import { IAnimationKeyframes } from "./KeyframesGenerator";
 export interface CssKeyframeConfig {
     property: string;
     to: string;
@@ -8,9 +7,8 @@ export interface CssKeyframeConfig {
     endAt?: number;
     startAt?: number;
     controls?: string[];
-    easing?: EasingNames;
+    easing?: EasingNames | ((percentage: number) => number);
 }
 export default class CssKeyframe extends Keyframe<(string | number)[]> {
     constructor({ from, to, easing, controls, ...config }: CssKeyframeConfig);
-    static createKeyframes(animationKeyframes: IAnimationKeyframes): Keyframe<(string | number)[]>[];
 }

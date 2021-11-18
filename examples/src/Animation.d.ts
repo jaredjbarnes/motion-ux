@@ -15,6 +15,6 @@ export default class Animation<T> implements IAnimation<T> {
     protected _createCurrentValues(): void;
     private _saveCurrentValues;
     update(time: number): this;
-    clone(): Animation<any>;
+    clone(): Animation<T>;
 }
 export {};

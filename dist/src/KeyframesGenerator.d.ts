@@ -1,33 +1,34 @@
 import { DynamicEasingNames } from "./createDynamicEasing";
-import Keyframe from "./Keyframe";
-export interface IComplexKeyframeValue {
-    value: any;
-    controlsIn?: any[];
-    controlsOut?: any[];
+import CssKeyframe from "./CssKeyframe";
+export declare type IAnimatedProperties<T> = {
+    [key in keyof T]: T[key] | IPercentageKeyframes<T[key]>;
+};
+export interface IPercentageKeyframes<TValue> {
+    [key: string]: TValue | IKeyframeControls<TValue>;
+    from: TValue | IKeyframeControls<TValue>;
+    to: TValue | IKeyframeControls<TValue>;
+}
+export interface IKeyframeControls<TValue> {
+    value: TValue;
+    controlsIn?: TValue[];
+    controlsOut?: TValue[];
     easeIn?: DynamicEasingNames;
     easeOut?: DynamicEasingNames;
-}
-interface IAnimatableObject {
-    [key: string]: IAnimationKeyframeValue;
-}
-export declare type IAnimationKeyframeValue = string | number | IComplexKeyframeValue;
-export interface IAnimationKeyframes {
-    [key: string]: IAnimatableObject;
-    from: IAnimatableObject;
-    to: IAnimatableObject;
 }
 export default class KeyframesGenerator {
     private transformValue;
     setTransformValue(transformValue: (value: any) => any): void;
-    isComplexKeyframe(value: any): boolean;
+    isComplexKeyframe(value: any): any;
     sortPercentages: (keyA: string, keyB: string) => 1 | 0 | -1;
     getDecimalFromPercentage(percentage: string): number;
-    getEaseIn(currentValue: any): any;
-    getEaseOut(nextValue: any): any;
-    getControlsIn(currentValue: any): any;
-    getControlsOut(nextValue: any): any;
-    getFrom(currentValue: any): any;
-    getTo(nextValue: any): any;
-    generate<T = any>(animationKeyframes: IAnimationKeyframes): Keyframe<T>[];
+    getEaseIn<T>(currentValue: IKeyframeControls<T>): DynamicEasingNames;
+    getEaseOut<T>(nextValue: IKeyframeControls<T>): DynamicEasingNames;
+    getControlsIn<T>(currentValue: IKeyframeControls<T>): any[];
+    getControlsOut<T>(nextValue: IKeyframeControls<T>): any[];
+    getFrom<T>(currentValue: IKeyframeControls<T>): any;
+    getTo<T>(nextValue: IKeyframeControls<T>): any;
+    normalizePrimitiveValue<T>(value: T): IKeyframeControls<T>;
+    normalizeValue<T>(value: T | IKeyframeControls<T>): IKeyframeControls<T>;
+    normalizeKeyframeValue<T>(value: T | IKeyframeControls<T> | IPercentageKeyframes<T>): IPercentageKeyframes<T>;
+    generate<T>(animatedProperties: IAnimatedProperties<T>): CssKeyframe[];
 }
-export {};

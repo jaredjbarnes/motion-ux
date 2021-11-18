@@ -1,6 +1,5 @@
 import { EasingFunction } from "./easings";
 import { DynamicEasingNames } from "./createDynamicEasing";
-import { IAnimationKeyframes } from "./KeyframesGenerator";
 export interface IComplexKeyframeValue<T> {
     value: T;
     controlsIn?: T[];
@@ -27,6 +26,5 @@ export default class Keyframe<T> {
     controls: T[];
     easing: EasingFunction;
     constructor(config: KeyframeConfig<T>);
-    static createKeyframes(animationKeyframes: IAnimationKeyframes): Keyframe<any>[];
-    clone(): Keyframe<any>;
+    clone(): Keyframe<T>;
 }

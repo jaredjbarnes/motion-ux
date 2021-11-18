@@ -67,7 +67,7 @@ class Animator {
                 resultObject[key] = this.getStringValue(from, to);
             }
             else if (typeof from === "object" && from != null) {
-                this.traverse(fromObject[key], controlsObject[key], toObject[key], resultObject[key]);
+                this.traverse(fromObject[key], controls || emptyArray, toObject[key], resultObject[key]);
             }
         }
     }
@@ -87,7 +87,7 @@ class Animator {
     }
 }
 
-const sortAsc = (animatorA, animatorB) => {
+const sortTime = (animatorA, animatorB) => {
     return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 class Animation {
@@ -101,8 +101,7 @@ class Animation {
     set keyframes(keyframes) {
         this.animators = keyframes.map((keyframe) => new Animator(keyframe));
         this._createCurrentValues();
-        // Sort by time.
-        this.animators.sort(sortAsc);
+        this.animators.sort(sortTime);
     }
     get keyframes() {
         return this.animators.map((a) => a.keyframe);
@@ -120,7 +119,7 @@ class Animation {
         const animators = this.animators;
         const length = animators.length;
         // Assign all values at least once.
-        // This initials values beyond the time we are at.
+        // These are the initials values beyond the time we are at.
         for (let x = 0; x < length; x++) {
             const keyframe = animators[x].keyframe;
             const key = keyframe.property;
@@ -808,218 +807,30 @@ const easings = {
     linear: easeLinear,
 };
 
-const easingOutMap = {
-    linear: [1],
-    quad: [1, 1],
-    cubic: [1, 1, 1],
-    quart: [1, 1, 1, 1],
-    back: [0, 0, -0.5],
-    quint: [1, 1, 1, 1, 1],
-    expo: [1, 1, 1, 1, 1, 1],
-    circ: [0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1],
-    elastic: [2, 2, -1, 1.5, 1.5, 0.75, 1.25, 0.85, 1, 1, 1],
-};
-const easingInMap = {
-    linear: [0],
-    quad: [0, 0],
-    cubic: [0, 0, 0],
-    quart: [0, 0, 0, 0],
-    back: [1.5, 1, 1],
-    quint: [0, 0, 0, 0, 0],
-    expo: [0, 0, 0, 0, 0, 0],
-    circ: [0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35],
-    elastic: [0, 0, 0, 0.15, -0.25, 0.25, -0.5, -0.5, 2, -1, -1],
-};
-function createDynamicEasing(easingIn, easingOut) {
-    const points = [...easingInMap[easingIn], ...easingOutMap[easingOut]];
-    const bezierCurve = new BezierCurve(points);
-    return (percentage) => {
-        return bezierCurve.valueAt(percentage);
-    };
+function deepClone(value) {
+    return JSON.parse(JSON.stringify(value));
 }
 
-const complexFrameKeys = ["controlsIn", "controlsOut", "easeIn", "easeOut"];
-class KeyframesGenerator {
-    constructor() {
-        this.transformValue = (value) => value;
-        this.sortPercentages = (keyA, keyB) => {
-            if (keyA === "from") {
-                return -1;
-            }
-            if (keyB === "from") {
-                return 1;
-            }
-            if (keyA === "to") {
-                return 1;
-            }
-            if (keyB === "to") {
-                return -1;
-            }
-            const keyAParts = keyA.split("%");
-            const keyBParts = keyB.split("%");
-            const keyANumber = parseFloat(keyAParts[0]);
-            const keyBNumber = parseFloat(keyBParts[0]);
-            if (keyANumber < keyBNumber) {
-                return -1;
-            }
-            else if (keyANumber > keyBNumber) {
-                return 1;
-            }
-            return 0;
-        };
-    }
-    setTransformValue(transformValue) {
-        this.transformValue = transformValue;
-    }
-    isComplexKeyframe(value) {
-        const keys = Object.keys(value);
-        return (keys.includes("value") && keys.some((k) => complexFrameKeys.includes(k)));
-    }
-    getDecimalFromPercentage(percentage) {
-        if (percentage === "to") {
-            return 1;
-        }
-        if (percentage === "from") {
-            return 0;
-        }
-        const percentageParts = percentage.split("%");
-        let decimal = parseFloat(percentageParts[0]) / 100;
-        if (isNaN(decimal)) {
-            throw new Error(`Unknown keyframe step: ${decimal}. Expected format 10% or 10.01% etc`);
-        }
-        decimal = Math.max(0, decimal);
-        decimal = Math.min(1, decimal);
-        return decimal;
-    }
-    getEaseIn(currentValue) {
-        if (this.isComplexKeyframe(currentValue) && currentValue.easeOut != null) {
-            return currentValue.easeOut || "linear";
-        }
-        else {
-            return "linear";
-        }
-    }
-    getEaseOut(nextValue) {
-        if (this.isComplexKeyframe(nextValue) && nextValue.easeIn != null) {
-            return nextValue.easeIn || "linear";
-        }
-        else {
-            return "linear";
-        }
-    }
-    getControlsIn(currentValue) {
-        if (this.isComplexKeyframe(currentValue) &&
-            Array.isArray(currentValue.controlsOut)) {
-            return currentValue.controlsOut.map((v) => this.transformValue(v));
-        }
-        else {
-            return [];
-        }
-    }
-    getControlsOut(nextValue) {
-        if (this.isComplexKeyframe(nextValue) &&
-            Array.isArray(nextValue.controlsIn)) {
-            return nextValue.controlsIn.map((v) => this.transformValue(v));
-        }
-        else {
-            return [];
-        }
-    }
-    getFrom(currentValue) {
-        if (this.isComplexKeyframe(currentValue)) {
-            return this.transformValue(currentValue.value);
-        }
-        else if (typeof currentValue === "string") {
-            return this.transformValue(currentValue);
-        }
-        else {
-            if (typeof (currentValue === null || currentValue === void 0 ? void 0 : currentValue.value) === "string") {
-                throw new Error("Invalid complex value, only found a value with no other complex settings.");
-            }
-            throw new Error(`Unknown from value: ${JSON.stringify(currentValue)}`);
-        }
-    }
-    getTo(nextValue) {
-        if (this.isComplexKeyframe(nextValue)) {
-            return this.transformValue(nextValue.value);
-        }
-        else if (typeof nextValue === "string") {
-            return this.transformValue(nextValue);
-        }
-        else {
-            if (typeof (nextValue === null || nextValue === void 0 ? void 0 : nextValue.value) === "string") {
-                throw new Error("Invalid complex value, only found a value with no other complex settings.");
-            }
-            throw new Error(`Unknown to value: ${JSON.stringify(nextValue)}`);
-        }
-    }
-    generate(animationKeyframes) {
-        const timeKeys = Object.keys(animationKeyframes);
-        const keyframes = [];
-        let lastKeyFramePercentage = 0;
-        timeKeys.sort(this.sortPercentages);
-        for (let index = 0; index < timeKeys.length - 1; index++) {
-            const key = timeKeys[index];
-            const nextKey = timeKeys[index + 1];
-            const currentAnimationKeyframe = animationKeyframes[key];
-            const nextAnimationKeyframe = animationKeyframes[nextKey] || null;
-            const startAt = lastKeyFramePercentage;
-            const endAt = this.getDecimalFromPercentage(timeKeys[index + 1]);
-            lastKeyFramePercentage = endAt;
-            Object.keys(currentAnimationKeyframe).forEach((key) => {
-                const currentValue = currentAnimationKeyframe[key];
-                const nextValue = nextAnimationKeyframe[key];
-                if (nextValue == null) {
-                    throw new Error(`All keyframe declarations need to have the same properties. Missing '${key}' from one of the keyframes. ${JSON.stringify(animationKeyframes)}`);
-                }
-                const easingIn = this.getEaseIn(currentValue);
-                const easingOut = this.getEaseOut(nextValue);
-                const easing = createDynamicEasing(easingIn, easingOut);
-                const controlsIn = this.getControlsIn(currentValue);
-                const controlsOut = this.getControlsOut(nextValue);
-                const controls = [...controlsIn, ...controlsOut];
-                const from = this.getFrom(currentValue);
-                const to = this.getTo(nextValue);
-                const keyframe = new Keyframe({
-                    property: key,
-                    from,
-                    to,
-                    controls,
-                    easing,
-                    startAt,
-                    endAt,
-                });
-                keyframes.push(keyframe);
-            });
-        }
-        return keyframes;
-    }
-}
-
-const keyframesGenerator$1 = new KeyframesGenerator();
 class Keyframe {
     constructor(config) {
         this.property = config.property;
         this.to = config.to;
         this.from = config.from;
-        this.result = JSON.parse(JSON.stringify(config.from));
+        this.result = deepClone(config.from);
         this.startAt = typeof config.startAt === "number" ? config.startAt : 0;
         this.endAt = typeof config.endAt === "number" ? config.endAt : 1;
         this.controls = Array.isArray(config.controls) ? config.controls : [];
         this.easing =
             typeof config.easing === "function" ? config.easing : easings.linear;
     }
-    static createKeyframes(animationKeyframes) {
-        return keyframesGenerator$1.generate(animationKeyframes);
-    }
     clone() {
         return new Keyframe({
             property: this.property,
-            to: JSON.parse(JSON.stringify(this.to)),
-            from: JSON.parse(JSON.stringify(this.from)),
+            to: deepClone(this.to),
+            from: deepClone(this.from),
             startAt: this.startAt,
             endAt: this.endAt,
-            controls: this.controls.map((c) => JSON.parse(JSON.stringify(c))),
+            controls: this.controls.map((c) => deepClone(c)),
             easing: this.easing,
         });
     }
@@ -2313,6 +2124,222 @@ const values = new RepeatComposite("values", value, spaces);
 
 const cssValue = new RepeatComposite("css-value", values, divider);
 
+const easingOutMap = {
+    linear: [1],
+    quad: [1, 1],
+    cubic: [1, 1, 1],
+    quart: [1, 1, 1, 1],
+    back: [0, 0, -0.5],
+    quint: [1, 1, 1, 1, 1],
+    expo: [1, 1, 1, 1, 1, 1],
+    circ: [0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1],
+    elastic: [2, 2, -1, 1.5, 1.5, 0.75, 1.25, 0.85, 1, 1, 1],
+};
+const easingInMap = {
+    linear: [0],
+    quad: [0, 0],
+    cubic: [0, 0, 0],
+    quart: [0, 0, 0, 0],
+    back: [1.5, 1, 1],
+    quint: [0, 0, 0, 0, 0],
+    expo: [0, 0, 0, 0, 0, 0],
+    circ: [0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35],
+    elastic: [0, 0, 0, 0.15, -0.25, 0.25, -0.5, -0.5, 2, -1, -1],
+};
+function createDynamicEasing(easingIn, easingOut) {
+    const points = [...easingInMap[easingIn], ...easingOutMap[easingOut]];
+    const bezierCurve = new BezierCurve(points);
+    return (percentage) => {
+        return bezierCurve.valueAt(percentage);
+    };
+}
+
+class KeyframesGenerator {
+    constructor() {
+        this.transformValue = (value) => value;
+        this.sortPercentages = (keyA, keyB) => {
+            if (keyA === "from") {
+                return -1;
+            }
+            if (keyB === "from") {
+                return 1;
+            }
+            if (keyA === "to") {
+                return 1;
+            }
+            if (keyB === "to") {
+                return -1;
+            }
+            const keyAParts = keyA.split("%");
+            const keyBParts = keyB.split("%");
+            const keyANumber = parseFloat(keyAParts[0]);
+            const keyBNumber = parseFloat(keyBParts[0]);
+            if (keyANumber < keyBNumber) {
+                return -1;
+            }
+            else if (keyANumber > keyBNumber) {
+                return 1;
+            }
+            return 0;
+        };
+    }
+    setTransformValue(transformValue) {
+        this.transformValue = transformValue;
+    }
+    isComplexKeyframe(value) {
+        return value.hasOwnProperty("value");
+    }
+    getDecimalFromPercentage(percentage) {
+        if (percentage === "to") {
+            return 1;
+        }
+        if (percentage === "from") {
+            return 0;
+        }
+        const percentageParts = percentage.split("%");
+        let decimal = parseFloat(percentageParts[0]) / 100;
+        if (isNaN(decimal)) {
+            throw new Error(`Unknown keyframe step: ${decimal}. Expected format 10% or 10.01% etc`);
+        }
+        decimal = Math.max(0, decimal);
+        decimal = Math.min(1, decimal);
+        return decimal;
+    }
+    getEaseIn(currentValue) {
+        if (this.isComplexKeyframe(currentValue) && currentValue.easeOut != null) {
+            return currentValue.easeOut || "linear";
+        }
+        else {
+            return "linear";
+        }
+    }
+    getEaseOut(nextValue) {
+        if (this.isComplexKeyframe(nextValue) && nextValue.easeIn != null) {
+            return nextValue.easeIn || "linear";
+        }
+        else {
+            return "linear";
+        }
+    }
+    getControlsIn(currentValue) {
+        if (this.isComplexKeyframe(currentValue) &&
+            Array.isArray(currentValue.controlsOut)) {
+            return currentValue.controlsOut.map((v) => this.transformValue(v));
+        }
+        else {
+            return [];
+        }
+    }
+    getControlsOut(nextValue) {
+        if (this.isComplexKeyframe(nextValue) &&
+            Array.isArray(nextValue.controlsIn)) {
+            return nextValue.controlsIn.map((v) => this.transformValue(v));
+        }
+        else {
+            return [];
+        }
+    }
+    getFrom(currentValue) {
+        if (this.isComplexKeyframe(currentValue)) {
+            return this.transformValue(currentValue.value);
+        }
+        else if (typeof currentValue === "string") {
+            return this.transformValue(currentValue);
+        }
+        else {
+            if (typeof (currentValue === null || currentValue === void 0 ? void 0 : currentValue.value) === "string") {
+                throw new Error("Invalid complex value, only found a value with no other complex settings.");
+            }
+            throw new Error(`Unknown from value: ${JSON.stringify(currentValue)}`);
+        }
+    }
+    getTo(nextValue) {
+        if (this.isComplexKeyframe(nextValue)) {
+            return this.transformValue(nextValue.value);
+        }
+        else if (typeof nextValue === "string") {
+            return this.transformValue(nextValue);
+        }
+        else {
+            if (typeof (nextValue === null || nextValue === void 0 ? void 0 : nextValue.value) === "string") {
+                throw new Error("Invalid complex value, only found a value with no other complex settings.");
+            }
+            throw new Error(`Unknown to value: ${JSON.stringify(nextValue)}`);
+        }
+    }
+    normalizePrimitiveValue(value) {
+        return {
+            value,
+        };
+    }
+    normalizeValue(value) {
+        if (typeof value === "string" || typeof value === "number") {
+            return this.normalizePrimitiveValue(value);
+        }
+        else {
+            return value;
+        }
+    }
+    normalizeKeyframeValue(value) {
+        if (typeof value === "string" || typeof value === "number") {
+            return {
+                from: this.normalizePrimitiveValue(value),
+                to: this.normalizePrimitiveValue(value),
+            };
+        }
+        else if (typeof value === "object" && value != null) {
+            const keyframes = value;
+            const keys = Object.keys(keyframes);
+            keys.forEach((key) => {
+                this.normalizeValue(keyframes[key]);
+            });
+            return value;
+        }
+        else {
+            throw new Error("Unknown value type.");
+        }
+    }
+    generate(animatedProperties) {
+        const animatedPropertyNames = Object.keys(animatedProperties);
+        const keyframes = [];
+        for (let x = 0; x < animatedPropertyNames.length; x++) {
+            const property = animatedPropertyNames[x];
+            let lastKeyFramePercentage = 0;
+            const keyframeValue = this.normalizeKeyframeValue(animatedProperties[property]);
+            const timeKeys = Object.keys(keyframeValue);
+            timeKeys.sort(this.sortPercentages);
+            for (let index = 0; index < timeKeys.length - 1; index++) {
+                const key = timeKeys[index];
+                const nextKey = timeKeys[index + 1];
+                const currentValue = this.normalizeValue(keyframeValue[key]);
+                const nextValue = this.normalizeValue(keyframeValue[nextKey]);
+                const startAt = lastKeyFramePercentage;
+                const endAt = this.getDecimalFromPercentage(timeKeys[index + 1]);
+                lastKeyFramePercentage = endAt;
+                const easingIn = this.getEaseIn(currentValue);
+                const easingOut = this.getEaseOut(nextValue);
+                const easing = createDynamicEasing(easingIn, easingOut);
+                const controlsIn = this.getControlsIn(currentValue);
+                const controlsOut = this.getControlsOut(nextValue);
+                const controls = [...controlsIn, ...controlsOut];
+                const from = this.getFrom(currentValue);
+                const to = this.getTo(nextValue);
+                const keyframe = new CssKeyframe({
+                    property: property.toString(),
+                    from,
+                    to,
+                    controls,
+                    easing,
+                    startAt,
+                    endAt,
+                });
+                keyframes.push(keyframe);
+            }
+        }
+        return keyframes;
+    }
+}
+
 const visitor = new Visitor();
 const keyframesGenerator = new KeyframesGenerator();
 keyframesGenerator.setTransformValue((value) => {
@@ -2351,11 +2378,8 @@ class CssKeyframe extends Keyframe {
         const toValue = convertValue(to);
         const fromValue = convertValue(from);
         const controlsValues = controls.map((c) => convertValue(c));
-        const easingValue = easings[easing];
+        const easingValue = typeof easing === "string" ? easings[easing] : easing;
         super(Object.assign(Object.assign({}, config), { from: fromValue, to: toValue, controls: controlsValues, easing: easingValue }));
-    }
-    static createKeyframes(animationKeyframes) {
-        return keyframesGenerator.generate(animationKeyframes);
     }
 }
 

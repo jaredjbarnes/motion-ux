@@ -7,8 +7,8 @@ import CssKeyframe, { CssKeyframeConfig } from "./CssKeyframe";
 import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
-import StatefulMotion from "./StatefulMotion";
-import { ITransitionConfig, Transition } from "./Transition";
+import StatefulMotion, { IMotionState } from "./StatefulMotion";
+import { ITransitionState, Transition } from "./Transition";
 
 export {
   IAnimation,
@@ -31,5 +31,6 @@ export {
   RepeatDirection,
   AnimationState,
   Transition,
-  ITransitionConfig,
+  ITransitionState,
+  IMotionState,
 };

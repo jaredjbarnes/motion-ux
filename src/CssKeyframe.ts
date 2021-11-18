@@ -2,7 +2,7 @@ import { Visitor } from "clarity-pattern-parser";
 import easings, { EasingNames } from "./easings";
 import Keyframe from "./Keyframe";
 import cssValue from "./patterns/cssValue";
-import KeyframesGenerator, { IAnimatedProperties, IKeyframeControls } from "./KeyframesGenerator";
+import KeyframesGenerator from "./KeyframesGenerator";
 
 export interface CssKeyframeConfig {
   property: string;
@@ -11,7 +11,7 @@ export interface CssKeyframeConfig {
   endAt?: number;
   startAt?: number;
   controls?: string[];
-  easing?: EasingNames;
+  easing?: EasingNames | ((percentage: number) => number);
 }
 
 const visitor = new Visitor();
@@ -61,7 +61,7 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
     const toValue = convertValue(to);
     const fromValue = convertValue(from);
     const controlsValues = controls.map((c) => convertValue(c));
-    const easingValue = easings[easing];
+    const easingValue = typeof easing === "string" ? easings[easing] : easing;
 
     super({
       ...config,
@@ -71,5 +71,4 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
       easing: easingValue,
     });
   }
-
 }
