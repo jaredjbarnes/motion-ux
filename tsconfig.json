@@ -16,5 +16,5 @@
     "typeRoots": ["node_modules/@types"]
   },
   "exclude": ["node_modules"],
-  "files": ["./src/index.ts", "./components/index.ts"]
+  "files": ["./src/index.ts"]
 }

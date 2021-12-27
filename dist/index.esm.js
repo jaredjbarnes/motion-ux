@@ -2410,7 +2410,7 @@ class SlopeAnimationBuilder {
 
 const slopeAnimationBuilder = new SlopeAnimationBuilder();
 class ExtendedAnimation {
-    constructor(animation, animationDuration, offset, playerState, extendedDuration = 0) {
+    constructor(animation, animationDuration, offset = 0, playerState = PlayerState.STOPPED, extendedDuration = 0) {
         this.animation = animation;
         this.animationDuration = animationDuration;
         this.offset = offset;
@@ -2765,25 +2765,34 @@ class StatefulMotion extends Transition {
     removeAllStates() {
         this._states = {};
     }
-    isFallThrough(name) {
+    isFallThrough(name, props) {
         if (this._currentStateName == null) {
             return false;
         }
-        const allFallThroughStates = this.getFallThrough(name, []);
+        const allFallThroughStates = this.getFallThrough(name, props, []);
         return allFallThroughStates.includes(this._currentStateName);
     }
-    getFallThrough(name, stack) {
-        const state = this._states[name];
+    getFallThrough(name, props, stack) {
+        const state = this.getState(name, props);
         if (state != null && typeof state.segueTo === "string") {
             stack.push(state.segueTo);
-            this.getFallThrough(state.segueTo, stack);
+            this.getFallThrough(state.segueTo, props, stack);
         }
         return stack;
     }
-    changeState(name) {
+    getState(name, props) {
+        const stateRef = this._states[name];
+        if (typeof stateRef === "function") {
+            return stateRef(props);
+        }
+        else {
+            return stateRef;
+        }
+    }
+    changeState(name, props) {
         var _a;
-        const state = this._states[name];
-        if (this.isFallThrough(name) ||
+        const state = this.getState(name, props);
+        if (this.isFallThrough(name, props) ||
             state == null ||
             this._currentStateName === name) {
             return this;
@@ -2795,7 +2804,7 @@ class StatefulMotion extends Transition {
             if (this.player.iterations >= state.iterationCount &&
                 typeof state.segueTo === "string" &&
                 this._states[state.segueTo]) {
-                this.changeState(state.segueTo);
+                this.changeState(state.segueTo, props);
             }
         });
         this.player.play();

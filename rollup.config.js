@@ -17,9 +17,9 @@ export default [
     ],
     plugins: [typescript(), resolve(), commonjs()],
   },
-  {
-    input: "components/index.ts",
-    output: [{ file: "./examples/index.js", format: "es" }],
-    plugins: [typescript(), resolve(), commonjs()],
-  },
+  // {
+  //   input: "components/index.ts",
+  //   output: [{ file: "./examples/index.js", format: "es" }],
+  //   plugins: [typescript(), resolve(), commonjs()],
+  // },
 ];

@@ -1,20 +1,22 @@
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { ITransitionState, Transition } from "./Transition";
-import KeyframesGenerator, { IAnimatedProperties } from "./KeyframesGenerator";
+import KeyframesGenerator from "./KeyframesGenerator";
 
 export type IMotionState<T> = ITransitionState<T> & {
   segueTo: string;
 };
 
-export interface StatefulMotionConfig<T> {
-  [key: string]: IMotionState<T>;
+export interface StatefulMotionConfig<T, TProps = unknown> {
+  [key: string]: IMotionState<T> | ((props?: TProps) => IMotionState<T>);
 }
 
 const keyframeGenerator = new KeyframesGenerator();
 
-export default class StatefulMotion<T> extends Transition<T> {
+export default class StatefulMotion<T, TProps = unknown> extends Transition<T> {
   protected _currentStateName: string | null = null;
-  protected _states: { [key: string]: IMotionState<T> } = {};
+  protected _states: {
+    [key: string]: IMotionState<T> | ((props: TProps) => IMotionState<T>);
+  } = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
   addState(name: string, state: IMotionState<T>) {
@@ -33,32 +35,41 @@ export default class StatefulMotion<T> extends Transition<T> {
     this._states = {};
   }
 
-  private isFallThrough(name: string) {
+  private isFallThrough(name: string, props:TProps) {
     if (this._currentStateName == null) {
       return false;
     }
 
-    const allFallThroughStates = this.getFallThrough(name, []);
+    const allFallThroughStates = this.getFallThrough(name, props, []);
     return allFallThroughStates.includes(this._currentStateName);
   }
 
-  private getFallThrough(name: string, stack: string[]) {
-    const state = this._states[name];
+  private getFallThrough(name: string, props: TProps, stack: string[]) {
+    const state = this.getState(name, props)
 
     if (state != null && typeof state.segueTo === "string") {
       stack.push(state.segueTo);
 
-      this.getFallThrough(state.segueTo, stack);
+      this.getFallThrough(state.segueTo, props, stack);
     }
 
     return stack;
   }
 
-  changeState(name: string) {
-    const state = this._states[name];
+  private getState(name: string, props: TProps) {
+    const stateRef = this._states[name];
+    if (typeof stateRef === "function") {
+      return stateRef(props);
+    } else {
+      return stateRef;
+    }
+  }
+
+  changeState(name: string, props: TProps) {
+    const state = this.getState(name, props)
 
     if (
-      this.isFallThrough(name) ||
+      this.isFallThrough(name, props) ||
       state == null ||
       this._currentStateName === name
     ) {
@@ -75,7 +86,7 @@ export default class StatefulMotion<T> extends Transition<T> {
         typeof state.segueTo === "string" &&
         this._states[state.segueTo]
       ) {
-        this.changeState(state.segueTo);
+        this.changeState(state.segueTo, props);
       }
     });
 
