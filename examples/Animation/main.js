@@ -106,13 +106,7 @@ const fifth = {
   transitionEasing: "easeOutQuad",
   transitionDuration: ANIMATION_DURATION,
   values: {
-    transform: {
-      from: "translate(250px, 250px)",
-      to: {
-        value: "translate(250px, 250px)",
-        easeIn: "expo",
-      },
-    },
+    transform: "translate(250px, 250px)",
   },
 };
 
@@ -136,7 +130,7 @@ const sixth = {
         value: "translate(500px, 0px)",
         easeIn: "quad",
       },
-    },
+    }
   },
 };
 
@@ -282,7 +276,7 @@ class StatefulAnimation {
   }
 }
 
-for (let x = 0; x < 1; x++) {
+for (let x = 0; x < 10; x++) {
   const animation = new StatefulAnimation(x);
   animation.start();
 

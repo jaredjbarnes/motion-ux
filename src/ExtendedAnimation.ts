@@ -18,8 +18,8 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   constructor(
     animation: IAnimation<T>,
     animationDuration: number,
-    offset: number,
-    playerState: PlayerState,
+    offset: number = 0,
+    playerState: PlayerState = PlayerState.STOPPED,
     extendedDuration = 0
   ) {
     this.animation = animation;
