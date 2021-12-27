@@ -2761,7 +2761,7 @@ class StatefulMotion extends Transition {
         this._states[name] = state;
     }
     addStates(states) {
-        Object.keys(states).forEach((name) => this.addState(name, states[name]));
+        this._states = states;
     }
     removeState(name, state) {
         delete this._states[name];

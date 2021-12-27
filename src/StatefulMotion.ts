@@ -6,25 +6,23 @@ export type IMotionState<T> = ITransitionState<T> & {
   segueTo: string;
 };
 
-export interface StatefulMotionConfig<T, TProps = unknown> {
-  [key: string]: IMotionState<T> | ((props?: TProps) => IMotionState<T>);
+export interface IMotionStates<T, TProps = unknown> {
+  [key: string]: IMotionState<T> | ((props: TProps) => IMotionState<T>);
 }
 
 const keyframeGenerator = new KeyframesGenerator();
 
 export default class StatefulMotion<T, TProps = unknown> extends Transition<T> {
   protected _currentStateName: string | null = null;
-  protected _states: {
-    [key: string]: IMotionState<T> | ((props: TProps) => IMotionState<T>);
-  } = {};
+  protected _states: IMotionStates<T, TProps> = {};
   protected _segueObserver: TimeObserver<ITimeEvent> | null = null;
 
   addState(name: string, state: IMotionState<T>) {
     this._states[name] = state;
   }
 
-  addStates(states: { [key: string]: IMotionState<T> }) {
-    Object.keys(states).forEach((name) => this.addState(name, states[name]));
+  addStates(states: IMotionStates<T, TProps>) {
+    this._states = states;
   }
 
   removeState(name: string, state: IMotionState<T>) {
@@ -35,7 +33,7 @@ export default class StatefulMotion<T, TProps = unknown> extends Transition<T> {
     this._states = {};
   }
 
-  private isFallThrough(name: string, props:TProps) {
+  private isFallThrough(name: string, props: TProps) {
     if (this._currentStateName == null) {
       return false;
     }
