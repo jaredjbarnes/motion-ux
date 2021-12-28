@@ -3,42 +3,29 @@ import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { IAnimatedProperties } from "./KeyframesGenerator";
 export declare type ITransitionState<T> = IValuesTransitionState<T> | IControlledTransitionState<T> | ILoopTransitionState<T>;
-export interface ITransitionStateBase {
-    transitionDuration: number;
-    transitionEasing: keyof typeof easings;
-}
-export interface ILoopTransitionState<T> extends ITransitionStateBase {
+export interface ILoopTransitionState<T> {
+    type: "loop";
+    easing: keyof typeof easings;
     iterationCount: number;
     duration: number;
     loop: IAnimatedProperties<T>;
-    enterDuration: never;
-    leaveDuration: never;
-    enter: never;
-    leave: never;
-    values: never;
 }
-export interface IControlledTransitionState<T> extends ITransitionStateBase {
+export interface IControlledTransitionState<T> {
+    type: "controlled";
+    easing: keyof typeof easings;
     enter: IAnimatedProperties<T>;
     leave: IAnimatedProperties<T>;
     enterDuration: number;
     leaveDuration: number;
-    duration: never;
-    loop: never;
-    iterationCount: never;
-    values: never;
 }
-export interface IValuesTransitionState<T> extends ITransitionStateBase {
+export interface IValuesTransitionState<T> {
+    type: "values";
+    duration: number;
+    easing: keyof typeof easings;
     values: IAnimatedProperties<T>;
-    enter: never;
-    leave: never;
-    enterDuration: never;
-    leaveDuration: never;
-    loop: never;
-    duration: never;
-    iterationCount: never;
 }
 export declare class Transition<T> {
-    protected _currentState: ITransitionState<T> | null;
+    protected _currentState: ILoopTransitionState<T> | IControlledTransitionState<T> | null;
     protected _observer: TimeObserver<ITimeEvent> | null;
     player: Player;
     protected _normalizeState(state: ITransitionState<T>): ILoopTransitionState<T> | IControlledTransitionState<T>;

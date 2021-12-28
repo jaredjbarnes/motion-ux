@@ -11,47 +11,34 @@ export type ITransitionState<T> =
   | IControlledTransitionState<T>
   | ILoopTransitionState<T>;
 
-export interface ITransitionStateBase {
-  transitionDuration: number;
-  transitionEasing: keyof typeof easings;
-}
 
-export interface ILoopTransitionState<T> extends ITransitionStateBase {
+export interface ILoopTransitionState<T> {
+  type: "loop",
+  easing: keyof typeof easings;
   iterationCount: number; //Default Infinity
   duration: number;
   loop: IAnimatedProperties<T>;
-  enterDuration: never;
-  leaveDuration: never;
-  enter: never;
-  leave: never;
-  values: never;
 }
 
-export interface IControlledTransitionState<T> extends ITransitionStateBase {
+export interface IControlledTransitionState<T> {
+  type: "controlled"
+  easing: keyof typeof easings;
   enter: IAnimatedProperties<T>;
   leave: IAnimatedProperties<T>;
   enterDuration: number;
   leaveDuration: number;
-  duration: never;
-  loop: never;
-  iterationCount: never;
-  values: never;
 }
 
-export interface IValuesTransitionState<T> extends ITransitionStateBase {
+export interface IValuesTransitionState<T> {
+  type: "values",
+  duration: number;
+  easing: keyof typeof easings;
   values: IAnimatedProperties<T>;
-  enter: never;
-  leave: never;
-  enterDuration: never;
-  leaveDuration: never;
-  loop: never;
-  duration: never;
-  iterationCount: never;
 }
 
 const keyframesGenerator = new KeyframesGenerator();
 export class Transition<T> {
-  protected _currentState: ITransitionState<T> | null = null;
+  protected _currentState: ILoopTransitionState<T> | IControlledTransitionState<T> | null = null;
   protected _observer: TimeObserver<ITimeEvent> | null = null;
 
   public player = new Player();
@@ -59,17 +46,20 @@ export class Transition<T> {
   protected _normalizeState(
     state: ITransitionState<T>
   ): ILoopTransitionState<T> | IControlledTransitionState<T> {
-    if (state.values != null) {
-      const { values, ...rest } = state;
+    if (state.type === "values") {
+      const { values, duration, easing } = state;
       return {
-        ...rest,
+        easing,
+        type: "controlled",
         enter: values,
         leave: values,
-      } as IControlledTransitionState<T>;
-    } else if (state.loop != null) {
-      return state as ILoopTransitionState<T>;
+        enterDuration: duration,
+        leaveDuration: duration
+      };
+    } else if (state.type === "loop") {
+      return state;
     } else {
-      return state as IControlledTransitionState<T>;
+      return state;
     }
   }
 
@@ -79,7 +69,7 @@ export class Transition<T> {
     this._currentState = state;
 
     const keyframes = keyframesGenerator.generate(
-      state.enter != null ? state.enter : state.loop
+      state.type === "controlled" ? state.enter : state.loop
     );
     const animation = new Animation("enter", keyframes);
 
@@ -88,9 +78,11 @@ export class Transition<T> {
     }
 
     if (lastState != null) {
-      if (lastState.loop != null || this.player.state !== 0) {
-        const remainingDuration = (1 - this.player.time) * lastState.duration;
-        const extendedDuration = state.transitionDuration - remainingDuration;
+      if (lastState.type === "loop" || this.player.state !== 0) {
+        const lastDuration = lastState.type === "loop" ? lastState.duration : lastState.enterDuration;
+        const newDuration = state.type === "loop" ? state.duration : state.enterDuration;
+        const remainingDuration = (1 - this.player.time) * lastDuration;
+        const extendedDuration = Math.max(newDuration - remainingDuration, 0);
 
         const from = new ExtendedAnimation(
           this.player.animation,
@@ -103,9 +95,9 @@ export class Transition<T> {
         this.player.animation = new BlendedAnimation(
           from,
           animation,
-          easings[state.transitionEasing]
+          easings[state.easing]
         );
-      } else {
+      } else if (lastState.type === "controlled") {
         const leaveAnimation = new Animation(
           "leave",
           keyframesGenerator.generate(lastState.leave)
@@ -114,19 +106,19 @@ export class Transition<T> {
         this.player.animation = new BlendedAnimation(
           leaveAnimation,
           animation,
-          easings[state.transitionEasing]
+          easings[state.easing]
         );
       }
     }
 
     this.player.seek(0);
-    this.player.duration = state.transitionDuration;
+    this.player.duration = state.type === "loop" ? state.duration : state.enterDuration;
     this.player.iterations = 0;
     this.player.repeat = 1;
 
     this._observer?.dispose();
     this._observer = this.player.observeTimeOnce(1, () => {
-      if (state.loop != null) {
+      if (state.type === "loop") {
         this.player.animation = animation.clone();
         this.player.duration = state.duration;
         this.player.repeat = state.iterationCount;

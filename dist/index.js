@@ -2693,11 +2693,18 @@ class Transition {
         this.player = new Player();
     }
     _normalizeState(state) {
-        if (state.values != null) {
-            const { values } = state, rest = __rest(state, ["values"]);
-            return Object.assign(Object.assign({}, rest), { enter: values, leave: values });
+        if (state.type === "values") {
+            const { values, duration, easing } = state;
+            return {
+                easing,
+                type: "controlled",
+                enter: values,
+                leave: values,
+                enterDuration: duration,
+                leaveDuration: duration
+            };
         }
-        else if (state.loop != null) {
+        else if (state.type === "loop") {
             return state;
         }
         else {
@@ -2709,30 +2716,32 @@ class Transition {
         state = this._normalizeState(state);
         const lastState = this._currentState;
         this._currentState = state;
-        const keyframes = keyframesGenerator.generate(state.enter != null ? state.enter : state.loop);
+        const keyframes = keyframesGenerator.generate(state.type === "controlled" ? state.enter : state.loop);
         const animation = new Animation("enter", keyframes);
         if (this.player.animation == null) {
             this.player.animation = animation;
         }
         if (lastState != null) {
-            if (lastState.loop != null || this.player.state !== 0) {
-                const remainingDuration = (1 - this.player.time) * lastState.duration;
-                const extendedDuration = state.transitionDuration - remainingDuration;
+            if (lastState.type === "loop" || this.player.state !== 0) {
+                const lastDuration = lastState.type === "loop" ? lastState.duration : lastState.enterDuration;
+                const newDuration = state.type === "loop" ? state.duration : state.enterDuration;
+                const remainingDuration = (1 - this.player.time) * lastDuration;
+                const extendedDuration = Math.max(newDuration - remainingDuration, 0);
                 const from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
-                this.player.animation = new BlendedAnimation(from, animation, easings[state.transitionEasing]);
+                this.player.animation = new BlendedAnimation(from, animation, easings[state.easing]);
             }
-            else {
+            else if (lastState.type === "controlled") {
                 const leaveAnimation = new Animation("leave", keyframesGenerator.generate(lastState.leave));
-                this.player.animation = new BlendedAnimation(leaveAnimation, animation, easings[state.transitionEasing]);
+                this.player.animation = new BlendedAnimation(leaveAnimation, animation, easings[state.easing]);
             }
         }
         this.player.seek(0);
-        this.player.duration = state.transitionDuration;
+        this.player.duration = state.type === "loop" ? state.duration : state.enterDuration;
         this.player.iterations = 0;
         this.player.repeat = 1;
         (_a = this._observer) === null || _a === void 0 ? void 0 : _a.dispose();
         this._observer = this.player.observeTimeOnce(1, () => {
-            if (state.loop != null) {
+            if (state.type === "loop") {
                 this.player.animation = animation.clone();
                 this.player.duration = state.duration;
                 this.player.repeat = state.iterationCount;
@@ -2805,7 +2814,8 @@ class StatefulMotion extends Transition {
         this._transitionToState(state);
         (_a = this._segueObserver) === null || _a === void 0 ? void 0 : _a.dispose();
         this._segueObserver = this.player.observeTime(1, () => {
-            if (this.player.iterations >= state.iterationCount &&
+            const iterationCount = state.type === "loop" ? state.iterationCount : 1;
+            if (this.player.iterations >= iterationCount &&
                 typeof state.segueTo === "string" &&
                 this._states[state.segueTo]) {
                 this.changeState(state.segueTo, props);

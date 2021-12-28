@@ -3,7 +3,7 @@ import { ITransitionState, Transition } from "./Transition";
 import KeyframesGenerator from "./KeyframesGenerator";
 
 export type IMotionState<T> = ITransitionState<T> & {
-  segueTo: string;
+  segueTo?: string;
 };
 
 export interface IMotionStates<T, TProps = unknown> {
@@ -79,8 +79,9 @@ export default class StatefulMotion<T, TProps = unknown> extends Transition<T> {
 
     this._segueObserver?.dispose();
     this._segueObserver = this.player.observeTime(1, () => {
+      const iterationCount = state.type === "loop" ? state.iterationCount : 1;
       if (
-        this.player.iterations >= state.iterationCount &&
+        this.player.iterations >= iterationCount &&
         typeof state.segueTo === "string" &&
         this._states[state.segueTo]
       ) {

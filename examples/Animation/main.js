@@ -3,10 +3,10 @@ const { StatefulMotion } = motionUX;
 
 const ANIMATION_DURATION = 1000;
 const first = {
+  type: "loop",
   iterationCount: 3,
+  easing: "easeOutQuad",
   duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
   segueTo: "second",
   loop: {
     transform: {
@@ -28,10 +28,10 @@ const first = {
 };
 
 const second = {
+  type: "loop",
   iterationCount: 4,
+  easing: "easeOutQuad",
   duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
   segueTo: "third",
   loop: {
     transform: {
@@ -53,10 +53,10 @@ const second = {
 };
 
 const third = {
+  type: "loop",
   iterationCount: Infinity,
+  easing: "easeOutQuad",
   duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
   loop: {
     transform: {
       from: {
@@ -77,10 +77,10 @@ const third = {
 };
 
 const fourth = {
-  iterationCount: 1,
-  duration: 0,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
+  type: "loop",
+  iterationCount: Infinity,
+  easing: "easeOutQuad",
+  duration: ANIMATION_DURATION,
   loop: {
     transform: {
       from: {
@@ -101,20 +101,20 @@ const fourth = {
 };
 
 const fifth = {
+  type: "values",
   iterationCount: Infinity,
-  duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
+  easing: "easeOutExpo",
+  duration: 2000,
   values: {
     transform: "translate(250px, 250px)",
   },
 };
 
 const sixth = {
+  type: "loop",
   iterationCount: Infinity,
+  easing: "easeOutQuad",
   duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
   loop: {
     transform: {
       from: {
@@ -135,10 +135,10 @@ const sixth = {
 };
 
 const seven = {
+  type: "loop",
   iterationCount: Infinity,
+  easing: "easeOutQuad",
   duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
   loop: {
     transform: {
       from: {
@@ -169,10 +169,10 @@ const seven = {
 };
 
 const eight = {
+  type: "controlled",
   iterationCount: Infinity,
-  duration: ANIMATION_DURATION,
-  transitionEasing: "easeOutQuad",
-  transitionDuration: ANIMATION_DURATION,
+  easing: "easeOutQuad",
+  enterDuration: ANIMATION_DURATION,
   enter: {
     transform: {
       from: "translate(300px, 300px)",
