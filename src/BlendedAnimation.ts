@@ -20,8 +20,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
 
     const keyframes = properties
       .map((name) => {
-        const from = fromValues[name] as any;
-        const to = toValues[name] as any;
+        const from = fromValues[name];
+        const to = toValues[name];
 
         if (to == null) {
           throw new Error(

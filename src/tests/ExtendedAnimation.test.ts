@@ -17,23 +17,16 @@ describe("Animation", () => {
       }),
     ]);
 
-    const clock = new MockClock();
-
-    const player = new Player();
-    player.clock = clock;
-    player.seek(0.5);
-    player.animation = animation;
-    player.duration = 1000;
-    player.play();
-
-    const extendedAnimation = new ExtendedAnimation(player, 1000);
+    animation.duration = 1000;
+    animation.update(1);
+    const extendedAnimation = new ExtendedAnimation(animation, 1, 1000);
     let values = extendedAnimation.update(0).currentValues;
 
-    expect(values.opacity).toBe(0.5);
+    expect(values.opacity).toBe(1);
 
     values = extendedAnimation.update(0.75).currentValues;
 
-    expect(values.opacity).toBe(1.2400000000000002);
+    expect(values.opacity).toBe(1.7500000000000007);
   });
 
   test("Extend Exponentially", () => {
@@ -48,22 +41,15 @@ describe("Animation", () => {
       }),
     ]);
 
-    const clock = new MockClock();
-
-    const player = new Player();
-    player.clock = clock;
-    player.seek(0.5);
-    player.animation = animation;
-    player.duration = 1000;
-    player.play();
-
-    const extendedAnimation = new ExtendedAnimation(player, 1000);
+    animation.update(1);
+    animation.duration = 1000;
+    const extendedAnimation = new ExtendedAnimation(animation, 1, 1000);
     let values = extendedAnimation.update(0).currentValues;
 
-    expect(values.opacity).toBe(0.96875);
+    expect(values.opacity).toBe(1);
 
     values = extendedAnimation.update(0.75).currentValues;
 
-    expect(values.opacity).toBe(1.0251196905281938);
+    expect(values.opacity).toBe(1.0784990329006057);
   });
 });

@@ -3,193 +3,196 @@ const { StatefulMotion } = motionUX;
 
 const ANIMATION_DURATION = 1000;
 const first = {
-  type: "loop",
-  iterationCount: 3,
-  easing: "easeOutQuad",
-  duration: ANIMATION_DURATION,
-  segueTo: "second",
-  loop: {
-    transform: {
-      from: {
-        value: "translate(0px, 0px)",
-        easeOut: "quad",
-      },
-      "50%": {
-        value: "translate(500px, 500px)",
-        easeIn: "quad",
-        easeOut: "quad",
-      },
-      to: {
-        value: "translate(0px, 0px)",
-        easeIn: "quad",
+  "@segueTo": "second",
+  "@loop": {
+    iterationCount: 3,
+    easing: "easeOutQuad",
+    duration: ANIMATION_DURATION,
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(0px, 0px)",
+          easeOut: "quad",
+        },
+        "50%": {
+          value: "translate(500px, 500px)",
+          easeIn: "quad",
+          easeOut: "quad",
+        },
+        to: {
+          value: "translate(0px, 0px)",
+          easeIn: "quad",
+        },
       },
     },
   },
 };
 
 const second = {
-  type: "loop",
-  iterationCount: 4,
-  easing: "easeOutQuad",
-  duration: ANIMATION_DURATION,
-  segueTo: "third",
-  loop: {
-    transform: {
-      from: {
-        value: "translate(500px, 0px)",
-        easeOut: "quad",
-      },
-      "50%": {
-        value: "translate(0px, 500px)",
-        easeIn: "quad",
-        easeOut: "quad",
-      },
-      to: {
-        value: "translate(500px, 0px)",
-        easeIn: "quad",
+  "@segueTo": "third",
+  "@loop": {
+    iterationCount: 4,
+    easing: "easeOutQuad",
+    duration: ANIMATION_DURATION,
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(500px, 0px)",
+          easeOut: "quad",
+        },
+        "50%": {
+          value: "translate(0px, 500px)",
+          easeIn: "quad",
+          easeOut: "quad",
+        },
+        to: {
+          value: "translate(500px, 0px)",
+          easeIn: "quad",
+        },
       },
     },
   },
 };
 
 const third = {
-  type: "loop",
-  iterationCount: Infinity,
-  easing: "easeOutQuad",
-  duration: ANIMATION_DURATION,
-  loop: {
-    transform: {
-      from: {
-        value: "translate(250px, 0px)",
-        easeOut: "quad",
-      },
-      "50%": {
-        value: "translate(250px, 500px)",
-        easeIn: "quad",
-        easeOut: "quad",
-      },
-      to: {
-        value: "translate(250px, 0px)",
-        easeIn: "quad",
+  "@loop": {
+    iterationCount: Infinity,
+    easing: "easeOutQuad",
+    duration: ANIMATION_DURATION,
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(250px, 0px)",
+          easeOut: "quad",
+        },
+        "50%": {
+          value: "translate(250px, 500px)",
+          easeIn: "quad",
+          easeOut: "quad",
+        },
+        to: {
+          value: "translate(250px, 0px)",
+          easeIn: "quad",
+        },
       },
     },
   },
 };
 
 const fourth = {
-  type: "loop",
-  iterationCount: Infinity,
-  easing: "easeOutQuad",
-  duration: ANIMATION_DURATION,
-  loop: {
-    transform: {
-      from: {
-        value: "translate(0px, 250px)",
-        easeOut: "quad",
-      },
-      "50%": {
-        value: "translate(500px, 250px)",
-        easeIn: "quad",
-        easeOut: "quad",
-      },
-      to: {
-        value: "translate(0px, 250px)",
-        easeIn: "quad",
+  "@loop": {
+    iterationCount: Infinity,
+    easing: "easeOutQuad",
+    duration: ANIMATION_DURATION,
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(0px, 250px)",
+          easeOut: "quad",
+        },
+        "50%": {
+          value: "translate(500px, 250px)",
+          easeIn: "quad",
+          easeOut: "quad",
+        },
+        to: {
+          value: "translate(0px, 250px)",
+          easeIn: "quad",
+        },
       },
     },
   },
 };
 
 const fifth = {
-  type: "values",
-  iterationCount: Infinity,
-  easing: "easeOutExpo",
-  duration: 2000,
-  values: {
+  "@values": {
     transform: "translate(250px, 250px)",
-  },
+  }
 };
 
 const sixth = {
-  type: "loop",
-  iterationCount: Infinity,
-  easing: "easeOutQuad",
-  duration: ANIMATION_DURATION,
-  loop: {
-    transform: {
-      from: {
-        value: "translate(500px, 0px)",
-        easeOut: "quad",
-      },
-      "50%": {
-        value: "translate(500px, 500px)",
-        easeIn: "quad",
-        easeOut: "quad",
-      },
-      to: {
-        value: "translate(500px, 0px)",
-        easeIn: "quad",
-      },
+  "@loop": {
+    iterationCount: Infinity,
+    easing: "easeOutQuad",
+    duration: ANIMATION_DURATION,
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(500px, 0px)",
+          easeOut: "quad",
+        },
+        "50%": {
+          value: "translate(500px, 500px)",
+          easeIn: "quad",
+          easeOut: "quad",
+        },
+        to: {
+          value: "translate(500px, 0px)",
+          easeIn: "quad",
+        },
+      }
     }
   },
 };
 
 const seven = {
-  type: "loop",
-  iterationCount: Infinity,
-  easing: "easeOutQuad",
-  duration: ANIMATION_DURATION,
-  loop: {
-    transform: {
-      from: {
-        value: "translate(250px, 0px)",
-        controlsOut: ["translate(338px, 0px)"],
-      },
-      "25%": {
-        value: "translate(500px, 250px)",
-        controlsIn: ["translate(500px, 112px)"],
-        controlsOut: ["translate(500px, 388px)"],
-      },
-      "50%": {
-        value: "translate(250px, 500px)",
-        controlsIn: ["translate(388px, 500px)"],
-        controlsOut: ["translate(112px, 500px)"],
-      },
-      "75%": {
-        value: "translate(0px, 250px)",
-        controlsIn: ["translate(0px, 388px)"],
-        controlsOut: ["translate(0px, 112px)"],
-      },
-      to: {
-        value: "translate(250px, 0px)",
-        controlsIn: ["translate(112px, 0px)"],
+  "@loop": {
+    iterationCount: Infinity,
+    easing: "easeOutQuad",
+    duration: ANIMATION_DURATION,
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(250px, 0px)",
+          controlsOut: ["translate(338px, 0px)"],
+        },
+        "25%": {
+          value: "translate(500px, 250px)",
+          controlsIn: ["translate(500px, 112px)"],
+          controlsOut: ["translate(500px, 388px)"],
+        },
+        "50%": {
+          value: "translate(250px, 500px)",
+          controlsIn: ["translate(388px, 500px)"],
+          controlsOut: ["translate(112px, 500px)"],
+        },
+        "75%": {
+          value: "translate(0px, 250px)",
+          controlsIn: ["translate(0px, 388px)"],
+          controlsOut: ["translate(0px, 112px)"],
+        },
+        to: {
+          value: "translate(250px, 0px)",
+          controlsIn: ["translate(112px, 0px)"],
+        },
       },
     },
   },
 };
 
 const eight = {
-  type: "controlled",
-  iterationCount: Infinity,
-  easing: "easeOutQuad",
-  enterDuration: ANIMATION_DURATION,
-  enter: {
-    transform: {
-      from: "translate(300px, 300px)",
-      to: {
-        value: "translate(800px, 300px)",
-        easeIn: "expo",
+  "@enter": {
+    keyframes: {
+      transform: {
+        from: "translate(300px, 300px)",
+        to: {
+          value: "translate(800px, 300px)",
+          easeIn: "expo",
+        },
       },
-    },
+    }
+
   },
-  leave: {
-    transform: {
-      from: {
-        value: "translate(800px, 300px)",
-        easeOut: "expo",
+  "@leave": {
+    keyframes: {
+      transform: {
+        from: {
+          value: "translate(800px, 300px)",
+          easeOut: "expo",
+        },
+        to: "translate(300px, 300px)",
       },
-      to: "translate(300px, 300px)",
-    },
+    }
   },
 };
 

@@ -2691,65 +2691,65 @@
   class Transition {
       constructor() {
           this._currentState = null;
+          this._currentDuration = 0;
+          this._currentEasing = "linear";
           this._observer = null;
           this.player = new Player();
       }
-      _normalizeState(state) {
-          if (state.type === "values") {
-              const { values, duration, easing } = state;
-              return {
-                  easing,
-                  type: "controlled",
-                  enter: values,
-                  leave: values,
-                  enterDuration: duration,
-                  leaveDuration: duration
-              };
-          }
-          else if (state.type === "loop") {
-              return state;
-          }
-          else {
-              return state;
-          }
-      }
-      _transitionToState(state) {
-          var _a;
-          state = this._normalizeState(state);
+      _transitionToState(state, duration = 1000, easing = "linear") {
+          var _a, _b, _c;
+          const isActivelyMoving = this.isActivelyMoving();
           const lastState = this._currentState;
+          const lastDuration = this._currentDuration;
+          let enterKeyframes = (_a = state["@enter"]) === null || _a === void 0 ? void 0 : _a.keyframes;
+          if (enterKeyframes == null) {
+              enterKeyframes = state["@values"];
+          }
           this._currentState = state;
-          const keyframes = keyframesGenerator.generate(state.type === "controlled" ? state.enter : state.loop);
+          this._currentDuration = duration;
+          this._currentEasing = easing;
+          const keyframes = keyframesGenerator.generate(state["@loop"] == null ? enterKeyframes : state["@loop"].keyframes);
           const animation = new Animation("enter", keyframes);
           if (this.player.animation == null) {
               this.player.animation = animation;
           }
           if (lastState != null) {
-              if (lastState.type === "loop" || this.player.state !== 0) {
-                  const lastDuration = lastState.type === "loop" ? lastState.duration : lastState.enterDuration;
-                  const newDuration = state.type === "loop" ? state.duration : state.enterDuration;
-                  const remainingDuration = (1 - this.player.time) * lastDuration;
+              let leaveKeyframes = (_b = lastState["@leave"]) === null || _b === void 0 ? void 0 : _b.keyframes;
+              if (leaveKeyframes == null) {
+                  leaveKeyframes = state["@values"];
+              }
+              if (isActivelyMoving) {
+                  const previousDuration = lastState["@loop"] != null ? lastState["@loop"].duration : lastDuration;
+                  const newDuration = state["@loop"] != null ? state["@loop"].duration : duration;
+                  const remainingDuration = (1 - this.player.time) * previousDuration;
                   const extendedDuration = Math.max(newDuration - remainingDuration, 0);
                   const from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
-                  this.player.animation = new BlendedAnimation(from, animation, easings[state.easing]);
+                  this.player.animation = new BlendedAnimation(from, animation, easings[easing]);
               }
-              else if (lastState.type === "controlled") {
-                  const leaveAnimation = new Animation("leave", keyframesGenerator.generate(lastState.leave));
-                  this.player.animation = new BlendedAnimation(leaveAnimation, animation, easings[state.easing]);
+              else if (leaveKeyframes != null) {
+                  const leaveAnimation = new Animation("leave", keyframesGenerator.generate(leaveKeyframes));
+                  this.player.animation = new BlendedAnimation(leaveAnimation, animation, easings[easing]);
               }
           }
           this.player.seek(0);
-          this.player.duration = state.type === "loop" ? state.duration : state.enterDuration;
+          this.player.duration = state && state["@loop"] != null ? state["@loop"].duration : duration;
           this.player.iterations = 0;
           this.player.repeat = 1;
-          (_a = this._observer) === null || _a === void 0 ? void 0 : _a.dispose();
+          (_c = this._observer) === null || _c === void 0 ? void 0 : _c.dispose();
           this._observer = this.player.observeTimeOnce(1, () => {
-              if (state.type === "loop") {
+              if (state && state["@loop"] != null) {
                   this.player.animation = animation.clone();
-                  this.player.duration = state.duration;
-                  this.player.repeat = state.iterationCount;
+                  this.player.duration = state["@loop"].duration;
+                  this.player.repeat = state["@loop"].iterationCount;
               }
           });
           return this;
+      }
+      isActivelyMoving() {
+          return this.player.state !== exports.PlayerState.STOPPED || this.isLoop(this._currentState);
+      }
+      isLoop(state) {
+          return state && state["@loop"] != null;
       }
       execute(state) {
           this._transitionToState(state);
@@ -2789,9 +2789,9 @@
       }
       getFallThrough(name, props, stack) {
           const state = this.getState(name, props);
-          if (state != null && typeof state.segueTo === "string") {
-              stack.push(state.segueTo);
-              this.getFallThrough(state.segueTo, props, stack);
+          if (state != null && typeof state["@segueTo"] === "string") {
+              stack.push(state["@segueTo"]);
+              this.getFallThrough(state["@segueTo"], props, stack);
           }
           return stack;
       }
@@ -2816,11 +2816,11 @@
           this._transitionToState(state);
           (_a = this._segueObserver) === null || _a === void 0 ? void 0 : _a.dispose();
           this._segueObserver = this.player.observeTime(1, () => {
-              const iterationCount = state.type === "loop" ? state.iterationCount : 1;
+              const iterationCount = state["@loop"] != null ? state["@loop"].iterationCount : 1;
               if (this.player.iterations >= iterationCount &&
-                  typeof state.segueTo === "string" &&
-                  this._states[state.segueTo]) {
-                  this.changeState(state.segueTo, props);
+                  typeof state["@segueTo"] === "string" &&
+                  this._states[state["@segueTo"]]) {
+                  this.changeState(state["@segueTo"], props);
               }
           });
           this.player.play();

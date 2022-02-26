@@ -6,40 +6,39 @@ const slopeAnimationBuilder = new SlopeAnimationBuilder();
 
 export default class ExtendedAnimation<T> implements IAnimation<T> {
   private animation: IAnimation<T>;
-  private animationDuration: number;
   private playerState: PlayerState;
-  private extendedDuration: number;
   private slopeAnimation: IAnimation<T>;
   private offset: number;
+  
 
   public currentValues: AnimationState<T>;
   public name: string;
+  public delay: number = 0;
+  public time: number = 0;
+  public duration: number = 0.0001;
 
   constructor(
     animation: IAnimation<T>,
-    animationDuration: number,
-    offset: number = 0,
     playerState: PlayerState = PlayerState.STOPPED,
-    extendedDuration = 0
+    duration = 0,
   ) {
     this.animation = animation;
-    this.animationDuration = animationDuration;
-    this.offset = offset;
+    this.offset = animation.time;
     this.playerState = playerState;
-    this.extendedDuration = extendedDuration;
+    this.duration = animation.duration + duration;
     this.currentValues = this.animation.currentValues;
-
     this.name = this.animation.name;
+    this.animation.update(1);
+    
     this.slopeAnimation = slopeAnimationBuilder.build(
       this.animation,
-      1,
-      animationDuration,
-      extendedDuration,
+      duration,
       playerState
     );
   }
 
   update(time: number) {
+    this.time = time;
     const offsetTime = this.offset + time;
 
     if (offsetTime + slopeAnimationBuilder.delta > 1) {
@@ -65,10 +64,8 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   clone() {
     return new ExtendedAnimation(
       this.animation.clone(),
-      this.animationDuration,
-      this.offset,
       this.playerState,
-      this.extendedDuration
+      this.duration
     );
   }
 }

@@ -1,7 +1,7 @@
 import { DynamicEasingNames } from "./createDynamicEasing";
 import CssKeyframe from "./CssKeyframe";
 export declare type IAnimatedProperties<T> = {
-    [key in keyof T]: T[key] | IPercentageKeyframes<T[key]>;
+    [P in keyof T]: T[P] | IPercentageKeyframes<T[P]>;
 };
 export interface IPercentageKeyframes<TValue> {
     [key: string]: TValue | IKeyframeControls<TValue>;

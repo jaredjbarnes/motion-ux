@@ -16,8 +16,11 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.update(0.5);
+    animation.duration = 1000;
+
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 1);
+    const slopeAnimation = builder.build(animation, 1000, 1);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -36,8 +39,10 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 2000, 1);
+    const slopeAnimation = builder.build(animation, 2000, 1);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -56,8 +61,10 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build<number>(animation, 0.5, 1000, 1000, 0);
+    const slopeAnimation = builder.build<number>(animation, 1000, 0);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -76,8 +83,10 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 1);
+    const slopeAnimation = builder.build(animation, 1000, 1);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -96,8 +105,10 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 2000, 1);
+    const slopeAnimation = builder.build(animation, 2000, 1);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -116,11 +127,11 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build<number[]>(
       animation,
-      0.5,
-      1000,
       1000,
       0
     );
@@ -142,8 +153,10 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 1);
+    const slopeAnimation = builder.build(animation, 1000, 1);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -161,9 +174,10 @@ describe("SlopeAnimationBuilder", () => {
         easing: easings.linear,
       }),
     ]);
-
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 2000, 1);
+    const slopeAnimation = builder.build(animation, 2000, 1);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -182,8 +196,10 @@ describe("SlopeAnimationBuilder", () => {
       }),
     ]);
 
+    animation.duration = 1000;
+    animation.update(0.5);
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build(animation, 0.5, 1000, 1000, 0);
+    const slopeAnimation = builder.build(animation, 1000, 0);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 

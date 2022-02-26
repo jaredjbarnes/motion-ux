@@ -4,7 +4,7 @@ import { IClock } from "./IClock";
 import IAnimation from "./IAnimation";
 
 const defaultClock = new DefaultClock();
-function defaultRender() {}
+function defaultRender() { }
 
 export enum PlayerState {
   REVERSE = -1,
@@ -17,7 +17,7 @@ export enum RepeatDirection {
   ALTERNATE = 1,
 }
 
-export default class Player extends Observable {
+export default class Player<TAnimation = any> extends Observable {
   private _timeScale: number;
   private _time: number;
   private _step: number;
@@ -26,11 +26,10 @@ export default class Player extends Observable {
   private _iterations: number;
   private _repeat: number;
   private _repeatDirection: RepeatDirection;
-  private _animation: IAnimation<any> | null = null;
+  private _animation: IAnimation<TAnimation> | null = null;
   private _clock: IClock;
   private _state: PlayerState;
-  private _render: (animation: IAnimation<any>) => void;
-  private _delay: number;
+  private _render: (animation: IAnimation<TAnimation>) => void;
 
   constructor() {
     super();
@@ -45,7 +44,6 @@ export default class Player extends Observable {
     this._clock = defaultClock;
     this._state = PlayerState.STOPPED;
     this._render = defaultRender;
-    this._delay = 0;
     this.tick = this.tick.bind(this);
   }
 
@@ -116,7 +114,7 @@ export default class Player extends Observable {
     return this._animation;
   }
 
-  set animation(animation: IAnimation<any> | null) {
+  set animation(animation: IAnimation<TAnimation> | null) {
     this._animation = animation;
   }
 
@@ -124,7 +122,7 @@ export default class Player extends Observable {
     return this._render;
   }
 
-  set render(render: (animation: IAnimation<any>) => void) {
+  set render(render: (animation: IAnimation<TAnimation>) => void) {
     this._render = render;
   }
 
@@ -146,14 +144,6 @@ export default class Player extends Observable {
     this._clock = value;
   }
 
-  get delay() {
-    return this._delay;
-  }
-
-  set delay(value: number) {
-    this._delay = value;
-  }
-
   private tick() {
     const timestamp = this._clock.now();
     const deltaTime = timestamp - this._lastTimestamp;
@@ -163,7 +153,7 @@ export default class Player extends Observable {
       this._step = 1;
     }
 
-    // This helps with unneeded renders as well as delays.
+    // This helps with unneeded renders.
     if (deltaTime <= 0) {
       return;
     }
@@ -308,7 +298,7 @@ export default class Player extends Observable {
 
   play() {
     if (this._state !== PlayerState.FORWARD) {
-      this._lastTimestamp = this._clock.now() + this._delay;
+      this._lastTimestamp = this._clock.now();
 
       this._state = PlayerState.FORWARD;
       this._clock.register(this.tick);
@@ -324,7 +314,7 @@ export default class Player extends Observable {
 
   reverse() {
     if (this._state !== PlayerState.REVERSE) {
-      this._lastTimestamp = this._clock.now() + this._delay;
+      this._lastTimestamp = this._clock.now();
 
       this._state = PlayerState.REVERSE;
       this._clock.register(this.tick);

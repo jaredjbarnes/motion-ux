@@ -1,6 +1,5 @@
 import easings, { EasingFunction } from "./easings";
 import { DynamicEasingNames } from "./createDynamicEasing";
-import KeyframesGenerator from "./KeyframesGenerator";
 import { deepClone } from "./deepClone";
 
 export interface IComplexKeyframeValue<T> {

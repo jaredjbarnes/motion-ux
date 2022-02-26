@@ -35,18 +35,16 @@ export default class SlopeAnimationBuilder {
 
   build<T>(
     animation: IAnimation<T>,
-    offset: number,
     duration: number,
-    newDuration: number,
     direction: PlayerState
   ) {
     this.animation = animation;
-    this.offset = offset;
-    this.duration = duration;
-    this.newDuration = newDuration;
+    this.offset = animation.time;
+    this.duration = animation.duration;
+    this.newDuration = duration;
     this.direction = direction;
 
-    // If the offset is at or near the end get the last slope. We
+    // If the offset is at or near the end get the last slope.
     if (this.offset + this.delta > 1) {
       this.offset -= this.delta;
     }

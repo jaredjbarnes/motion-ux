@@ -9,10 +9,12 @@ const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
 type AnimationState<T> = { [key: string]: T };
 
 export default class Animation<T> implements IAnimation<T> {
-  protected _time: number = 0;
   protected animators: Animator<T>[] = [];
 
   public name: string;
+  public time = 0
+  public delay = 0;
+  public duration = 0.0001;
   public currentValues: AnimationState<T>;
 
   constructor(name: string, keyframes: Keyframe<T>[]) {
@@ -66,14 +68,14 @@ export default class Animation<T> implements IAnimation<T> {
     for (let x = 0; x < length; x++) {
       const keyframe = animators[x].keyframe;
 
-      if (keyframe.startAt <= this._time) {
+      if (keyframe.startAt <= this.time) {
         this.currentValues[keyframe.property] = keyframe.result;
       }
     }
   }
 
   update(time: number) {
-    this._time = time;
+    this.time = time;
 
     this.animators.forEach((animator) => {
       animator.update(time);

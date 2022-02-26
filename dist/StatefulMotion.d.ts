@@ -1,7 +1,7 @@
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { ITransitionState, Transition } from "./Transition";
 export declare type IMotionState<T> = ITransitionState<T> & {
-    segueTo?: string;
+    "@segueTo"?: string;
 };
 export interface IMotionStates<T, TProps = unknown> {
     [key: string]: IMotionState<T> | ((props: TProps) => IMotionState<T>);

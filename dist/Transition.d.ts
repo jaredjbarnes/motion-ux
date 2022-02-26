@@ -2,34 +2,40 @@ import Player from "./Player";
 import easings from "./easings";
 import TimeObserver, { ITimeEvent } from "./TimeObserver";
 import { IAnimatedProperties } from "./KeyframesGenerator";
-export declare type ITransitionState<T> = IValuesTransitionState<T> | IControlledTransitionState<T> | ILoopTransitionState<T>;
-export interface ILoopTransitionState<T> {
-    type: "loop";
-    easing: keyof typeof easings;
+export declare type Easings = keyof typeof easings;
+export declare type ITransitionAnimation<T> = {
+    keyframes: IAnimatedProperties<T>;
+    duration: number;
+    easing: Easings;
+};
+export declare type ITransitionAnimationLoop<T> = ITransitionAnimation<T> & {
     iterationCount: number;
-    duration: number;
-    loop: IAnimatedProperties<T>;
-}
-export interface IControlledTransitionState<T> {
-    type: "controlled";
-    easing: keyof typeof easings;
-    enter: IAnimatedProperties<T>;
-    leave: IAnimatedProperties<T>;
-    enterDuration: number;
-    leaveDuration: number;
-}
-export interface IValuesTransitionState<T> {
-    type: "values";
-    duration: number;
-    easing: keyof typeof easings;
-    values: IAnimatedProperties<T>;
-}
+};
+export declare type ITransitionProperties<T> = {
+    [P in keyof T]: T[P];
+};
+export declare type IValuesTransitionState<T> = {
+    "@values": IAnimatedProperties<T>;
+    "@loop": never;
+    "@enter"?: ITransitionAnimation<T>;
+    "@leave"?: ITransitionAnimation<T>;
+};
+export declare type ILoopTransitionState<T> = {
+    "@values": never;
+    "@loop": ITransitionAnimationLoop<T>;
+    "@enter"?: ITransitionAnimation<T>;
+    "@leave"?: ITransitionAnimation<T>;
+};
+export declare type ITransitionState<T> = IValuesTransitionState<T> | ILoopTransitionState<T>;
 export declare class Transition<T> {
-    protected _currentState: ILoopTransitionState<T> | IControlledTransitionState<T> | null;
+    protected _currentState: ITransitionState<T> | null;
+    protected _currentDuration: number;
+    protected _currentEasing: keyof typeof easings;
     protected _observer: TimeObserver<ITimeEvent> | null;
-    player: Player;
-    protected _normalizeState(state: ITransitionState<T>): ILoopTransitionState<T> | IControlledTransitionState<T>;
-    protected _transitionToState(state: ITransitionState<T>): this;
+    player: Player<any>;
+    protected _transitionToState(state: ITransitionState<T>, duration?: number, easing?: Easings): this;
+    private isActivelyMoving;
+    private isLoop;
     execute(state: ITransitionState<T>): this;
     dispose(): void;
 }
