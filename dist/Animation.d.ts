@@ -5,9 +5,10 @@ declare type AnimationState<T> = {
     [key: string]: T;
 };
 export default class Animation<T> implements IAnimation<T> {
-    protected _time: number;
     protected animators: Animator<T>[];
     name: string;
+    time: number;
+    duration: number;
     currentValues: AnimationState<T>;
     constructor(name: string, keyframes: Keyframe<T>[]);
     set keyframes(keyframes: Keyframe<T>[]);

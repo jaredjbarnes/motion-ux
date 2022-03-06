@@ -23,7 +23,6 @@ export default class Player<TAnimation = any> extends Observable {
     private _clock;
     private _state;
     private _render;
-    private _delay;
     constructor();
     get time(): number;
     set time(value: number);
@@ -44,8 +43,6 @@ export default class Player<TAnimation = any> extends Observable {
     set iterations(value: number);
     get clock(): IClock;
     set clock(value: IClock);
-    get delay(): number;
-    set delay(value: number);
     private tick;
     private stepForward;
     private stepBackward;

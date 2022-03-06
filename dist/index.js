@@ -96,8 +96,9 @@ const sortTime = (animatorA, animatorB) => {
 };
 class Animation {
     constructor(name, keyframes) {
-        this._time = 0;
         this.animators = [];
+        this.time = 0;
+        this.duration = 0.0001;
         this.name = name;
         this.currentValues = {};
         this.keyframes = keyframes;
@@ -136,13 +137,13 @@ class Animation {
         // Since we have it sorted, the most current will win.
         for (let x = 0; x < length; x++) {
             const keyframe = animators[x].keyframe;
-            if (keyframe.startAt <= this._time) {
+            if (keyframe.startAt <= this.time) {
                 this.currentValues[keyframe.property] = keyframe.result;
             }
         }
     }
     update(time) {
-        this._time = time;
+        this.time = time;
         this.animators.forEach((animator) => {
             animator.update(time);
         });
@@ -314,7 +315,6 @@ class Player extends Observable {
         this._clock = defaultClock;
         this._state = exports.PlayerState.STOPPED;
         this._render = defaultRender;
-        this._delay = 0;
         this.tick = this.tick.bind(this);
     }
     get time() {
@@ -391,12 +391,6 @@ class Player extends Observable {
     set clock(value) {
         this._clock = value;
     }
-    get delay() {
-        return this._delay;
-    }
-    set delay(value) {
-        this._delay = value;
-    }
     tick() {
         const timestamp = this._clock.now();
         const deltaTime = timestamp - this._lastTimestamp;
@@ -404,7 +398,7 @@ class Player extends Observable {
         if (this._step > 1) {
             this._step = 1;
         }
-        // This helps with unneeded renders as well as delays.
+        // This helps with unneeded renders.
         if (deltaTime <= 0) {
             return;
         }
@@ -525,7 +519,7 @@ class Player extends Observable {
     }
     play() {
         if (this._state !== exports.PlayerState.FORWARD) {
-            this._lastTimestamp = this._clock.now() + this._delay;
+            this._lastTimestamp = this._clock.now();
             this._state = exports.PlayerState.FORWARD;
             this._clock.register(this.tick);
             this.notify({
@@ -537,7 +531,7 @@ class Player extends Observable {
     }
     reverse() {
         if (this._state !== exports.PlayerState.REVERSE) {
-            this._lastTimestamp = this._clock.now() + this._delay;
+            this._lastTimestamp = this._clock.now();
             this._state = exports.PlayerState.REVERSE;
             this._clock.register(this.tick);
             this.notify({
@@ -2119,7 +2113,7 @@ const cssValue = new RepeatComposite("css-value", values, divider);
 
 const visitor = new Visitor();
 const convertValue = (value) => {
-    const node = cssValue.exec(value);
+    const node = cssValue.exec(String(value));
     if (node == null) {
         return [];
     }
@@ -2147,12 +2141,11 @@ const convertValue = (value) => {
 };
 class CssKeyframe extends Keyframe {
     constructor(_a) {
-        var { from, to, easing = "linear", controls = [] } = _a, config = __rest(_a, ["from", "to", "easing", "controls"]);
+        var { from, to, easing = easings.linear, controls = [] } = _a, config = __rest(_a, ["from", "to", "easing", "controls"]);
         const toValue = convertValue(to);
         const fromValue = convertValue(from);
         const controlsValues = controls.map((c) => convertValue(c));
-        const easingValue = typeof easing === "string" ? easings[easing] : easing;
-        super(Object.assign(Object.assign({}, config), { from: fromValue, to: toValue, controls: controlsValues, easing: easingValue }));
+        super(Object.assign(Object.assign({}, config), { from: fromValue, to: toValue, controls: controlsValues, easing }));
     }
 }
 
@@ -2186,320 +2179,7 @@ function createDynamicEasing(easingIn, easingOut) {
     };
 }
 
-const emptyFn$1 = () => 0;
-class ObjectVisitor {
-    constructor(callback = emptyFn$1) {
-        this.visitor = emptyFn$1;
-        this.setVisitor(callback);
-    }
-    visit(object) {
-        this.walk(object);
-    }
-    walk(object) {
-        if (typeof object === "object" && object != null) {
-            for (let key in object) {
-                if (typeof object[key] === "number") {
-                    object[key] = this.visitor(object[key]);
-                }
-                else if (typeof object[key] === "object") {
-                    this.walk(object[key]);
-                }
-            }
-        }
-    }
-    setVisitor(visitor) {
-        if (typeof visitor === "function") {
-            this.visitor = visitor;
-        }
-        else {
-            this.visitor = emptyFn$1;
-        }
-        this.visitor = visitor;
-    }
-}
-
-const emptyFn = () => 0;
-class ObjectsVisitor {
-    constructor(callback = emptyFn) {
-        this.visitor = emptyFn;
-        this.setVisitor(callback);
-    }
-    visit(left, right, output) {
-        this.walk(left, right, output);
-    }
-    walk(left, right, output) {
-        if (typeof left === "object" && left != null) {
-            for (let key in left) {
-                if (typeof left[key] === "number" &&
-                    typeof right[key] === "number" &&
-                    typeof output[key] === "number") {
-                    output[key] = this.visitor(left[key], right[key]);
-                }
-                else if (typeof left[key] === "object") {
-                    this.walk(left[key], right[key], output[key]);
-                }
-            }
-        }
-    }
-    setVisitor(visitor) {
-        if (typeof visitor === "function") {
-            this.visitor = visitor;
-        }
-        else {
-            this.visitor = emptyFn;
-        }
-        this.visitor = visitor;
-    }
-}
-
-const add = (left, right) => {
-    return left + right;
-};
-const subtract = (left, right) => {
-    return left - right;
-};
-const multiply = (left, right) => {
-    return left * right;
-};
-const divide = (left, right) => {
-    return left / right;
-};
-class ObjectOperator {
-    constructor() {
-        this.objectsVisitor = new ObjectsVisitor();
-        this.visitor = new ObjectVisitor();
-    }
-    assign(object, number) {
-        this.visitor.setVisitor(() => {
-            return number;
-        });
-        this.visitor.visit(object);
-    }
-    add(left, right, output) {
-        this.objectsVisitor.setVisitor(add);
-        this.objectsVisitor.visit(left, right, output);
-    }
-    subtract(left, right, output) {
-        this.objectsVisitor.setVisitor(subtract);
-        this.objectsVisitor.visit(left, right, output);
-    }
-    multiply(left, right, output) {
-        this.objectsVisitor.setVisitor(multiply);
-        this.objectsVisitor.visit(left, right, output);
-    }
-    divide(left, right, output) {
-        this.objectsVisitor.setVisitor(divide);
-        this.objectsVisitor.visit(left, right, output);
-    }
-}
-
-const nullableAnimation = new Animation("null", [
-    new Keyframe({ from: 0, to: 0, property: "null" }),
-]);
-const objectOperator = new ObjectOperator();
-const FORWARD = 1;
-class SlopeAnimationBuilder {
-    constructor() {
-        this.direction = 0;
-        this.newDuration = 0;
-        this.duration = 0;
-        this.offset = 0;
-        this.delta = 0.01;
-        this.animation = nullableAnimation;
-    }
-    cloneValues(values) {
-        return deepClone(values);
-    }
-    build(animation, offset, duration, newDuration, direction) {
-        this.animation = animation;
-        this.offset = offset;
-        this.duration = duration;
-        this.newDuration = newDuration;
-        this.direction = direction;
-        // If the offset is at or near the end get the last slope. We
-        if (this.offset + this.delta > 1) {
-            this.offset -= this.delta;
-        }
-        this.calculate();
-        this.createSlopeTimeline();
-        return this.slopeAnimation;
-    }
-    cacheValues() {
-        this.deltaStepValues = this.cloneValues(this.nowValues);
-        this.scaleValues = this.cloneValues(this.nowValues);
-        this.dynamicValues = this.cloneValues(this.nowValues);
-        this.cacheDeltaStepValues();
-        this.cacheScaleValues();
-    }
-    cacheDeltaStepValues() {
-        Object.keys(this.deltaStepValues).forEach((property) => {
-            objectOperator.assign(this.deltaStepValues[property], this.delta);
-        });
-    }
-    cacheScaleValues() {
-        const scale = this.newDuration / this.duration;
-        Object.keys(this.scaleValues).forEach((property) => {
-            objectOperator.assign(this.scaleValues[property], scale);
-        });
-    }
-    cacheDeltaValueForward() {
-        this.animation.update(this.offset + this.delta);
-        this.deltaValues = this.cloneValues(this.animation.currentValues);
-    }
-    cacheDeltaValueStopped() {
-        this.animation.update(this.offset);
-        this.deltaValues = this.cloneValues(this.animation.currentValues);
-    }
-    calculate() {
-        this.animation.update(this.offset);
-        this.nowValues = this.cloneValues(this.animation.currentValues);
-        this.toValues = this.cloneValues(this.nowValues);
-        if (this.direction === FORWARD) {
-            this.cacheDeltaValueForward();
-        }
-        else {
-            this.cacheDeltaValueStopped();
-        }
-        Object.keys(this.nowValues).forEach((property) => {
-            const value = this.nowValues[property];
-            if (typeof value === "object" && value != null) {
-                this.cacheValues();
-                this.calculateObject(property);
-            }
-            else {
-                this.calculatePrimitive(property);
-            }
-        });
-    }
-    calculatePrimitive(property) {
-        const now = this.nowValues[property];
-        const dxNow = this.deltaValues[property];
-        const scale = this.newDuration / this.duration;
-        const diff = dxNow - now;
-        const derivative = diff / this.delta;
-        const scaled = derivative * scale;
-        const to = now + scaled;
-        this.toValues[property] = to;
-    }
-    calculateObject(property) {
-        const now = this.nowValues[property];
-        const delta = this.deltaValues[property];
-        const deltaStep = this.deltaStepValues[property];
-        const scale = this.scaleValues[property];
-        const dynamicValue = this.dynamicValues[property];
-        const to = this.toValues[property];
-        objectOperator.subtract(delta, now, dynamicValue);
-        objectOperator.divide(dynamicValue, deltaStep, dynamicValue);
-        objectOperator.multiply(dynamicValue, scale, dynamicValue);
-        objectOperator.add(now, dynamicValue, to);
-        this.toValues[property] = to;
-    }
-    createSlopeTimeline() {
-        const keyframes = Object.keys(this.nowValues)
-            .map((property) => {
-            return new Keyframe({
-                property,
-                from: this.nowValues[property],
-                controls: [],
-                to: this.toValues[property],
-                startAt: 0,
-                endAt: 1,
-                easing: easings.linear,
-            });
-        })
-            .flat();
-        this.slopeAnimation = new Animation("slope", keyframes);
-    }
-}
-
-const slopeAnimationBuilder = new SlopeAnimationBuilder();
-class ExtendedAnimation {
-    constructor(animation, animationDuration, offset = 0, playerState = exports.PlayerState.STOPPED, extendedDuration = 0) {
-        this.animation = animation;
-        this.animationDuration = animationDuration;
-        this.offset = offset;
-        this.playerState = playerState;
-        this.extendedDuration = extendedDuration;
-        this.currentValues = this.animation.currentValues;
-        this.name = this.animation.name;
-        this.slopeAnimation = slopeAnimationBuilder.build(this.animation, 1, animationDuration, extendedDuration, playerState);
-    }
-    update(time) {
-        const offsetTime = this.offset + time;
-        if (offsetTime + slopeAnimationBuilder.delta > 1) {
-            if (this.slopeAnimation == null) {
-                return this;
-            }
-            const overflowTime = offsetTime + slopeAnimationBuilder.delta - 1;
-            this.slopeAnimation.update(overflowTime);
-            this.currentValues = this.slopeAnimation.currentValues;
-        }
-        else {
-            if (this.animation == null) {
-                return this;
-            }
-            this.animation.update(offsetTime);
-            this.currentValues = this.animation.currentValues;
-        }
-        return this;
-    }
-    clone() {
-        return new ExtendedAnimation(this.animation.clone(), this.animationDuration, this.offset, this.playerState, this.extendedDuration);
-    }
-}
-
-class BlendedAnimation extends Animation {
-    constructor(fromAnimation, toAnimation, easing = easings.linear) {
-        const fromValues = fromAnimation.currentValues;
-        const toValues = toAnimation.currentValues;
-        const properties = Object.keys(fromValues);
-        const keyframes = properties
-            .map((name) => {
-            const from = fromValues[name];
-            const to = toValues[name];
-            if (to == null) {
-                throw new Error(`Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(Object.keys(from))}, To Animation: ${JSON.stringify(Object.keys(to))}`);
-            }
-            return new Keyframe({
-                property: name,
-                startAt: 0,
-                endAt: 1,
-                from,
-                to,
-                controls: [],
-                easing: easing || easings.linear,
-            });
-        })
-            .flat();
-        super(`${fromAnimation.name}-${toAnimation.name}-blended`, keyframes);
-        this.easing = easing;
-        this.properties = properties;
-        this.fromAnimation = fromAnimation;
-        this.toAnimation = toAnimation;
-    }
-    updateKeyframes() {
-        const length = this.properties.length;
-        for (let x = 0; x < length; x++) {
-            const animator = this.animators[x];
-            const property = animator.keyframe.property;
-            const keyframe = animator.keyframe;
-            keyframe.to = this.toAnimation.currentValues[property];
-            keyframe.from = this.fromAnimation.currentValues[property];
-        }
-    }
-    update(time) {
-        this.fromAnimation.update(time);
-        this.toAnimation.update(time);
-        this.updateKeyframes();
-        super.update(time);
-        return this;
-    }
-    clone() {
-        return new BlendedAnimation(this.fromAnimation.clone(), this.toAnimation.clone(), this.easing);
-    }
-}
-
-class KeyframesGenerator {
+class CSSKeyframesGenerator {
     constructor() {
         this.transformValue = (value) => value;
         this.sortPercentages = (keyA, keyB) => {
@@ -2685,155 +2365,13 @@ class KeyframesGenerator {
     }
 }
 
-const keyframesGenerator = new KeyframesGenerator();
-class Transition {
-    constructor() {
-        this._currentState = null;
-        this._currentDuration = 0;
-        this._currentEasing = "linear";
-        this._observer = null;
-        this.player = new Player();
-    }
-    _transitionToState(state, duration = 1000, easing = "linear") {
-        var _a, _b, _c;
-        const isActivelyMoving = this.isActivelyMoving();
-        const lastState = this._currentState;
-        const lastDuration = this._currentDuration;
-        let enterKeyframes = (_a = state["@enter"]) === null || _a === void 0 ? void 0 : _a.keyframes;
-        if (enterKeyframes == null) {
-            enterKeyframes = state["@values"];
-        }
-        this._currentState = state;
-        this._currentDuration = duration;
-        this._currentEasing = easing;
-        const keyframes = keyframesGenerator.generate(state["@loop"] == null ? enterKeyframes : state["@loop"].keyframes);
-        const animation = new Animation("enter", keyframes);
-        if (this.player.animation == null) {
-            this.player.animation = animation;
-        }
-        if (lastState != null) {
-            let leaveKeyframes = (_b = lastState["@leave"]) === null || _b === void 0 ? void 0 : _b.keyframes;
-            if (leaveKeyframes == null) {
-                leaveKeyframes = state["@values"];
-            }
-            if (isActivelyMoving) {
-                const previousDuration = lastState["@loop"] != null ? lastState["@loop"].duration : lastDuration;
-                const newDuration = state["@loop"] != null ? state["@loop"].duration : duration;
-                const remainingDuration = (1 - this.player.time) * previousDuration;
-                const extendedDuration = Math.max(newDuration - remainingDuration, 0);
-                const from = new ExtendedAnimation(this.player.animation, this.player.duration, this.player.time, this.player.state, extendedDuration);
-                this.player.animation = new BlendedAnimation(from, animation, easings[easing]);
-            }
-            else if (leaveKeyframes != null) {
-                const leaveAnimation = new Animation("leave", keyframesGenerator.generate(leaveKeyframes));
-                this.player.animation = new BlendedAnimation(leaveAnimation, animation, easings[easing]);
-            }
-        }
-        this.player.seek(0);
-        this.player.duration = state && state["@loop"] != null ? state["@loop"].duration : duration;
-        this.player.iterations = 0;
-        this.player.repeat = 1;
-        (_c = this._observer) === null || _c === void 0 ? void 0 : _c.dispose();
-        this._observer = this.player.observeTimeOnce(1, () => {
-            if (state && state["@loop"] != null) {
-                this.player.animation = animation.clone();
-                this.player.duration = state["@loop"].duration;
-                this.player.repeat = state["@loop"].iterationCount;
-            }
-        });
-        return this;
-    }
-    isActivelyMoving() {
-        return this.player.state !== exports.PlayerState.STOPPED || this.isLoop(this._currentState);
-    }
-    isLoop(state) {
-        return state && state["@loop"] != null;
-    }
-    execute(state) {
-        this._transitionToState(state);
-        this.player.play();
-        return this;
-    }
-    dispose() {
-        this.player.dispose();
-    }
-}
-
-class StatefulMotion extends Transition {
-    constructor() {
-        super(...arguments);
-        this._currentStateName = null;
-        this._states = {};
-        this._segueObserver = null;
-    }
-    addState(name, state) {
-        this._states[name] = state;
-    }
-    addStates(states) {
-        this._states = states;
-    }
-    removeState(name, state) {
-        delete this._states[name];
-    }
-    removeAllStates() {
-        this._states = {};
-    }
-    isFallThrough(name, props) {
-        if (this._currentStateName == null) {
-            return false;
-        }
-        const allFallThroughStates = this.getFallThrough(name, props, []);
-        return allFallThroughStates.includes(this._currentStateName);
-    }
-    getFallThrough(name, props, stack) {
-        const state = this.getState(name, props);
-        if (state != null && typeof state["@segueTo"] === "string") {
-            stack.push(state["@segueTo"]);
-            this.getFallThrough(state["@segueTo"], props, stack);
-        }
-        return stack;
-    }
-    getState(name, props) {
-        const stateRef = this._states[name];
-        if (typeof stateRef === "function") {
-            return stateRef(props);
-        }
-        else {
-            return stateRef;
-        }
-    }
-    changeState(name, props) {
-        var _a;
-        const state = this.getState(name, props);
-        if (this.isFallThrough(name, props) ||
-            state == null ||
-            this._currentStateName === name) {
-            return this;
-        }
-        this._currentStateName = name;
-        this._transitionToState(state);
-        (_a = this._segueObserver) === null || _a === void 0 ? void 0 : _a.dispose();
-        this._segueObserver = this.player.observeTime(1, () => {
-            const iterationCount = state["@loop"] != null ? state["@loop"].iterationCount : 1;
-            if (this.player.iterations >= iterationCount &&
-                typeof state["@segueTo"] === "string" &&
-                this._states[state["@segueTo"]]) {
-                this.changeState(state["@segueTo"], props);
-            }
-        });
-        this.player.play();
-        return this;
-    }
-}
-
 exports.Animation = Animation;
 exports.Animator = Animator;
 exports.BezierCurve = BezierCurve;
 exports.CssKeyframe = CssKeyframe;
+exports.CssKeyframesGenerator = CSSKeyframesGenerator;
 exports.Keyframe = Keyframe;
 exports.Player = Player;
-exports.StatefulMotion = StatefulMotion;
-exports.Transition = Transition;
 exports.createDynamicEasing = createDynamicEasing;
 exports.easings = easings;
 //# sourceMappingURL=index.js.map

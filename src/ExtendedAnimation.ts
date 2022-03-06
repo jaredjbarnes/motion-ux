@@ -9,30 +9,28 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   private playerState: PlayerState;
   private slopeAnimation: IAnimation<T>;
   private offset: number;
-  
 
   public currentValues: AnimationState<T>;
   public name: string;
-  public delay: number = 0;
   public time: number = 0;
   public duration: number = 0.0001;
 
   constructor(
     animation: IAnimation<T>,
     playerState: PlayerState = PlayerState.STOPPED,
-    duration = 0,
+    extendDurationBy = 0,
   ) {
     this.animation = animation;
     this.offset = animation.time;
     this.playerState = playerState;
-    this.duration = animation.duration + duration;
+    this.duration = animation.duration + extendDurationBy;
     this.currentValues = this.animation.currentValues;
     this.name = this.animation.name;
     this.animation.update(1);
-    
+
     this.slopeAnimation = slopeAnimationBuilder.build(
       this.animation,
-      duration,
+      extendDurationBy,
       playerState
     );
   }

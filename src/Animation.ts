@@ -13,7 +13,6 @@ export default class Animation<T> implements IAnimation<T> {
 
   public name: string;
   public time = 0
-  public delay = 0;
   public duration = 0.0001;
   public currentValues: AnimationState<T>;
 
