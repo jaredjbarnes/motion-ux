@@ -1,17 +1,20 @@
 import ExtendedAnimation from "./ExtendedAnimation";
 import IAnimation from "./IAnimation";
-import Player, { PlayerState, RepeatDirection } from "./Player";
+import Player, { RepeatDirection } from "./Player";
 import BlendedAnimation from "./BlendedAnimation";
 import { EasingFunction } from "./easings";
 
 export default class Motion<T> {
     protected player = new Player();
 
+    constructor(render: (animation: IAnimation<T>) => void) {
+        this.player.render = render;
+    }
+
     segueTo(animation: IAnimation<T>, easing?: EasingFunction) {
         this.player.repeat = 1;
-        this.player.time = 0;
 
-        if (this.player.animation == null || this.player.state != PlayerState.FORWARD) {
+        if (this.player.animation == null) {
             this.player.animation = animation;
         } else {
             const currentAnimation = this.player.animation;
@@ -28,26 +31,29 @@ export default class Motion<T> {
             this.player.animation = new BlendedAnimation(fromAnimation, animation, easing);
 
             this.player.observeTimeOnce(1, () => {
-                this.player.animation = null;
+                this.player.stop();
+                this.player.animation = animation;
             });
+
+            this.player.time = 0;
+            this.player.play();
         }
-        this.player.play();
     }
 
     segueToLoop(animation: IAnimation<T>, easing?: EasingFunction) {
         this.player.repeat = Infinity;
         this.player.repeatDirection = RepeatDirection.DEFAULT;
 
-        if (this.player.animation == null || this.player.state != PlayerState.FORWARD) {
+        if (this.player.animation == null) {
             this.player.animation = animation;
         } else {
             const currentAnimation = this.player.animation;
-            const remainingDuration = animation.duration = currentAnimation.duration;
+            const extendDurationBy = animation.duration - (currentAnimation.duration - this.player.time);
 
             let fromAnimation: IAnimation<T>;
 
-            if (remainingDuration > 0) {
-                fromAnimation = new ExtendedAnimation(currentAnimation, this.player.state, remainingDuration);
+            if (extendDurationBy > 0) {
+                fromAnimation = new ExtendedAnimation(currentAnimation, this.player.state, extendDurationBy);
             } else {
                 fromAnimation = currentAnimation;
             }
@@ -58,6 +64,7 @@ export default class Motion<T> {
                 this.player.animation = animation;
             });
         }
+        this.player.time = 0;
         this.player.play();
     }
 
