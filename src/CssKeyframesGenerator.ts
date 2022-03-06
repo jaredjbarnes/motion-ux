@@ -1,5 +1,5 @@
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
-import Keyframe from "./Keyframe";
+import CssKeyframe from "./CssKeyframe";
 
 export type IAnimatedProperties<T> = {
   [P in keyof T]: T[P] | IPercentageKeyframes<T[P]>;
@@ -19,7 +19,7 @@ export interface IKeyframeControls<TValue> {
   easeOut?: DynamicEasingNames;
 }
 
-export default class KeyframesGenerator {
+export default class CSSKeyframesGenerator {
   private transformValue: (value: any) => any = (value) => value;
 
   setTransformValue(transformValue: (value: any) => any) {
@@ -28,10 +28,6 @@ export default class KeyframesGenerator {
 
   isComplexKeyframe(value: any) {
     return value.hasOwnProperty("value");
-  }
-
-  isObject(value: any) {
-    return typeof value === "object" && value != null;
   }
 
   sortPercentages = (keyA: string, keyB: string) => {
@@ -138,17 +134,13 @@ export default class KeyframesGenerator {
           "Invalid complex value, only found a value with no other complex settings."
         );
       }
-      throw new Error(`Unknown "from" value: ${JSON.stringify(currentValue)}`);
+      throw new Error(`Unknown from value: ${JSON.stringify(currentValue)}`);
     }
   }
 
   getTo<T>(nextValue: IKeyframeControls<T>) {
-    const isComplexKeyframe = this.isComplexKeyframe(nextValue);
-
-    if (isComplexKeyframe) {
+    if (this.isComplexKeyframe(nextValue)) {
       return this.transformValue(nextValue.value);
-    } else if (!isComplexKeyframe && this.isObject(nextValue)) {
-      return this.transformValue(nextValue);
     } else if (typeof nextValue === "string") {
       return this.transformValue(nextValue);
     } else {
@@ -157,11 +149,11 @@ export default class KeyframesGenerator {
           "Invalid complex value, only found a value with no other complex settings."
         );
       }
-      throw new Error(`Unknown "to" value: ${JSON.stringify(nextValue)}`);
+      throw new Error(`Unknown to value: ${JSON.stringify(nextValue)}`);
     }
   }
 
-  wrapValue<T>(value: T): IKeyframeControls<T> {
+  normalizePrimitiveValue<T>(value: T): IKeyframeControls<T> {
     return {
       value,
     };
@@ -169,10 +161,8 @@ export default class KeyframesGenerator {
 
   normalizeValue<T>(value: T | IKeyframeControls<T>): IKeyframeControls<T> {
     if (typeof value === "string" || typeof value === "number") {
-      return this.wrapValue(value);
-    } else if (this.isObject(value) && !this.isComplexKeyframe(value)) {
-      return this.wrapValue(value as T);
-    } {
+      return this.normalizePrimitiveValue(value);
+    } else {
       return value as IKeyframeControls<T>;
     }
   }
@@ -182,10 +172,10 @@ export default class KeyframesGenerator {
   ): IPercentageKeyframes<T> {
     if (typeof value === "string" || typeof value === "number") {
       return {
-        from: this.wrapValue(value),
-        to: this.wrapValue(value),
+        from: this.normalizePrimitiveValue(value),
+        to: this.normalizePrimitiveValue(value),
       };
-    } else if (this.isObject(value)) {
+    } else if (typeof value === "object" && value != null) {
       const keyframes: any = value;
       const keys = Object.keys(keyframes);
       keys.forEach((key) => {
@@ -203,7 +193,7 @@ export default class KeyframesGenerator {
     const animatedPropertyNames = Object.keys(
       animatedProperties
     ) as (keyof T)[];
-    const keyframes: Keyframe<T>[] = [];
+    const keyframes: CssKeyframe[] = [];
 
     for (let x = 0; x < animatedPropertyNames.length; x++) {
       const property = animatedPropertyNames[x];
@@ -234,7 +224,7 @@ export default class KeyframesGenerator {
         const from = this.getFrom(currentValue);
         const to = this.getTo(nextValue);
 
-        const keyframe = new Keyframe({
+        const keyframe = new CssKeyframe({
           property: property.toString(),
           from,
           to,

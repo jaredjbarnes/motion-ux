@@ -1,111 +1,134 @@
+import easings from "../easings";
 import KeyframesGenerator from "../KeyframesGenerator";
+import Animation from "../Animation";
 
 describe("KeyframeGenerator", () => {
   test("Simple test", () => {
     const keyframeGenerator = new KeyframesGenerator();
     const keyframes = keyframeGenerator.generate({
-      backgroundColor: "rgba(0,0,0,0)",
+      backgroundColor: 0,
       opacity: 1,
     });
 
     expect(keyframes.length).toBe(2);
 
     expect(keyframes[0].property).toBe("backgroundColor");
-    expect(keyframes[0].from).toBe("rgba(0,0,0,0)");
-    expect(keyframes[0].to).toBe("rgba(0,0,0,0)");
-    expect(keyframes[0].controls.length).toBe(0);
-    expect(keyframes[0].startAt).toBe(0);
-    expect(keyframes[0].endAt).toBe(1);
 
-    expect(keyframes[1].property).toBe("opacity");
-    expect(keyframes[1].from).toBe(1);
-    expect(keyframes[1].to).toBe(1);
-    expect(keyframes[1].controls.length).toBe(0);
-    expect(keyframes[1].startAt).toBe(0);
-    expect(keyframes[1].endAt).toBe(1);
   });
 
-  test("Custom Percentages.", () => {
+  test("Simple test2", () => {
     const keyframeGenerator = new KeyframesGenerator();
     const keyframes = keyframeGenerator.generate({
       backgroundColor: {
-        from: "rgba(0,0,0,0)",
-        "50%": "rgba(0,0,0,0.5)",
-        to: "rgba(0,0,0,1)",
-      },
-      opacity: {
-        from: 0,
-        "50%": 0.5,
-        to: 1,
-      },
-    });
-
-    expect(keyframes.length).toBe(4);
-
-    expect(keyframes[0].property).toBe("backgroundColor");
-    expect(keyframes[0].from).toBe("rgba(0,0,0,0)");
-    expect(keyframes[0].to).toBe("rgba(0,0,0,0.5)");
-    expect(keyframes[0].controls.length).toBe(0);
-    expect(keyframes[0].startAt).toBe(0);
-    expect(keyframes[0].endAt).toBe(0.5);
-
-    expect(keyframes[1].property).toBe("backgroundColor");
-    expect(keyframes[1].from).toBe("rgba(0,0,0,0.5)");
-    expect(keyframes[1].to).toBe("rgba(0,0,0,1)");
-    expect(keyframes[1].controls.length).toBe(0);
-    expect(keyframes[1].startAt).toBe(0.5);
-    expect(keyframes[1].endAt).toBe(1);
-
-    expect(keyframes[2].property).toBe("opacity");
-    expect(keyframes[2].from).toBe(0);
-    expect(keyframes[2].to).toBe(0.5);
-    expect(keyframes[2].controls.length).toBe(0);
-    expect(keyframes[2].startAt).toBe(0);
-    expect(keyframes[2].endAt).toBe(0.5);
-
-    expect(keyframes[3].property).toBe("opacity");
-    expect(keyframes[3].from).toBe(0.5);
-    expect(keyframes[3].to).toBe(1);
-    expect(keyframes[3].controls.length).toBe(0);
-    expect(keyframes[3].startAt).toBe(0.5);
-    expect(keyframes[3].endAt).toBe(1);
-  });
-
-  test("Complex easings Percentages.", () => {
-    const keyframeGenerator = new KeyframesGenerator();
-    const keyframes = keyframeGenerator.generate({
-      backgroundColor: {
-        from: {
-          value: "rgba(0,0,0,0)",
-          easeOut: "quad",
-        },
+        from: 100,
         "50%": {
-          value: "rgba(0,0,0,0.5)",
+          value: -50,
           easeIn: "quad",
-          easeOut: "quad",
+          easeOut: "quad"
+        },
+        to: 200,
+      },
+      object: {
+        from: {
+          prop1: 1,
+          prop2: 2
         },
         to: {
-          value: "rgba(0,0,0,1)",
-          easeIn: "quad",
-        },
-      }
+          value: {
+            prop1: 2,
+            prop2: 4
+          }
+        }
+      },
     });
 
-    expect(keyframes.length).toBe(4);
+    const animation = new Animation("My Animation", keyframes);
+    const result = animation.update(0.5);
 
-    expect(keyframes[0].property).toBe("backgroundColor");
-    expect(keyframes[0].from).toBe("rgba(0,0,0,0)");
-    expect(keyframes[0].to).toBe("rgba(0,0,0,0.5)");
-    expect(keyframes[0].controls.length).toBe(0);
-    expect(keyframes[0].startAt).toBe(0);
-    expect(keyframes[0].endAt).toBe(0.5);
-
-    expect(keyframes[1].property).toBe("backgroundColor");
-    expect(keyframes[1].from).toBe("rgba(0,0,0,0.5)");
-    expect(keyframes[1].to).toBe("rgba(0,0,0,1)");
-    expect(keyframes[1].controls.length).toBe(0);
-    expect(keyframes[1].startAt).toBe(0.5);
-    expect(keyframes[1].endAt).toBe(1);
 
   });
+
+  // test("Custom Percentages.", () => {
+  //   const keyframeGenerator = new KeyframesGenerator();
+  //   const keyframes = keyframeGenerator.generate({
+  //     backgroundColor: {
+  //       from: "rgba(0,0,0,0)",
+  //       "50%": "rgba(0,0,0,0.5)",
+  //       to: "rgba(0,0,0,1)",
+  //     },
+  //     opacity: {
+  //       from: 0,
+  //       "50%": 0.5,
+  //       to: 1,
+  //     },
+  //   });
+
+  //   expect(keyframes.length).toBe(4);
+
+  //   expect(keyframes[0].property).toBe("backgroundColor");
+  //   expect(keyframes[0].from.join("")).toBe("rgba(0,0,0,0)");
+  //   expect(keyframes[0].to.join("")).toBe("rgba(0,0,0,0.5)");
+  //   expect(keyframes[0].controls.length).toBe(0);
+  //   expect(keyframes[0].startAt).toBe(0);
+  //   expect(keyframes[0].endAt).toBe(0.5);
+
+  //   expect(keyframes[1].property).toBe("backgroundColor");
+  //   expect(keyframes[1].from.join("")).toBe("rgba(0,0,0,0.5)");
+  //   expect(keyframes[1].to.join("")).toBe("rgba(0,0,0,1)");
+  //   expect(keyframes[1].controls.length).toBe(0);
+  //   expect(keyframes[1].startAt).toBe(0.5);
+  //   expect(keyframes[1].endAt).toBe(1);
+
+  //   expect(keyframes[2].property).toBe("opacity");
+  //   expect(keyframes[2].from.join("")).toBe("0");
+  //   expect(keyframes[2].to.join("")).toBe("0.5");
+  //   expect(keyframes[2].controls.length).toBe(0);
+  //   expect(keyframes[2].startAt).toBe(0);
+  //   expect(keyframes[2].endAt).toBe(0.5);
+
+  //   expect(keyframes[3].property).toBe("opacity");
+  //   expect(keyframes[3].from.join("")).toBe("0.5");
+  //   expect(keyframes[3].to.join("")).toBe("1");
+  //   expect(keyframes[3].controls.length).toBe(0);
+  //   expect(keyframes[3].startAt).toBe(0.5);
+  //   expect(keyframes[3].endAt).toBe(1);
+  // });
+
+  // test("Complex easings Percentages.", () => {
+  //   const keyframeGenerator = new KeyframesGenerator();
+  //   const keyframes = keyframeGenerator.generate({
+  //     backgroundColor: {
+  //       from: {
+  //         value: "rgba(0,0,0,0)",
+  //         easeOut: "quad",
+  //       },
+  //       "50%": {
+  //         value: "rgba(0,0,0,0.5)",
+  //         easeIn: "quad",
+  //         easeOut: "quad",
+  //       },
+  //       to: {
+  //         value: "rgba(0,0,0,1)",
+  //         easeIn: "quad",
+  //       },
+  //     }
+  //   });
+
+  //   expect(keyframes.length).toBe(2);
+
+  //   expect(keyframes[0].property).toBe("backgroundColor");
+  //   expect(keyframes[0].from.join("")).toBe("rgba(0,0,0,0)");
+  //   expect(keyframes[0].to.join("")).toBe("rgba(0,0,0,0.5)");
+  //   expect(keyframes[0].controls.length).toBe(0);
+  //   expect(keyframes[0].startAt).toBe(0);
+  //   expect(keyframes[0].endAt).toBe(0.5);
+
+  //   expect(keyframes[1].property).toBe("backgroundColor");
+  //   expect(keyframes[1].from.join("")).toBe("rgba(0,0,0,0.5)");
+  //   expect(keyframes[1].to.join("")).toBe("rgba(0,0,0,1)");
+  //   expect(keyframes[1].controls.length).toBe(0);
+  //   expect(keyframes[1].startAt).toBe(0.5);
+  //   expect(keyframes[1].endAt).toBe(1);
+
+  // });
 });

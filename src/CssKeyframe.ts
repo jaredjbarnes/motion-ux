@@ -1,22 +1,12 @@
 import { Visitor } from "clarity-pattern-parser";
-import easings, { EasingNames } from "./easings";
-import Keyframe from "./Keyframe";
+import easings from "./easings";
+import Keyframe, { KeyframeConfig } from "./Keyframe";
 import cssValue from "./patterns/cssValue";
-
-export interface CssKeyframeConfig {
-  property: string;
-  to: string;
-  from: string;
-  endAt?: number;
-  startAt?: number;
-  controls?: string[];
-  easing?: EasingNames | ((percentage: number) => number);
-}
 
 const visitor = new Visitor();
 
 const convertValue = (value: string) => {
-  const node = cssValue.exec(value);
+  const node = cssValue.exec(String(value));
   if (node == null) {
     return [];
   }
@@ -48,21 +38,22 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
   constructor({
     from,
     to,
-    easing = "linear",
+    easing = easings.linear,
     controls = [],
     ...config
-  }: CssKeyframeConfig) {
+  }: KeyframeConfig<string>) {
     const toValue = convertValue(to);
     const fromValue = convertValue(from);
     const controlsValues = controls.map((c) => convertValue(c));
-    const easingValue = typeof easing === "string" ? easings[easing] : easing;
 
     super({
       ...config,
       from: fromValue,
       to: toValue,
       controls: controlsValues,
-      easing: easingValue,
+      easing,
     });
   }
+
+
 }

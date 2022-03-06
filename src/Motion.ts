@@ -2,10 +2,18 @@ import IAnimation from "./IAnimation";
 import Player from "./Player";
 
 export default class Motion<T> {
-    animation: IAnimation<T>;
+    animation: IAnimation<T> | null;
     player = new Player();
 
-    segueTo() { }
+    segueTo(animation: IAnimation<T>) {
+        if (this.animation == null) {
 
-    segueToLoop() { }
+        } else {
+
+        }
+    }
+
+    segueToLoop() {
+
+    }
 }
