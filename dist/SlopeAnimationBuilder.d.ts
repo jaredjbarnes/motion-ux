@@ -15,7 +15,7 @@ export default class SlopeAnimationBuilder {
     scaleValues: any;
     dynamicValues: any;
     private cloneValues;
-    build<T>(animation: IAnimation<T>, offset: number, duration: number, newDuration: number, direction: PlayerState): IAnimation<T>;
+    build<T>(animation: IAnimation<T>, duration: number, direction: PlayerState): IAnimation<T>;
     private cacheValues;
     private cacheDeltaStepValues;
     private cacheScaleValues;

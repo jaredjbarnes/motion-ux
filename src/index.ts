@@ -8,6 +8,7 @@ import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import CssKeyframesGenerator from "./CssKeyframesGenerator";
+import Motion from "./Motion";
 
 export {
   IAnimation,
@@ -27,5 +28,6 @@ export {
   PlayerState,
   RepeatDirection,
   AnimationState,
-  CssKeyframesGenerator
+  CssKeyframesGenerator,
+  Motion,
 };
