@@ -56,10 +56,47 @@ document.body.addEventListener("pointerdown", (event) => {
       },
     })
   );
-  
+
   lastX = event.pageX;
   lastY = event.pageY;
 
   animation.duration = 1000;
   motion.segueTo(animation, easings.easeOutExpo);
+});
+
+function animateLoop() {
+  const keyframes = cssGenerator.generate({
+    left: {
+      from: {
+        value: `${lastX}px`,
+        easeOut: "quad",
+      },
+      "50%": {
+        value: `${lastX + 300}px`,
+        easeIn: "quad",
+        easeOut: "quad",
+      },
+      to: {
+        value: `${lastX}px`,
+        easeIn: "quad",
+      },
+    },
+    top: {
+      from: `${lastY}px`,
+      to: `${lastY}px`,
+    },
+  });
+
+  const animation = new Animation("loop", keyframes);
+  animation.duration = 1000;
+  animation.repeat = Infinity;
+
+  motion.segueToLoop(animation);
+}
+
+const button = document.querySelector("#button");
+button.addEventListener("pointerdown", (event) => {
+  event.stopPropagation();
+  event.preventDefault();
+  animateLoop();
 });

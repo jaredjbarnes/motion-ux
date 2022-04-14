@@ -9,6 +9,7 @@ import TimeObserver from "./TimeObserver";
 
 export default class Motion<T> {
   protected player = new Player<T>();
+  protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
 
   constructor(render: (animation: IAnimation<T>) => void) {
@@ -109,7 +110,7 @@ export default class Motion<T> {
 
     return new Animation<T>(
       "last-animation",
-      new KeyframeGenerator().generate(keyframes)
+      this.keyframeGenerator.generate(keyframes)
     );
   }
 

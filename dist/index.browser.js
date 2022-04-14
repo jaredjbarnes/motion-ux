@@ -2885,6 +2885,7 @@
   class Motion {
       constructor(render) {
           this.player = new Player();
+          this.keyframeGenerator = new KeyframesGenerator();
           this.observer = null;
           this.player.render = render;
       }
@@ -2953,7 +2954,7 @@
               };
               return acc;
           }, {});
-          return new Animation("last-animation", new KeyframesGenerator().generate(keyframes));
+          return new Animation("last-animation", this.keyframeGenerator.generate(keyframes));
       }
       stop() {
           this.player.stop();
