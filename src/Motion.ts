@@ -19,6 +19,7 @@ export default class Motion<T> {
   }
 
   segueTo(animation: IAnimation<T>, easing?: EasingFunction) {
+    animation.time = 0;
     const currentAnimation = this.player.animation;
     this.player.iterations = 0;
     this.player.repeat = 1;
@@ -70,6 +71,7 @@ export default class Motion<T> {
   }
 
   segueToLoop(animation: IAnimation<T>, easing?: EasingFunction) {
+    animation.time = 0;
     this.player.repeat = Infinity;
     this.player.repeatDirection = RepeatDirection.DEFAULT;
 

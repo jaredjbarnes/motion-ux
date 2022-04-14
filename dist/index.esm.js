@@ -2886,6 +2886,7 @@ class Motion {
     }
     segueTo(animation, easing) {
         var _a;
+        animation.time = 0;
         const currentAnimation = this.player.animation;
         this.player.iterations = 0;
         this.player.repeat = 1;
@@ -2924,6 +2925,7 @@ class Motion {
     }
     segueToLoop(animation, easing) {
         var _a;
+        animation.time = 0;
         this.player.repeat = Infinity;
         this.player.repeatDirection = RepeatDirection.DEFAULT;
         if (this.player.animation == null) {
