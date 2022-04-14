@@ -5,62 +5,61 @@ import {
   easings,
 } from "../../dist/index.esm.js";
 
-window.setTimeout(() => {
-  const subject = document.querySelector("#subject");
-  const cssGenerator = new CssKeyframesGenerator();
+const subject = document.querySelector("#subject");
+const cssGenerator = new CssKeyframesGenerator();
 
-  const animation1 = new Animation(
-    "First Animation",
-    cssGenerator.generate({
-      left: {
-        from: "0px",
-        to: "0px",
+const animation1 = new Animation(
+  "First Animation",
+  cssGenerator.generate({
+    left: {
+      from: "0px",
+      to: "0px",
+    },
+    top: {
+      from: "0px",
+      to: {
+        value: "300px",
+        easeIn: "expo",
       },
-      top: {
-        from: "0px",
-        to: {
-          value: "300px",
-          easeIn: "expo",
-        },
-      },
-    })
-  );
-  animation1.duration = 2000;
+    },
+  })
+);
+animation1.duration = 2000;
 
-  const animation2 = new Animation(
+const motion = new Motion((animation) => {
+  const values = animation.currentValues;
+  Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
+});
+
+motion.segueTo(animation1);
+
+let lastX = 0;
+let lastY = 0;
+
+document.body.addEventListener("pointerdown", (event) => {
+  const animation = new Animation(
     "Second Animation",
     cssGenerator.generate({
       top: {
-        from: "0px",
+        from: `${lastY}px`,
         to: {
-          value: "150px",
+          value: `${event.pageY}px`,
           easeIn: "expo",
         },
       },
       left: {
-        from: "0px",
+        from: `${lastX}px`,
         to: {
-          value: "300px",
+          value: `${event.pageX}`,
           easeIn: "expo",
         },
       },
     })
   );
-  animation2.duration = 2000;
+  
+  lastX = event.pageX;
+  lastY = event.pageY;
 
-  const motion = new Motion((animation) => {
-    const values = animation.currentValues;
-    Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
-  });
-
-  motion.segueTo(animation1);
-
-  window.setTimeout(() => {
-    motion.segueTo(animation2, easings.easeOutExpo);
-  }, 300);
-
-  window.setTimeout(() => {
-    motion.segueTo(animation1, easings.easeOutExpo);
-  }, 1000);
-
-}, 3000);
+  animation.duration = 1000;
+  motion.segueTo(animation, easings.easeOutExpo);
+});

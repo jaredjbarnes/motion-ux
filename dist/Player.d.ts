@@ -10,7 +10,7 @@ export declare enum RepeatDirection {
     DEFAULT = 0,
     ALTERNATE = 1
 }
-export default class Player<TAnimation = any> extends Observable {
+export default class Player<T = any> extends Observable {
     private _timeScale;
     private _time;
     private _step;
@@ -35,10 +35,10 @@ export default class Player<TAnimation = any> extends Observable {
     get repeatDirection(): RepeatDirection;
     set repeatDirection(value: RepeatDirection);
     get state(): PlayerState;
-    get animation(): IAnimation<TAnimation> | null;
-    set animation(animation: IAnimation<TAnimation> | null);
-    get render(): (animation: IAnimation<TAnimation>) => void;
-    set render(render: (animation: IAnimation<TAnimation>) => void);
+    get animation(): IAnimation<T> | null;
+    set animation(animation: IAnimation<T> | null);
+    get render(): (animation: IAnimation<T>) => void;
+    set render(render: (animation: IAnimation<T>) => void);
     get iterations(): number;
     set iterations(value: number);
     get clock(): IClock;

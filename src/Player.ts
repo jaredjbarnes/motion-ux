@@ -4,7 +4,7 @@ import { IClock } from "./IClock";
 import IAnimation from "./IAnimation";
 
 const defaultClock = new DefaultClock();
-function defaultRender() { }
+function defaultRender() {}
 
 export enum PlayerState {
   REVERSE = -1,
@@ -17,7 +17,7 @@ export enum RepeatDirection {
   ALTERNATE = 1,
 }
 
-export default class Player<TAnimation = any> extends Observable {
+export default class Player<T = any> extends Observable {
   private _timeScale: number;
   private _time: number;
   private _step: number;
@@ -26,10 +26,10 @@ export default class Player<TAnimation = any> extends Observable {
   private _iterations: number;
   private _repeat: number;
   private _repeatDirection: RepeatDirection;
-  private _animation: IAnimation<TAnimation> | null = null;
+  private _animation: IAnimation<T> | null = null;
   private _clock: IClock;
   private _state: PlayerState;
-  private _render: (animation: IAnimation<TAnimation>) => void;
+  private _render: (animation: IAnimation<T>) => void;
 
   constructor() {
     super();
@@ -114,7 +114,7 @@ export default class Player<TAnimation = any> extends Observable {
     return this._animation;
   }
 
-  set animation(animation: IAnimation<TAnimation> | null) {
+  set animation(animation: IAnimation<T> | null) {
     this._animation = animation;
     this.duration = this._animation?.duration || 0.0001;
   }
@@ -123,7 +123,7 @@ export default class Player<TAnimation = any> extends Observable {
     return this._render;
   }
 
-  set render(render: (animation: IAnimation<TAnimation>) => void) {
+  set render(render: (animation: IAnimation<T>) => void) {
     this._render = render;
   }
 

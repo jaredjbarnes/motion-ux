@@ -2680,35 +2680,241 @@ class BlendedAnimation extends Animation {
     }
 }
 
+class KeyframesGenerator {
+    constructor() {
+        this.transformValue = (value) => value;
+        this.sortPercentages = (keyA, keyB) => {
+            if (keyA === "from") {
+                return -1;
+            }
+            if (keyB === "from") {
+                return 1;
+            }
+            if (keyA === "to") {
+                return 1;
+            }
+            if (keyB === "to") {
+                return -1;
+            }
+            const keyAParts = keyA.split("%");
+            const keyBParts = keyB.split("%");
+            const keyANumber = parseFloat(keyAParts[0]);
+            const keyBNumber = parseFloat(keyBParts[0]);
+            if (keyANumber < keyBNumber) {
+                return -1;
+            }
+            else if (keyANumber > keyBNumber) {
+                return 1;
+            }
+            return 0;
+        };
+    }
+    setTransformValue(transformValue) {
+        this.transformValue = transformValue;
+    }
+    isComplexKeyframe(value) {
+        return value.hasOwnProperty("value");
+    }
+    isObject(value) {
+        return typeof value === "object" && value != null;
+    }
+    getDecimalFromPercentage(percentage) {
+        if (percentage === "to") {
+            return 1;
+        }
+        if (percentage === "from") {
+            return 0;
+        }
+        const percentageParts = percentage.split("%");
+        let decimal = parseFloat(percentageParts[0]) / 100;
+        if (isNaN(decimal)) {
+            throw new Error(`Unknown keyframe step: ${decimal}. Expected format 10% or 10.01% etc`);
+        }
+        decimal = Math.max(0, decimal);
+        decimal = Math.min(1, decimal);
+        return decimal;
+    }
+    getEaseIn(currentValue) {
+        if (this.isComplexKeyframe(currentValue) && currentValue.easeOut != null) {
+            return currentValue.easeOut || "linear";
+        }
+        else {
+            return "linear";
+        }
+    }
+    getEaseOut(nextValue) {
+        if (this.isComplexKeyframe(nextValue) && nextValue.easeIn != null) {
+            return nextValue.easeIn || "linear";
+        }
+        else {
+            return "linear";
+        }
+    }
+    getControlsIn(currentValue) {
+        if (this.isComplexKeyframe(currentValue) &&
+            Array.isArray(currentValue.controlsOut)) {
+            return currentValue.controlsOut.map((v) => this.transformValue(v));
+        }
+        else {
+            return [];
+        }
+    }
+    getControlsOut(nextValue) {
+        if (this.isComplexKeyframe(nextValue) &&
+            Array.isArray(nextValue.controlsIn)) {
+            return nextValue.controlsIn.map((v) => this.transformValue(v));
+        }
+        else {
+            return [];
+        }
+    }
+    getFrom(currentValue) {
+        if (this.isComplexKeyframe(currentValue)) {
+            return this.transformValue(currentValue.value);
+        }
+        else if (typeof currentValue === "string") {
+            return this.transformValue(currentValue);
+        }
+        else {
+            if (typeof (currentValue === null || currentValue === void 0 ? void 0 : currentValue.value) === "string") {
+                throw new Error("Invalid complex value, only found a value with no other complex settings.");
+            }
+            throw new Error(`Unknown "from" value: ${JSON.stringify(currentValue)}`);
+        }
+    }
+    getTo(nextValue) {
+        const isComplexKeyframe = this.isComplexKeyframe(nextValue);
+        if (isComplexKeyframe) {
+            return this.transformValue(nextValue.value);
+        }
+        else if (!isComplexKeyframe && this.isObject(nextValue)) {
+            return this.transformValue(nextValue);
+        }
+        else if (typeof nextValue === "string") {
+            return this.transformValue(nextValue);
+        }
+        else {
+            if (typeof (nextValue === null || nextValue === void 0 ? void 0 : nextValue.value) === "string") {
+                throw new Error("Invalid complex value, only found a value with no other complex settings.");
+            }
+            throw new Error(`Unknown "to" value: ${JSON.stringify(nextValue)}`);
+        }
+    }
+    wrapValue(value) {
+        return {
+            value,
+        };
+    }
+    normalizeValue(value) {
+        if (typeof value === "string" || typeof value === "number") {
+            return this.wrapValue(value);
+        }
+        else if (this.isObject(value) && !this.isComplexKeyframe(value)) {
+            return this.wrapValue(value);
+        }
+        {
+            return value;
+        }
+    }
+    normalizeKeyframeValue(value) {
+        if (typeof value === "string" || typeof value === "number") {
+            return {
+                from: this.wrapValue(value),
+                to: this.wrapValue(value),
+            };
+        }
+        else if (this.isObject(value)) {
+            const keyframes = value;
+            const keys = Object.keys(keyframes);
+            keys.forEach((key) => {
+                this.normalizeValue(keyframes[key]);
+            });
+            return value;
+        }
+        else {
+            throw new Error("Unknown value type.");
+        }
+    }
+    generate(animatedProperties) {
+        const animatedPropertyNames = Object.keys(animatedProperties);
+        const keyframes = [];
+        for (let x = 0; x < animatedPropertyNames.length; x++) {
+            const property = animatedPropertyNames[x];
+            let lastKeyFramePercentage = 0;
+            const keyframeValue = this.normalizeKeyframeValue(animatedProperties[property]);
+            const timeKeys = Object.keys(keyframeValue);
+            timeKeys.sort(this.sortPercentages);
+            for (let index = 0; index < timeKeys.length - 1; index++) {
+                const key = timeKeys[index];
+                const nextKey = timeKeys[index + 1];
+                const currentValue = this.normalizeValue(keyframeValue[key]);
+                const nextValue = this.normalizeValue(keyframeValue[nextKey]);
+                const startAt = lastKeyFramePercentage;
+                const endAt = this.getDecimalFromPercentage(timeKeys[index + 1]);
+                lastKeyFramePercentage = endAt;
+                const easingIn = this.getEaseIn(currentValue);
+                const easingOut = this.getEaseOut(nextValue);
+                const easing = createDynamicEasing(easingIn, easingOut);
+                const controlsIn = this.getControlsIn(currentValue);
+                const controlsOut = this.getControlsOut(nextValue);
+                const controls = [...controlsIn, ...controlsOut];
+                const from = this.getFrom(currentValue);
+                const to = this.getTo(nextValue);
+                const keyframe = new Keyframe({
+                    property: property.toString(),
+                    from,
+                    to,
+                    controls,
+                    easing,
+                    startAt,
+                    endAt,
+                });
+                keyframes.push(keyframe);
+            }
+        }
+        return keyframes;
+    }
+}
+
 class Motion {
     constructor(render) {
         this.player = new Player();
+        this.observer = null;
         this.player.render = render;
     }
     segueTo(animation, easing) {
+        var _a;
+        const currentAnimation = this.player.animation;
+        this.player.iterations = 0;
         this.player.repeat = 1;
-        if (this.player.animation == null) {
+        if (currentAnimation == null) {
             this.player.animation = animation;
         }
         else {
-            const currentAnimation = this.player.animation;
             const extendDurationBy = animation.duration - currentAnimation.duration * this.player.time;
             let fromAnimation;
             if (extendDurationBy > 0) {
                 fromAnimation = new ExtendedAnimation(currentAnimation, this.player.state, extendDurationBy);
             }
             else {
-                fromAnimation = currentAnimation;
+                const values = currentAnimation.currentValues;
+                const animation = this.makeAnimationFromLastValues(values);
+                fromAnimation = animation;
             }
-            this.player.animation = new BlendedAnimation(fromAnimation, animation, easing);
-            this.player.observeTimeOnce(1, () => {
-                this.player.stop();
+            const newAnimation = new BlendedAnimation(fromAnimation, animation, easing);
+            this.player.animation = newAnimation;
+            (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
+            this.observer = this.player.observeTimeOnce(1, () => {
+                const values = newAnimation.currentValues;
+                const animation = this.makeAnimationFromLastValues(values);
+                this.player.animation = animation;
             });
         }
         this.player.time = 0;
         this.player.play();
     }
     segueToLoop(animation, easing) {
+        var _a;
         this.player.repeat = Infinity;
         this.player.repeatDirection = RepeatDirection.DEFAULT;
         if (this.player.animation == null) {
@@ -2725,12 +2931,23 @@ class Motion {
                 fromAnimation = currentAnimation;
             }
             this.player.animation = new BlendedAnimation(fromAnimation, animation, easing);
-            this.player.observeTimeOnce(1, () => {
+            (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
+            this.observer = this.player.observeTimeOnce(1, () => {
                 this.player.animation = animation;
             });
         }
         this.player.time = 0;
         this.player.play();
+    }
+    makeAnimationFromLastValues(values) {
+        const keyframes = Object.keys(values).reduce((acc, key) => {
+            acc[key] = {
+                from: JSON.parse(JSON.stringify(values[key])),
+                to: JSON.parse(JSON.stringify(values[key])),
+            };
+            return acc;
+        }, {});
+        return new Animation("last-animation", new KeyframesGenerator().generate(keyframes));
     }
     stop() {
         this.player.stop();
