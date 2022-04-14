@@ -8,12 +8,14 @@ import KeyframeGenerator from "./KeyframesGenerator";
 import TimeObserver from "./TimeObserver";
 
 export default class Motion<T> {
+  protected setOnFirst: boolean;
   protected player = new Player<T>();
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
 
-  constructor(render: (animation: IAnimation<T>) => void) {
+  constructor(render: (animation: IAnimation<T>) => void, setOnFirst = false) {
     this.player.render = render;
+    this.setOnFirst = setOnFirst;
   }
 
   segueTo(animation: IAnimation<T>, easing?: EasingFunction) {
@@ -22,7 +24,13 @@ export default class Motion<T> {
     this.player.repeat = 1;
 
     if (currentAnimation == null) {
-      this.player.animation = animation;
+      if (this.setOnFirst) {
+        const finishedAnimation = animation.clone();
+        finishedAnimation.duration = 0.001;
+        this.player.animation = finishedAnimation;
+      } else {
+        this.player.animation = animation;
+      }
     } else {
       const extendDurationBy =
         animation.duration - currentAnimation.duration * this.player.time;

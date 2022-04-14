@@ -5,10 +5,11 @@ import { EasingFunction } from "./easings";
 import KeyframeGenerator from "./KeyframesGenerator";
 import TimeObserver from "./TimeObserver";
 export default class Motion<T> {
+    protected setOnFirst: boolean;
     protected player: Player<T>;
     protected keyframeGenerator: KeyframeGenerator;
     protected observer: TimeObserver<any> | null;
-    constructor(render: (animation: IAnimation<T>) => void);
+    constructor(render: (animation: IAnimation<T>) => void, setOnFirst?: boolean);
     segueTo(animation: IAnimation<T>, easing?: EasingFunction): void;
     segueToLoop(animation: IAnimation<T>, easing?: EasingFunction): void;
     protected makeAnimationFromLastValues(values: AnimationState<T>): Animation<T>;

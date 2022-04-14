@@ -29,7 +29,7 @@ animation1.duration = 2000;
 const motion = new Motion((animation) => {
   const values = animation.currentValues;
   Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
-});
+}, true);
 
 motion.segueTo(animation1);
 

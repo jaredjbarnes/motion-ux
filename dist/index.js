@@ -2881,11 +2881,12 @@ class KeyframesGenerator {
 }
 
 class Motion {
-    constructor(render) {
+    constructor(render, setOnFirst = false) {
         this.player = new Player();
         this.keyframeGenerator = new KeyframesGenerator();
         this.observer = null;
         this.player.render = render;
+        this.setOnFirst = setOnFirst;
     }
     segueTo(animation, easing) {
         var _a;
@@ -2893,7 +2894,14 @@ class Motion {
         this.player.iterations = 0;
         this.player.repeat = 1;
         if (currentAnimation == null) {
-            this.player.animation = animation;
+            if (this.setOnFirst) {
+                const finishedAnimation = animation.clone();
+                finishedAnimation.duration = 0.001;
+                this.player.animation = finishedAnimation;
+            }
+            else {
+                this.player.animation = animation;
+            }
         }
         else {
             const extendDurationBy = animation.duration - currentAnimation.duration * this.player.time;
