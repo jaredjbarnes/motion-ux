@@ -19,33 +19,34 @@ const firstAnimation = createCssAnimation({
 
 const secondAnimation = createCssAnimation({
   left: {
-    from: {
-      value: "calc(0% - 0px)",
-      easeOut: "quad",
-    },
-    "50%": {
-      value: "calc(100% - 300px)",
-      easeIn: "quad",
-      easeOut: "quad",
-    },
+    from: "calc(0% - 0px)",
+    "5%": "calc(0% - 0px)",
     to: {
       value: "calc(50% - 150px)",
-      easeIn: "quad",
+      easeIn: "elastic",
     },
   },
 });
 
 const thirdAnimation = createCssAnimation({
   left: {
-    from: "0%",
-    to: "50%",
+    from: "calc(0% - 0px)",
+    "10%": "calc(0% - 0px)",
+    to: {
+      value: "calc(50% - 100px)",
+      easeIn: "elastic",
+    },
   },
 });
 
 const fourthAnimation = createCssAnimation({
   left: {
-    from: "0%",
-    to: "50%",
+    from: "calc(0% - 0px)",
+    "15%": "calc(0% - 0px)",
+    to: {
+      value: "calc(50% - 50px)",
+      easeIn: "elastic",
+    },
   },
 });
 
