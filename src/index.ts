@@ -9,6 +9,8 @@ import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import CssKeyframesGenerator from "./CssKeyframesGenerator";
 import Motion from "./Motion";
+import { createAnimation } from "./createAnimation";
+import { createCssAnimation } from "./createCssAnimation";
 
 export {
   IAnimation,
@@ -20,6 +22,8 @@ export {
   BezierCurve,
   easings,
   createDynamicEasing,
+  createAnimation,
+  createCssAnimation,
   DynamicEasingNames,
   EasingNames,
   EasingFunction,

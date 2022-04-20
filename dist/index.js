@@ -2083,7 +2083,7 @@ const method = new AndComposite("method", [
     optionalSpaces,
     optionalArgs,
     optionalSpaces,
-    closeParen
+    closeParen,
 ]);
 
 const openBracket = new Literal("open-square-bracket", "[");
@@ -2097,17 +2097,28 @@ const array = new AndComposite("array", [
     closeBracket,
 ]);
 
+const space = new Literal("space", " ");
+const spaces = new RepeatValue("spaces", space);
+
+const operator = new RegexValue("operator", "[\\+\\-\\*\\/]");
+const value$1 = new OrComposite("value", [unit, method]);
+const expression = new AndComposite("expression", [
+    value$1,
+    spaces,
+    operator,
+    spaces,
+    value$1,
+]);
+
 const value = new OrComposite("value", [
     array,
     hex,
+    expression,
     method,
     unit,
     number,
     name,
 ]);
-
-const space = new Literal("space", " ");
-const spaces = new RepeatValue("spaces", space);
 
 const values = new RepeatComposite("values", value, spaces);
 
@@ -2972,6 +2983,22 @@ class Motion {
     }
 }
 
+const keyframesGenerator = new KeyframesGenerator();
+function createAnimation(animatedProperties, duration) {
+    const keyframes = keyframesGenerator.generate(animatedProperties);
+    const animation = new Animation("", keyframes);
+    animation.duration = duration;
+    return animation;
+}
+
+const cssKeyframesGenerator = new CSSKeyframesGenerator();
+function createCssAnimation(animatedProperties, duration) {
+    const keyframes = cssKeyframesGenerator.generate(animatedProperties);
+    const animation = new Animation("", keyframes);
+    animation.duration = duration;
+    return animation;
+}
+
 exports.Animation = Animation;
 exports.Animator = Animator;
 exports.BezierCurve = BezierCurve;
@@ -2980,6 +3007,8 @@ exports.CssKeyframesGenerator = CSSKeyframesGenerator;
 exports.Keyframe = Keyframe;
 exports.Motion = Motion;
 exports.Player = Player;
+exports.createAnimation = createAnimation;
+exports.createCssAnimation = createCssAnimation;
 exports.createDynamicEasing = createDynamicEasing;
 exports.easings = easings;
 //# sourceMappingURL=index.js.map

@@ -12,7 +12,7 @@ export default class Animation<T> implements IAnimation<T> {
   protected animators: Animator<T>[] = [];
 
   public name: string;
-  public time = 0
+  public time = 0;
   public duration = 0.0001;
   public currentValues: AnimationState<T>;
 

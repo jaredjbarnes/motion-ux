@@ -3,7 +3,7 @@ import {
   AndComposite,
   RepeatComposite,
   RecursivePattern,
-  OptionalComposite
+  OptionalComposite,
 } from "clarity-pattern-parser";
 
 import name from "./name";
@@ -22,7 +22,7 @@ const method = new AndComposite("method", [
   optionalSpaces,
   optionalArgs,
   optionalSpaces,
-  closeParen
+  closeParen,
 ]);
 
 export default method;

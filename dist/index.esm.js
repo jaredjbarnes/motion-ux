@@ -2079,7 +2079,7 @@ const method = new AndComposite("method", [
     optionalSpaces,
     optionalArgs,
     optionalSpaces,
-    closeParen
+    closeParen,
 ]);
 
 const openBracket = new Literal("open-square-bracket", "[");
@@ -2093,17 +2093,28 @@ const array = new AndComposite("array", [
     closeBracket,
 ]);
 
+const space = new Literal("space", " ");
+const spaces = new RepeatValue("spaces", space);
+
+const operator = new RegexValue("operator", "[\\+\\-\\*\\/]");
+const value$1 = new OrComposite("value", [unit, method]);
+const expression = new AndComposite("expression", [
+    value$1,
+    spaces,
+    operator,
+    spaces,
+    value$1,
+]);
+
 const value = new OrComposite("value", [
     array,
     hex,
+    expression,
     method,
     unit,
     number,
     name,
 ]);
-
-const space = new Literal("space", " ");
-const spaces = new RepeatValue("spaces", space);
 
 const values = new RepeatComposite("values", value, spaces);
 
@@ -2968,5 +2979,21 @@ class Motion {
     }
 }
 
-export { Animation, Animator, BezierCurve, CssKeyframe, CSSKeyframesGenerator as CssKeyframesGenerator, Keyframe, Motion, Player, PlayerState, RepeatDirection, createDynamicEasing, easings };
+const keyframesGenerator = new KeyframesGenerator();
+function createAnimation(animatedProperties, duration) {
+    const keyframes = keyframesGenerator.generate(animatedProperties);
+    const animation = new Animation("", keyframes);
+    animation.duration = duration;
+    return animation;
+}
+
+const cssKeyframesGenerator = new CSSKeyframesGenerator();
+function createCssAnimation(animatedProperties, duration) {
+    const keyframes = cssKeyframesGenerator.generate(animatedProperties);
+    const animation = new Animation("", keyframes);
+    animation.duration = duration;
+    return animation;
+}
+
+export { Animation, Animator, BezierCurve, CssKeyframe, CSSKeyframesGenerator as CssKeyframesGenerator, Keyframe, Motion, Player, PlayerState, RepeatDirection, createAnimation, createCssAnimation, createDynamicEasing, easings };
 //# sourceMappingURL=index.esm.js.map
