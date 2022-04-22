@@ -116,7 +116,6 @@ export default class Player<T = any> extends Observable {
 
   set animation(animation: IAnimation<T> | null) {
     this._animation = animation;
-    this.duration = this._animation?.duration || 0.0001;
   }
 
   get render() {

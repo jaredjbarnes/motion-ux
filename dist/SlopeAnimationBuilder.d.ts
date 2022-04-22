@@ -1,5 +1,4 @@
 import IAnimation from "./IAnimation";
-import { PlayerState } from "./Player";
 export default class SlopeAnimationBuilder {
     direction: number;
     newDuration: number;
@@ -15,7 +14,7 @@ export default class SlopeAnimationBuilder {
     scaleValues: any;
     dynamicValues: any;
     private cloneValues;
-    build<T>(animation: IAnimation<T>, duration: number, direction: PlayerState): IAnimation<T>;
+    build<T>(animation: IAnimation<T>, duration: number, offset: number, extendDurationBy: number, direction?: number): IAnimation<T>;
     private cacheValues;
     private cacheDeltaStepValues;
     private cacheScaleValues;

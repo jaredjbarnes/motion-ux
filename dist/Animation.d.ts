@@ -1,14 +1,11 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
 import IAnimation from "./IAnimation";
-declare type AnimationState<T> = {
-    [key: string]: T;
-};
+import { AnimationState } from "./IAnimation";
 export default class Animation<T> implements IAnimation<T> {
     protected animators: Animator<T>[];
+    protected time: number;
     name: string;
-    time: number;
-    duration: number;
     currentValues: AnimationState<T>;
     constructor(name: string, keyframes: Keyframe<T>[]);
     set keyframes(keyframes: Keyframe<T>[]);
@@ -18,4 +15,3 @@ export default class Animation<T> implements IAnimation<T> {
     update(time: number): this;
     clone(): Animation<T>;
 }
-export {};

@@ -46,7 +46,6 @@ export default class BlendedAnimation<T> extends Animation<T> {
     super(`${fromAnimation.name}-${toAnimation.name}-blended`, keyframes);
 
     this.easing = easing;
-    this.duration = toAnimation.duration;
     this.properties = properties;
     this.fromAnimation = fromAnimation;
     this.toAnimation = toAnimation;

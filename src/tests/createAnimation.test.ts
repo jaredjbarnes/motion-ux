@@ -1,25 +1,18 @@
-import Keyframe from "../Keyframe";
-import Animation from "../Animation";
+import { createAnimation } from "../createAnimation";
 
-describe("Keyframe", () => {
-  test("createKeyframes: Many Steps.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: 0,
-      },
-      "25%": {
-        opacity: 0.75,
-      },
-      "50%": {
-        opacity: 0.25,
-      },
-      "75%": {
-        opacity: 0.5,
-      },
-      to: {
-        opacity: 1,
+describe("createAnimation", () => {
+  test("Many Steps.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: 0,
+        "25%": 0.75,
+        "50%": 0.25,
+        "75%": 0.5,
+        to: 1,
       },
     });
+
+    const keyframes = animation.keyframes;
 
     expect(keyframes[0].from).toBe(0);
     expect(keyframes[0].to).toBe(0.75);
@@ -42,19 +35,17 @@ describe("Keyframe", () => {
     expect(keyframes[3].controls.length).toBe(0);
   });
 
-  test("createKeyframes: simple values.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: 0,
-        display: "none",
+  test("simple values.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: 0,
+        to: 1,
       },
-      to: {
-        opacity: 1,
-        display: "block",
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.5);
 
@@ -71,22 +62,20 @@ describe("Keyframe", () => {
     expect(currentValues.display).toBe("block");
   });
 
-  test("createKeyframes: Both controls.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: { value: 0, controlsOut: [-0.5] },
-        display: "none",
-      },
-      to: {
-        opacity: {
+  test("Both controls.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: { value: 0, controlsOut: [-0.5] },
+        to: {
           value: 1,
           controlsIn: [1.5],
         },
-        display: "block",
+      },
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
@@ -110,19 +99,17 @@ describe("Keyframe", () => {
     expect(currentValues.display).toBe("block");
   });
 
-  test("createKeyframes: Control out.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: { value: 0, controlsOut: [-0.5] },
-        display: "none",
+  test("Control out.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: { value: 0, controlsOut: [-0.5] },
+        to: 1,
       },
-      to: {
-        opacity: 1,
-        display: "block",
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
@@ -146,19 +133,14 @@ describe("Keyframe", () => {
     expect(currentValues.display).toBe("block");
   });
 
-  test("createKeyframes: Control in.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: 0,
-        display: "none",
-      },
-      to: {
-        opacity: { value: 1, controlsIn: [1.5] },
-        display: "block",
+  test("Control in.", () => {
+    const animation = createAnimation({
+      opacity: { from: 0, to: { value: 1, controlsIn: [1.5] } },
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
@@ -182,22 +164,20 @@ describe("Keyframe", () => {
     expect(currentValues.display).toBe("block");
   });
 
-  test("createKeyframes: Both easings.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: { value: 0, easeOut: "quad" },
-        display: "none",
-      },
-      to: {
-        opacity: {
+  test("Both easings.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: { value: 0, easeOut: "quad" },
+        to: {
           value: 1,
           easeIn: "quad",
         },
-        display: "block",
+      },
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
@@ -221,19 +201,17 @@ describe("Keyframe", () => {
     expect(currentValues.display).toBe("block");
   });
 
-  test("createKeyframes: Ease out.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: { value: 0, easeOut: "quad" },
-        display: "none",
+  test("Ease out.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: { value: 0, easeOut: "quad" },
+        to: 1,
       },
-      to: {
-        opacity: 1,
-        display: "block",
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 
@@ -257,19 +235,17 @@ describe("Keyframe", () => {
     expect(currentValues.display).toBe("block");
   });
 
-  test("createKeyframes: Ease in.", () => {
-    const keyframes = Keyframe.createKeyframes({
-      from: {
-        opacity: 0,
-        display: "none",
+  test("Ease in.", () => {
+    const animation = createAnimation({
+      opacity: {
+        from: 0,
+        to: { value: 1, easeIn: "quad" },
       },
-      to: {
-        opacity: { value: 1, easeIn: "quad" },
-        display: "block",
+      display: {
+        from: "none",
+        to: "block",
       },
     });
-
-    const animation = new Animation("css", keyframes);
 
     animation.update(0.1);
 

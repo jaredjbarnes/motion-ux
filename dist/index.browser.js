@@ -100,7 +100,6 @@
       constructor(name, keyframes) {
           this.animators = [];
           this.time = 0;
-          this.duration = 0.0001;
           this.name = name;
           this.currentValues = {};
           this.keyframes = keyframes;
@@ -371,9 +370,7 @@
           return this._animation;
       }
       set animation(animation) {
-          var _a;
           this._animation = animation;
-          this.duration = ((_a = this._animation) === null || _a === void 0 ? void 0 : _a.duration) || 0.0001;
       }
       get render() {
           return this._render;
@@ -2504,11 +2501,11 @@
       cloneValues(values) {
           return deepClone(values);
       }
-      build(animation, duration, direction) {
+      build(animation, duration, offset, extendDurationBy, direction = 0) {
           this.animation = animation;
-          this.offset = animation.time;
-          this.duration = animation.duration;
-          this.newDuration = duration;
+          this.offset = offset;
+          this.duration = duration;
+          this.newDuration = extendDurationBy;
           this.direction = direction;
           // If the offset is at or near the end get the last slope.
           if (this.offset + this.delta > 1) {
@@ -2608,17 +2605,15 @@
 
   const slopeAnimationBuilder = new SlopeAnimationBuilder();
   class ExtendedAnimation {
-      constructor(animation, playerState = exports.PlayerState.STOPPED, extendDurationBy = 0) {
+      constructor(animation, duration, offset, extendDurationBy = 0) {
           this.time = 0;
-          this.duration = 0.0001;
+          this.duration = duration;
+          this.offset = offset;
+          this.extendDurationBy = extendDurationBy;
           this.animation = animation;
-          this.offset = animation.time;
-          this.playerState = playerState;
-          this.duration = animation.duration + extendDurationBy;
           this.currentValues = this.animation.currentValues;
           this.name = this.animation.name;
-          this.animation.update(1);
-          this.slopeAnimation = slopeAnimationBuilder.build(this.animation, extendDurationBy, playerState);
+          this.slopeAnimation = slopeAnimationBuilder.build(this.animation, duration, 1, extendDurationBy, 1);
       }
       update(time) {
           this.time = time;
@@ -2641,7 +2636,7 @@
           return this;
       }
       clone() {
-          return new ExtendedAnimation(this.animation.clone(), this.playerState, this.duration);
+          return new ExtendedAnimation(this.animation.clone(), this.duration, this.offset, this.extendDurationBy);
       }
   }
 
@@ -2670,7 +2665,6 @@
               .flat();
           super(`${fromAnimation.name}-${toAnimation.name}-blended`, keyframes);
           this.easing = easing;
-          this.duration = toAnimation.duration;
           this.properties = properties;
           this.fromAnimation = fromAnimation;
           this.toAnimation = toAnimation;
@@ -2896,21 +2890,24 @@
   class Motion {
       constructor(render, setOnFirst = false) {
           this.player = new Player();
+          this.currentDuration = 0;
           this.keyframeGenerator = new KeyframesGenerator();
           this.observer = null;
           this.player.render = render;
           this.setOnFirst = setOnFirst;
       }
-      segueTo(animation, easing) {
+      segueTo(animation, duration = 0, easing) {
           var _a;
-          animation.time = 0;
+          const currentDuration = this.currentDuration;
           const currentAnimation = this.player.animation;
+          const currentTime = this.player.time;
+          this.player.duration = this.currentDuration = duration;
           this.player.iterations = 0;
           this.player.repeat = 1;
           if (currentAnimation == null) {
               if (this.setOnFirst) {
                   const finishedAnimation = animation.clone();
-                  finishedAnimation.duration = 0.001;
+                  this.player.duration = 0.001;
                   this.player.animation = finishedAnimation;
               }
               else {
@@ -2918,10 +2915,10 @@
               }
           }
           else {
-              const extendDurationBy = animation.duration - currentAnimation.duration * this.player.time;
+              const extendDurationBy = duration - currentDuration * currentTime;
               let fromAnimation;
               if (extendDurationBy > 0) {
-                  fromAnimation = new ExtendedAnimation(currentAnimation, this.player.state, extendDurationBy);
+                  fromAnimation = new ExtendedAnimation(currentAnimation, currentDuration, currentTime, extendDurationBy);
               }
               else {
                   const values = currentAnimation.currentValues;
@@ -2940,20 +2937,24 @@
           this.player.time = 0;
           this.player.play();
       }
-      segueToLoop(animation, easing) {
+      segueToLoop(animation, duration = 0, easing) {
           var _a;
-          animation.time = 0;
+          const currentDuration = this.currentDuration;
+          const currentAnimation = this.player.animation;
+          const currentTime = this.player.time;
+          this.player.duration = this.currentDuration = duration;
+          this.player.iterations = 0;
+          this.player.repeat = 1;
           this.player.repeat = Infinity;
           this.player.repeatDirection = exports.RepeatDirection.DEFAULT;
-          if (this.player.animation == null) {
+          if (currentAnimation == null) {
               this.player.animation = animation;
           }
           else {
-              const currentAnimation = this.player.animation;
-              const extendDurationBy = animation.duration - currentAnimation.duration * this.player.time;
+              const extendDurationBy = duration - currentDuration * currentTime;
               let fromAnimation;
               if (extendDurationBy > 0) {
-                  fromAnimation = new ExtendedAnimation(currentAnimation, this.player.state, extendDurationBy);
+                  fromAnimation = new ExtendedAnimation(currentAnimation, currentDuration, currentTime, extendDurationBy);
               }
               else {
                   fromAnimation = currentAnimation;
@@ -2986,18 +2987,16 @@
   }
 
   const keyframesGenerator = new KeyframesGenerator();
-  function createAnimation(animatedProperties, duration) {
+  function createAnimation(animatedProperties) {
       const keyframes = keyframesGenerator.generate(animatedProperties);
       const animation = new Animation("", keyframes);
-      animation.duration = duration;
       return animation;
   }
 
   const cssKeyframesGenerator = new CSSKeyframesGenerator();
-  function createCssAnimation(animatedProperties, duration) {
+  function createCssAnimation(animatedProperties) {
       const keyframes = cssKeyframesGenerator.generate(animatedProperties);
       const animation = new Animation("", keyframes);
-      animation.duration = duration;
       return animation;
   }
 

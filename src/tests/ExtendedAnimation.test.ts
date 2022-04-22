@@ -17,9 +17,7 @@ describe("Animation", () => {
       }),
     ]);
 
-    animation.duration = 1000;
-    animation.update(1);
-    const extendedAnimation = new ExtendedAnimation(animation, 1, 1000);
+    const extendedAnimation = new ExtendedAnimation(animation, 1000, 1, 1000);
     let values = extendedAnimation.update(0).currentValues;
 
     expect(values.opacity).toBe(1);
@@ -41,9 +39,7 @@ describe("Animation", () => {
       }),
     ]);
 
-    animation.update(1);
-    animation.duration = 1000;
-    const extendedAnimation = new ExtendedAnimation(animation, 1, 1000);
+    const extendedAnimation = new ExtendedAnimation(animation, 1000, 1, 1000);
     let values = extendedAnimation.update(0).currentValues;
 
     expect(values.opacity).toBe(1);

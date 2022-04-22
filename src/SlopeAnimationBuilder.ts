@@ -3,7 +3,7 @@ import Keyframe from "./Keyframe";
 import IAnimation from "./IAnimation";
 import Animation from "./Animation";
 import ObjectOperator from "./ObjectOperator";
-import { PlayerState } from "./Player";
+import Player, { PlayerState } from "./Player";
 import { deepClone } from "./deepClone";
 
 const nullableAnimation = new Animation("null", [
@@ -36,12 +36,14 @@ export default class SlopeAnimationBuilder {
   build<T>(
     animation: IAnimation<T>,
     duration: number,
-    direction: PlayerState
+    offset: number,
+    extendDurationBy: number,
+    direction = 0
   ) {
     this.animation = animation;
-    this.offset = animation.time;
-    this.duration = animation.duration;
-    this.newDuration = duration;
+    this.offset = offset;
+    this.duration = duration;
+    this.newDuration = extendDurationBy;
     this.direction = direction;
 
     // If the offset is at or near the end get the last slope.

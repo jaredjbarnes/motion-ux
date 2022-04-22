@@ -1,3 +1,4 @@
+import { Player } from ".";
 import IAnimation, { AnimationState } from "./IAnimation";
 import { PlayerState } from "./Player";
 import SlopeAnimationBuilder from "./SlopeAnimationBuilder";
@@ -6,32 +7,35 @@ const slopeAnimationBuilder = new SlopeAnimationBuilder();
 
 export default class ExtendedAnimation<T> implements IAnimation<T> {
   private animation: IAnimation<T>;
-  private playerState: PlayerState;
   private slopeAnimation: IAnimation<T>;
   private offset: number;
+  private duration;
+  private extendDurationBy;
 
   public currentValues: AnimationState<T>;
   public name: string;
   public time: number = 0;
-  public duration: number = 0.0001;
 
   constructor(
     animation: IAnimation<T>,
-    playerState: PlayerState = PlayerState.STOPPED,
-    extendDurationBy = 0,
+    duration: number,
+    offset: number,
+    extendDurationBy = 0
   ) {
+    this.duration = duration;
+    this.offset = offset;
+    this.extendDurationBy = extendDurationBy;
+
     this.animation = animation;
-    this.offset = animation.time;
-    this.playerState = playerState;
-    this.duration = animation.duration + extendDurationBy;
     this.currentValues = this.animation.currentValues;
     this.name = this.animation.name;
-    this.animation.update(1);
 
     this.slopeAnimation = slopeAnimationBuilder.build(
       this.animation,
+      duration,
+      1,
       extendDurationBy,
-      playerState
+      1
     );
   }
 
@@ -62,8 +66,9 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   clone() {
     return new ExtendedAnimation(
       this.animation.clone(),
-      this.playerState,
-      this.duration
+      this.duration,
+      this.offset,
+      this.extendDurationBy
     );
   }
 }

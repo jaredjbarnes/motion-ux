@@ -10,6 +10,7 @@ import TimeObserver from "./TimeObserver";
 export default class Motion<T> {
   protected setOnFirst: boolean;
   protected player = new Player<T>();
+  protected currentDuration = 0;
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
 
@@ -18,30 +19,37 @@ export default class Motion<T> {
     this.setOnFirst = setOnFirst;
   }
 
-  segueTo(animation: IAnimation<T>, easing?: EasingFunction) {
-    animation.time = 0;
+  segueTo(
+    animation: IAnimation<T>,
+    duration: number = 0,
+    easing?: EasingFunction
+  ) {
+    const currentDuration = this.currentDuration;
     const currentAnimation = this.player.animation;
+    const currentTime = this.player.time;
+
+    this.player.duration = this.currentDuration = duration;
     this.player.iterations = 0;
     this.player.repeat = 1;
 
     if (currentAnimation == null) {
       if (this.setOnFirst) {
         const finishedAnimation = animation.clone();
-        finishedAnimation.duration = 0.001;
+        this.player.duration = 0.001;
         this.player.animation = finishedAnimation;
       } else {
         this.player.animation = animation;
       }
     } else {
-      const extendDurationBy =
-        animation.duration - currentAnimation.duration * this.player.time;
+      const extendDurationBy = duration - currentDuration * currentTime;
 
       let fromAnimation: IAnimation<T>;
 
       if (extendDurationBy > 0) {
         fromAnimation = new ExtendedAnimation(
           currentAnimation,
-          this.player.state,
+          currentDuration,
+          currentTime,
           extendDurationBy
         );
       } else {
@@ -70,24 +78,30 @@ export default class Motion<T> {
     this.player.play();
   }
 
-  segueToLoop(animation: IAnimation<T>, easing?: EasingFunction) {
-    animation.time = 0;
+  segueToLoop(animation: IAnimation<T>, duration = 0, easing?: EasingFunction) {
+    const currentDuration = this.currentDuration;
+    const currentAnimation = this.player.animation;
+    const currentTime = this.player.time;
+
+    this.player.duration = this.currentDuration = duration;
+    this.player.iterations = 0;
+    this.player.repeat = 1;
+
     this.player.repeat = Infinity;
     this.player.repeatDirection = RepeatDirection.DEFAULT;
 
-    if (this.player.animation == null) {
+    if (currentAnimation == null) {
       this.player.animation = animation;
     } else {
-      const currentAnimation = this.player.animation;
-      const extendDurationBy =
-        animation.duration - currentAnimation.duration * this.player.time;
+      const extendDurationBy = duration - currentDuration * currentTime;
 
       let fromAnimation: IAnimation<T>;
 
       if (extendDurationBy > 0) {
         fromAnimation = new ExtendedAnimation(
           currentAnimation,
-          this.player.state,
+          currentDuration,
+          currentTime,
           extendDurationBy
         );
       } else {

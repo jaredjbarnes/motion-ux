@@ -1,19 +1,17 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
 import IAnimation from "./IAnimation";
+import { AnimationState } from "./IAnimation";
 
 const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 
-type AnimationState<T> = { [key: string]: T };
-
 export default class Animation<T> implements IAnimation<T> {
   protected animators: Animator<T>[] = [];
+  protected time = 0;
 
   public name: string;
-  public time = 0;
-  public duration = 0.0001;
   public currentValues: AnimationState<T>;
 
   constructor(name: string, keyframes: Keyframe<T>[]) {

@@ -24,14 +24,13 @@ const animation1 = new Animation(
     },
   })
 );
-animation1.duration = 2000;
 
 const motion = new Motion((animation) => {
   const values = animation.currentValues;
   Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
 }, true);
 
-motion.segueTo(animation1);
+motion.segueTo(animation1, 2000);
 
 let lastX = 0;
 let lastY = 0;
@@ -60,8 +59,7 @@ document.body.addEventListener("pointerdown", (event) => {
   lastX = event.pageX;
   lastY = event.pageY;
 
-  animation.duration = 1000;
-  motion.segueTo(animation, easings.easeOutExpo);
+  motion.segueTo(animation, 1000, easings.easeOutExpo);
 });
 
 function animateLoop() {
@@ -88,10 +86,9 @@ function animateLoop() {
   });
 
   const animation = new Animation("loop", keyframes);
-  animation.duration = 1000;
   animation.repeat = Infinity;
 
-  motion.segueToLoop(animation);
+  motion.segueToLoop(animation, 1000);
 }
 
 const button = document.querySelector("#button");
