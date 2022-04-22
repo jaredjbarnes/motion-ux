@@ -1,12 +1,12 @@
 import CssKeyframesGenerator, {
-  IAnimatedProperties,
+  ICssAnimatedProperties,
 } from "./CssKeyframesGenerator";
 import Animation from "./Animation";
 
 const cssKeyframesGenerator = new CssKeyframesGenerator();
 
 export function createCssAnimation<T>(
-  animatedProperties: IAnimatedProperties<T>,
+  animatedProperties: ICssAnimatedProperties<T>,
   duration: number
 ) {
   const keyframes = cssKeyframesGenerator.generate<T>(animatedProperties);

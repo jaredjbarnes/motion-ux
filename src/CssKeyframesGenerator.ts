@@ -1,17 +1,17 @@
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import CssKeyframe from "./CssKeyframe";
 
-export type IAnimatedProperties<T> = {
-  [P in keyof T]: T[P] | IPercentageKeyframes<T[P]>;
+export type ICssAnimatedProperties<T> = {
+  [P in keyof T]: T[P] | ICssPercentageKeyframes<T[P]>;
 };
 
-export interface IPercentageKeyframes<TValue> {
-  [key: string]: TValue | IKeyframeControls<TValue>;
-  from: TValue | IKeyframeControls<TValue>;
-  to: TValue | IKeyframeControls<TValue>;
+export interface ICssPercentageKeyframes<TValue> {
+  [key: string]: TValue | ICssKeyframeControls<TValue>;
+  from: TValue | ICssKeyframeControls<TValue>;
+  to: TValue | ICssKeyframeControls<TValue>;
 }
 
-export interface IKeyframeControls<TValue> {
+export interface ICssKeyframeControls<TValue> {
   value: TValue;
   controlsIn?: TValue[];
   controlsOut?: TValue[];
@@ -85,7 +85,7 @@ export default class CSSKeyframesGenerator {
     return decimal;
   }
 
-  getEaseIn<T>(currentValue: IKeyframeControls<T>) {
+  getEaseIn<T>(currentValue: ICssKeyframeControls<T>) {
     if (this.isComplexKeyframe(currentValue) && currentValue.easeOut != null) {
       return currentValue.easeOut || "linear";
     } else {
@@ -93,7 +93,7 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  getEaseOut<T>(nextValue: IKeyframeControls<T>) {
+  getEaseOut<T>(nextValue: ICssKeyframeControls<T>) {
     if (this.isComplexKeyframe(nextValue) && nextValue.easeIn != null) {
       return nextValue.easeIn || "linear";
     } else {
@@ -101,7 +101,7 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  getControlsIn<T>(currentValue: IKeyframeControls<T>) {
+  getControlsIn<T>(currentValue: ICssKeyframeControls<T>) {
     if (
       this.isComplexKeyframe(currentValue) &&
       Array.isArray(currentValue.controlsOut)
@@ -112,7 +112,7 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  getControlsOut<T>(nextValue: IKeyframeControls<T>) {
+  getControlsOut<T>(nextValue: ICssKeyframeControls<T>) {
     if (
       this.isComplexKeyframe(nextValue) &&
       Array.isArray(nextValue.controlsIn)
@@ -123,7 +123,7 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  getFrom<T>(currentValue: IKeyframeControls<T>) {
+  getFrom<T>(currentValue: ICssKeyframeControls<T>) {
     if (this.isComplexKeyframe(currentValue)) {
       return this.transformValue(currentValue.value);
     } else if (typeof currentValue === "string") {
@@ -138,7 +138,7 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  getTo<T>(nextValue: IKeyframeControls<T>) {
+  getTo<T>(nextValue: ICssKeyframeControls<T>) {
     if (this.isComplexKeyframe(nextValue)) {
       return this.transformValue(nextValue.value);
     } else if (typeof nextValue === "string") {
@@ -153,23 +153,25 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  normalizePrimitiveValue<T>(value: T): IKeyframeControls<T> {
+  normalizePrimitiveValue<T>(value: T): ICssKeyframeControls<T> {
     return {
       value,
     };
   }
 
-  normalizeValue<T>(value: T | IKeyframeControls<T>): IKeyframeControls<T> {
+  normalizeValue<T>(
+    value: T | ICssKeyframeControls<T>
+  ): ICssKeyframeControls<T> {
     if (typeof value === "string" || typeof value === "number") {
       return this.normalizePrimitiveValue(value);
     } else {
-      return value as IKeyframeControls<T>;
+      return value as ICssKeyframeControls<T>;
     }
   }
 
   normalizeKeyframeValue<T>(
-    value: T | IKeyframeControls<T> | IPercentageKeyframes<T>
-  ): IPercentageKeyframes<T> {
+    value: T | ICssKeyframeControls<T> | ICssPercentageKeyframes<T>
+  ): ICssPercentageKeyframes<T> {
     if (typeof value === "string" || typeof value === "number") {
       return {
         from: this.normalizePrimitiveValue(value),
@@ -183,13 +185,13 @@ export default class CSSKeyframesGenerator {
         keyframeValue;
       });
 
-      return value as IPercentageKeyframes<T>;
+      return value as ICssPercentageKeyframes<T>;
     } else {
       throw new Error("Unknown value type.");
     }
   }
 
-  generate<T>(animatedProperties: IAnimatedProperties<T>) {
+  generate<T>(animatedProperties: ICssAnimatedProperties<T>) {
     const animatedPropertyNames = Object.keys(
       animatedProperties
     ) as (keyof T)[];

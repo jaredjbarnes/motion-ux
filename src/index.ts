@@ -7,13 +7,20 @@ import CssKeyframe from "./CssKeyframe";
 import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
-import CssKeyframesGenerator from "./CssKeyframesGenerator";
+import CssKeyframesGenerator, {
+  ICssAnimatedProperties,
+  ICssKeyframeControls,
+  ICssPercentageKeyframes,
+} from "./CssKeyframesGenerator";
 import Motion from "./Motion";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
 
 export {
   IAnimation,
+  ICssAnimatedProperties,
+  ICssKeyframeControls,
+  ICssPercentageKeyframes,
   Player,
   Animator,
   Animation,
