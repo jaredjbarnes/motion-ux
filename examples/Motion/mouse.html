@@ -6,7 +6,6 @@
       }
       #first-circle {
         position: sticky;
-        z-index: 10;
         top: 0;
         left: 0%;
         width: 400px;
@@ -55,7 +54,6 @@
         padding: 0;
         height: 4000px;
         width: 100%;
-        filter: url('#gooey');
       }
     </style>
   </head>
@@ -65,20 +63,7 @@
       <div id="second-circle"></div>
       <div id="third-circle"></div>
       <div id="fourth-circle"></div>
+      <script type="module" src="mouse.js"></script>
     </div>
-    <svg>
-      <filter id="gooey">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
-        <feColorMatrix
-          values="
-        1 0 0 0 0 
-        0 1 0 0 0
-        0 0 1 0 0
-        0 0 0 20 -10
-        "
-        />
-      </filter>
-    </svg>
-    <script type="module" src="scrolling.js"></script>
   </body>
 </html>
