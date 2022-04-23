@@ -1,5 +1,4 @@
-import Animation from "./Animation";
-import IAnimation from "./IAnimation";
+import Animation, { IAnimation } from "./Animation";
 import { EasingFunction } from "./easings";
 export default class BlendedAnimation<T> extends Animation<T> {
     fromAnimation: IAnimation<T>;

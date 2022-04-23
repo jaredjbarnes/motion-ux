@@ -1,7 +1,7 @@
 import Observable from "./Observable";
 import DefaultClock from "./DefaultClock";
 import { IClock } from "./IClock";
-import IAnimation from "./IAnimation";
+import { IAnimation } from "./Animation";
 
 const defaultClock = new DefaultClock();
 function defaultRender() {}
@@ -26,10 +26,9 @@ export default class Player<T = any> extends Observable {
   private _iterations: number;
   private _repeat: number;
   private _repeatDirection: RepeatDirection;
-  private _animation: IAnimation<T> | null = null;
   private _clock: IClock;
   private _state: PlayerState;
-  private _render: (animation: IAnimation<T>) => void;
+  private _render: (time: number) => void;
 
   constructor() {
     super();
@@ -110,19 +109,11 @@ export default class Player<T = any> extends Observable {
     return this._state;
   }
 
-  get animation() {
-    return this._animation;
-  }
-
-  set animation(animation: IAnimation<T> | null) {
-    this._animation = animation;
-  }
-
   get render() {
     return this._render;
   }
 
-  set render(render: (animation: IAnimation<T>) => void) {
+  set render(render: (time: number) => void) {
     this._render = render;
   }
 
@@ -180,7 +171,6 @@ export default class Player<T = any> extends Observable {
         type: "TICK",
         time: 1,
         lastTime,
-        animation: this._animation,
       });
 
       if (this._iterations >= this._repeat) {
@@ -202,7 +192,6 @@ export default class Player<T = any> extends Observable {
           type: "TICK",
           time: 0,
           lastTime,
-          animation: this._animation,
         });
 
         this._time = 0;
@@ -227,7 +216,6 @@ export default class Player<T = any> extends Observable {
         type: "TICK",
         time: 0,
         lastTime,
-        animation: this._animation,
       });
 
       if (this._iterations >= this._repeat) {
@@ -249,7 +237,6 @@ export default class Player<T = any> extends Observable {
           type: "TICK",
           time: 1,
           lastTime,
-          animation: this._animation,
         });
 
         this._time = 1;
@@ -265,18 +252,12 @@ export default class Player<T = any> extends Observable {
     const lastTime = this._time;
     this._time = time;
 
-    if (this._animation == null) {
-      return;
-    }
-
-    this._animation.update(this._time);
-    this._render(this._animation);
+    this._render(this._time);
 
     this.notify({
       type: "TICK",
       time,
       lastTime,
-      animation: this._animation,
     });
 
     return this;
@@ -289,7 +270,6 @@ export default class Player<T = any> extends Observable {
 
       this.notify({
         type: "STOPPED",
-        animation: this._animation,
       });
     }
 
@@ -305,7 +285,6 @@ export default class Player<T = any> extends Observable {
 
       this.notify({
         type: "PLAYED",
-        animation: this._animation,
       });
     }
 
@@ -321,7 +300,6 @@ export default class Player<T = any> extends Observable {
 
       this.notify({
         type: "REVERSED",
-        animation: this._animation,
       });
     }
 

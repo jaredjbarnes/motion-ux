@@ -302,7 +302,6 @@ exports.RepeatDirection = void 0;
 class Player extends Observable {
     constructor() {
         super();
-        this._animation = null;
         this._timeScale = 1;
         this._time = 0;
         this._step = 0;
@@ -364,12 +363,6 @@ class Player extends Observable {
     get state() {
         return this._state;
     }
-    get animation() {
-        return this._animation;
-    }
-    set animation(animation) {
-        this._animation = animation;
-    }
     get render() {
         return this._render;
     }
@@ -419,7 +412,6 @@ class Player extends Observable {
                 type: "TICK",
                 time: 1,
                 lastTime,
-                animation: this._animation,
             });
             if (this._iterations >= this._repeat) {
                 this.seek(1);
@@ -438,7 +430,6 @@ class Player extends Observable {
                     type: "TICK",
                     time: 0,
                     lastTime,
-                    animation: this._animation,
                 });
                 this._time = 0;
                 this.seek(adjustedTime);
@@ -459,7 +450,6 @@ class Player extends Observable {
                 type: "TICK",
                 time: 0,
                 lastTime,
-                animation: this._animation,
             });
             if (this._iterations >= this._repeat) {
                 this.seek(0);
@@ -478,7 +468,6 @@ class Player extends Observable {
                     type: "TICK",
                     time: 1,
                     lastTime,
-                    animation: this._animation,
                 });
                 this._time = 1;
                 this.seek(adjustedTime);
@@ -492,16 +481,11 @@ class Player extends Observable {
     seek(time) {
         const lastTime = this._time;
         this._time = time;
-        if (this._animation == null) {
-            return;
-        }
-        this._animation.update(this._time);
-        this._render(this._animation);
+        this._render(this._time);
         this.notify({
             type: "TICK",
             time,
             lastTime,
-            animation: this._animation,
         });
         return this;
     }
@@ -511,7 +495,6 @@ class Player extends Observable {
             this._clock.unregister(this.tick);
             this.notify({
                 type: "STOPPED",
-                animation: this._animation,
             });
         }
         return this;
@@ -523,7 +506,6 @@ class Player extends Observable {
             this._clock.register(this.tick);
             this.notify({
                 type: "PLAYED",
-                animation: this._animation,
             });
         }
         return this;
@@ -535,7 +517,6 @@ class Player extends Observable {
             this._clock.register(this.tick);
             this.notify({
                 type: "REVERSED",
-                animation: this._animation,
             });
         }
         return this;
@@ -2887,17 +2868,23 @@ class KeyframesGenerator {
 
 class Motion {
     constructor(render, setOnFirst = false) {
+        this.animation = null;
         this.player = new Player();
         this.currentDuration = 0;
         this.keyframeGenerator = new KeyframesGenerator();
         this.observer = null;
-        this.player.render = render;
+        this.player.render = (time) => {
+            if (this.animation != null) {
+                this.animation.update(time);
+                render(this.animation);
+            }
+        };
         this.setOnFirst = setOnFirst;
     }
     segueTo(animation, duration = 0, easing) {
         var _a;
         const currentDuration = this.currentDuration;
-        const currentAnimation = this.player.animation;
+        const currentAnimation = this.animation;
         const currentTime = this.player.time;
         this.player.duration = this.currentDuration = duration;
         this.player.iterations = 0;
@@ -2906,10 +2893,10 @@ class Motion {
             if (this.setOnFirst) {
                 const finishedAnimation = animation.clone();
                 this.player.duration = 0.001;
-                this.player.animation = finishedAnimation;
+                this.animation = finishedAnimation;
             }
             else {
-                this.player.animation = animation;
+                this.animation = animation;
             }
         }
         else {
@@ -2924,12 +2911,12 @@ class Motion {
                 fromAnimation = animation;
             }
             const newAnimation = new BlendedAnimation(fromAnimation, animation, easing);
-            this.player.animation = newAnimation;
+            this.animation = newAnimation;
             (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
             this.observer = this.player.observeTimeOnce(1, () => {
                 const values = newAnimation.currentValues;
                 const animation = this.makeAnimationFromLastValues(values);
-                this.player.animation = animation;
+                this.animation = animation;
             });
         }
         this.player.time = 0;
@@ -2938,7 +2925,7 @@ class Motion {
     segueToLoop(animation, duration = 0, easing) {
         var _a;
         const currentDuration = this.currentDuration;
-        const currentAnimation = this.player.animation;
+        const currentAnimation = this.animation;
         const currentTime = this.player.time;
         this.player.duration = this.currentDuration = duration;
         this.player.iterations = 0;
@@ -2946,7 +2933,7 @@ class Motion {
         this.player.repeat = Infinity;
         this.player.repeatDirection = exports.RepeatDirection.DEFAULT;
         if (currentAnimation == null) {
-            this.player.animation = animation;
+            this.animation = animation;
         }
         else {
             const extendDurationBy = duration - currentDuration * currentTime;
@@ -2957,10 +2944,10 @@ class Motion {
             else {
                 fromAnimation = currentAnimation;
             }
-            this.player.animation = new BlendedAnimation(fromAnimation, animation, easing);
+            this.animation = new BlendedAnimation(fromAnimation, animation, easing);
             (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
             this.observer = this.player.observeTimeOnce(1, () => {
-                this.player.animation = animation;
+                this.animation = animation;
             });
         }
         this.player.time = 0;

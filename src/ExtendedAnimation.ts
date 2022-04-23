@@ -1,6 +1,4 @@
-import { Player } from ".";
-import IAnimation, { AnimationState } from "./IAnimation";
-import { PlayerState } from "./Player";
+import { IAnimation, AnimationState } from "./Animation";
 import SlopeAnimationBuilder from "./SlopeAnimationBuilder";
 
 const slopeAnimationBuilder = new SlopeAnimationBuilder();

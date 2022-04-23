@@ -7,20 +7,26 @@ const fourth = document.querySelector("#fourth-circle");
 
 const firstAnimation = createCssAnimation({
   left: {
-    from: "calc(0% - 0px)",
+    from: "0%",
     to: {
-      value: "calc(50% - 200px)",
+      value: "50%",
       easeIn: "elastic",
     },
+  },
+  transform: {
+    from: "scale(1)",
+    "8%": "scale(1)",
+    "13%": "scale(1.5)",
+    to: "scale(2)",
   },
 });
 
 const secondAnimation = createCssAnimation({
   left: {
-    from: "calc(0% - 0px)",
-    "5%": "calc(0% - 0px)",
+    from: "0%",
+    "5%": "0%",
     to: {
-      value: "calc(50% - 150px)",
+      value: "50%",
       easeIn: "elastic",
     },
   },
@@ -28,10 +34,10 @@ const secondAnimation = createCssAnimation({
 
 const thirdAnimation = createCssAnimation({
   left: {
-    from: "calc(0% - 0px)",
-    "10%": "calc(0% - 0px)",
+    from: "0%",
+    "10%": "0%",
     to: {
-      value: "calc(50% - 100px)",
+      value: "50%",
       easeIn: "elastic",
     },
   },
@@ -39,10 +45,10 @@ const thirdAnimation = createCssAnimation({
 
 const fourthAnimation = createCssAnimation({
   left: {
-    from: "calc(0% - 0px)",
-    "15%": "calc(0% - 0px)",
+    from: "0%",
+    "15%": "0%",
     to: {
-      value: "calc(50% - 50px)",
+      value: "50%",
       easeIn: "elastic",
     },
   },
@@ -72,6 +78,7 @@ function update() {
   const scrollTop = body.scrollTop;
   const height = body.offsetHeight;
   const time = scrollTop / (scrollHeight - height);
+  console.log(time);
 
   animations.forEach((animation, index) => {
     animation.update(time);

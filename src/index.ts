@@ -1,5 +1,4 @@
-import Animation from "./Animation";
-import IAnimation, { AnimationState } from "./IAnimation";
+import Animation, { AnimationState, IAnimation } from "./Animation";
 import Player, { PlayerState, RepeatDirection } from "./Player";
 import Animator from "./Animator";
 import Keyframe, { IComplexKeyframeValue, KeyframeConfig } from "./Keyframe";

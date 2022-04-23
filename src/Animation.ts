@@ -1,7 +1,14 @@
 import Animator from "./Animator";
 import Keyframe from "./Keyframe";
-import IAnimation from "./IAnimation";
-import { AnimationState } from "./IAnimation";
+
+export type AnimationState<T> = { [key: string]: T };
+
+export interface IAnimation<T> {
+  name: string;
+  currentValues: AnimationState<T>;
+  update(time: number): IAnimation<T>;
+  clone(): IAnimation<T>;
+}
 
 const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;

@@ -1,6 +1,5 @@
 import Observable from "./Observable";
 import { IClock } from "./IClock";
-import IAnimation from "./IAnimation";
 export declare enum PlayerState {
     REVERSE = -1,
     STOPPED = 0,
@@ -19,7 +18,6 @@ export default class Player<T = any> extends Observable {
     private _iterations;
     private _repeat;
     private _repeatDirection;
-    private _animation;
     private _clock;
     private _state;
     private _render;
@@ -35,10 +33,8 @@ export default class Player<T = any> extends Observable {
     get repeatDirection(): RepeatDirection;
     set repeatDirection(value: RepeatDirection);
     get state(): PlayerState;
-    get animation(): IAnimation<T> | null;
-    set animation(animation: IAnimation<T> | null);
-    get render(): (animation: IAnimation<T>) => void;
-    set render(render: (animation: IAnimation<T>) => void);
+    get render(): (time: number) => void;
+    set render(render: (time: number) => void);
     get iterations(): number;
     set iterations(value: number);
     get clock(): IClock;
@@ -46,7 +42,7 @@ export default class Player<T = any> extends Observable {
     private tick;
     private stepForward;
     private stepBackward;
-    seek(time: number): this | undefined;
+    seek(time: number): this;
     stop(): this;
     play(): this;
     reverse(): this;

@@ -1,5 +1,4 @@
-import Animation from "./Animation";
-import IAnimation from "./IAnimation";
+import Animation, {IAnimation} from "./Animation";
 import Keyframe from "./Keyframe";
 import easings, { EasingFunction } from "./easings";
 

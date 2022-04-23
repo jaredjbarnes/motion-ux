@@ -1,4 +1,4 @@
-import IAnimation from "./IAnimation";
+import { IAnimation } from "./Animation";
 export default class SlopeAnimationBuilder {
     direction: number;
     newDuration: number;

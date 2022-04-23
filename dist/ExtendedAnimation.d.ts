@@ -1,4 +1,4 @@
-import IAnimation, { AnimationState } from "./IAnimation";
+import { IAnimation, AnimationState } from "./Animation";
 export default class ExtendedAnimation<T> implements IAnimation<T> {
     private animation;
     private slopeAnimation;

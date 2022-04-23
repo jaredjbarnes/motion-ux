@@ -1,11 +1,11 @@
-import IAnimation, { AnimationState } from "./IAnimation";
-import Animation from "./Animation";
+import Animation, { IAnimation, AnimationState } from "./Animation";
 import Player from "./Player";
 import { EasingFunction } from "./easings";
 import KeyframeGenerator from "./KeyframesGenerator";
 import TimeObserver from "./TimeObserver";
 export default class Motion<T> {
     protected setOnFirst: boolean;
+    protected animation: IAnimation<T> | null;
     protected player: Player<T>;
     protected currentDuration: number;
     protected keyframeGenerator: KeyframeGenerator;

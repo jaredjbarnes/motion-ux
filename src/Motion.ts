@@ -1,6 +1,5 @@
 import ExtendedAnimation from "./ExtendedAnimation";
-import IAnimation, { AnimationState } from "./IAnimation";
-import Animation from "./Animation";
+import Animation, { IAnimation, AnimationState } from "./Animation";
 import Player, { RepeatDirection } from "./Player";
 import BlendedAnimation from "./BlendedAnimation";
 import { EasingFunction } from "./easings";
@@ -9,13 +8,19 @@ import TimeObserver from "./TimeObserver";
 
 export default class Motion<T> {
   protected setOnFirst: boolean;
+  protected animation: IAnimation<T> | null = null;
   protected player = new Player<T>();
   protected currentDuration = 0;
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
 
   constructor(render: (animation: IAnimation<T>) => void, setOnFirst = false) {
-    this.player.render = render;
+    this.player.render = (time: number) => {
+      if (this.animation != null) {
+        this.animation.update(time);
+        render(this.animation);
+      }
+    };
     this.setOnFirst = setOnFirst;
   }
 
@@ -25,7 +30,7 @@ export default class Motion<T> {
     easing?: EasingFunction
   ) {
     const currentDuration = this.currentDuration;
-    const currentAnimation = this.player.animation;
+    const currentAnimation = this.animation;
     const currentTime = this.player.time;
 
     this.player.duration = this.currentDuration = duration;
@@ -36,9 +41,9 @@ export default class Motion<T> {
       if (this.setOnFirst) {
         const finishedAnimation = animation.clone();
         this.player.duration = 0.001;
-        this.player.animation = finishedAnimation;
+        this.animation = finishedAnimation;
       } else {
-        this.player.animation = animation;
+        this.animation = animation;
       }
     } else {
       const extendDurationBy = duration - currentDuration * currentTime;
@@ -58,19 +63,19 @@ export default class Motion<T> {
         fromAnimation = animation;
       }
 
-      const newAnimation = new BlendedAnimation(
+      const newAnimation = new BlendedAnimation<T>(
         fromAnimation,
         animation,
         easing
       );
 
-      this.player.animation = newAnimation;
+      this.animation = newAnimation;
 
       this.observer?.dispose();
       this.observer = this.player.observeTimeOnce(1, () => {
         const values = newAnimation.currentValues;
         const animation = this.makeAnimationFromLastValues(values);
-        this.player.animation = animation;
+        this.animation = animation;
       });
     }
 
@@ -80,7 +85,7 @@ export default class Motion<T> {
 
   segueToLoop(animation: IAnimation<T>, duration = 0, easing?: EasingFunction) {
     const currentDuration = this.currentDuration;
-    const currentAnimation = this.player.animation;
+    const currentAnimation = this.animation;
     const currentTime = this.player.time;
 
     this.player.duration = this.currentDuration = duration;
@@ -91,7 +96,7 @@ export default class Motion<T> {
     this.player.repeatDirection = RepeatDirection.DEFAULT;
 
     if (currentAnimation == null) {
-      this.player.animation = animation;
+      this.animation = animation;
     } else {
       const extendDurationBy = duration - currentDuration * currentTime;
 
@@ -108,7 +113,7 @@ export default class Motion<T> {
         fromAnimation = currentAnimation;
       }
 
-      this.player.animation = new BlendedAnimation(
+      this.animation = new BlendedAnimation<T>(
         fromAnimation,
         animation,
         easing
@@ -116,7 +121,7 @@ export default class Motion<T> {
 
       this.observer?.dispose();
       this.observer = this.player.observeTimeOnce(1, () => {
-        this.player.animation = animation;
+        this.animation = animation;
       });
     }
     this.player.time = 0;
