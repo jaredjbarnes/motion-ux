@@ -2102,13 +2102,13 @@ const values = new RepeatComposite("values", value, spaces);
 
 const cssValue = new RepeatComposite("css-value", values, divider);
 
-const visitor = new Visitor();
+const visitor$1 = new Visitor();
 const convertValue = (value) => {
     const node = cssValue.exec(String(value));
     if (node == null) {
         return [];
     }
-    visitor
+    visitor$1
         .setRoot(node)
         .selectRoot()
         .flatten()
@@ -2971,6 +2971,257 @@ class Motion {
     }
 }
 
+const m = new Literal("M", "M");
+const v = new Literal("v", "v");
+const V = new Literal("V", "V");
+new Literal("h", "h");
+new Literal("H", "H");
+const c = new Literal("c", "c");
+const C = new Literal("C", "C");
+const x = number.clone("x");
+const y = number.clone("y");
+const dx = number.clone("dx");
+const dy = number.clone("dy");
+const moveTo = new AndComposite("moveTo", [
+    m,
+    optionalSpaces,
+    x,
+    spaces,
+    y,
+]);
+const absoluteVerticalLine = new AndComposite("absoluteVerticalLine", [
+    V,
+    optionalSpaces,
+    x,
+    spaces,
+    y,
+]);
+const relativeVerticalLine = new AndComposite("relativeVerticalLine", [
+    v,
+    optionalSpaces,
+    dx,
+    spaces,
+    dy,
+]);
+const absoluteHorizontalLine = new AndComposite("absoluteHorizontalLine", [V, optionalSpaces, x, spaces, y]);
+new AndComposite("relativeHorizontalLine", [v, optionalSpaces, dx, spaces, dy]);
+const absoluteCurvedLine = new AndComposite("absoluteCurvedLine", [
+    C,
+    optionalSpaces,
+    x,
+    spaces,
+    y,
+    divider,
+    x,
+    spaces,
+    y,
+    divider,
+    x,
+    spaces,
+    y,
+]);
+const relativeCurvedLine = new AndComposite("relativeCurvedLine", [
+    c,
+    optionalSpaces,
+    dx,
+    spaces,
+    dy,
+    divider,
+    dx,
+    spaces,
+    dy,
+    divider,
+    dx,
+    spaces,
+    dy,
+]);
+const pathCommands = new OrComposite("pathCommands", [
+    moveTo,
+    absoluteVerticalLine,
+    relativeVerticalLine,
+    absoluteHorizontalLine,
+    relativeVerticalLine,
+    absoluteCurvedLine,
+    relativeCurvedLine,
+]);
+const path = new RepeatComposite("path", pathCommands, spaces);
+
+const visitor = new Visitor();
+class PathAnimation {
+    constructor(pathString, easing = easings.linear) {
+        this.position = { x: 0, y: 0 };
+        this.name = "";
+        const tree = path.parse(new Cursor(pathString));
+        this.pathString = pathString;
+        visitor
+            .setRoot(tree)
+            .selectRoot()
+            .clear()
+            .select((n) => n.name === "optional-spaces")
+            .remove()
+            .clear()
+            .select((n) => n.name === "spaces")
+            .remove()
+            .clear()
+            .select((n) => n.name === "divider")
+            .remove();
+        if (tree == null) {
+            throw new Error("Invalid path.");
+        }
+        this.easing = easing;
+        let length = tree.children.filter((n) => n.name != "moveTo").length;
+        let moveToAmount = 0;
+        const keyframes = tree.children.reduce((acc, n, index) => {
+            const currentIndex = index - moveToAmount;
+            if (n.name === "moveTo") {
+                moveToAmount++;
+            }
+            const nextIndex = index + 1 - moveToAmount;
+            const results = this[n.name](n, length > 0 ? currentIndex / length : 0, length > 0 ? nextIndex / length : 0);
+            return acc.concat(results);
+        }, []);
+        this.animation = new Animation("path", keyframes);
+    }
+    get currentValues() {
+        return this.animation.currentValues;
+    }
+    moveTo(n, startAt, endAt) {
+        const xValue = Number(n.children[1].value);
+        const yValue = Number(n.children[2].value);
+        const x = new Keyframe({
+            property: "x",
+            from: xValue,
+            to: xValue,
+            startAt,
+            endAt,
+        });
+        const y = new Keyframe({
+            property: "y",
+            from: yValue,
+            to: yValue,
+            startAt: startAt,
+            endAt: endAt,
+        });
+        this.position.x = xValue;
+        this.position.y = yValue;
+        return [x, y];
+    }
+    absoluteVerticalLine(n, startAt, endAt) {
+        const yValue = Number(n.children[2].value);
+        const y = new Keyframe({
+            property: "y",
+            from: this.position.y,
+            to: yValue,
+            startAt: startAt,
+            endAt: endAt,
+        });
+        this.position.y = yValue;
+        return [y];
+    }
+    relativeVerticalLine(n, startAt, endAt) {
+        const yValue = Number(n.children[2].value) + this.position.y;
+        const y = new Keyframe({
+            property: "y",
+            from: this.position.y,
+            to: yValue,
+            startAt: startAt,
+            endAt: endAt,
+        });
+        this.position.y = yValue;
+        return [y];
+    }
+    absoluteHorizontalLine(n, startAt, endAt) {
+        const xValue = Number(n.children[1].value);
+        const x = new Keyframe({
+            property: "x",
+            from: this.position.x,
+            to: xValue,
+            startAt,
+            endAt,
+        });
+        this.position.x = xValue;
+        return [x];
+    }
+    relativeHorizontalLine(n, startAt, endAt) {
+        const xValue = Number(n.children[1].value) + this.position.x;
+        const x = new Keyframe({
+            property: "x",
+            from: this.position.x,
+            to: xValue,
+            startAt,
+            endAt,
+        });
+        this.position.x = xValue;
+        return [x];
+    }
+    absoluteCurvedLine(n, startAt, endAt) {
+        const startXValue = this.position.x;
+        const startYValue = this.position.y;
+        const xControl1 = Number(n.children[1].value);
+        const yControl1 = Number(n.children[2].value);
+        const xControl2 = Number(n.children[3].value);
+        const yControl2 = Number(n.children[4].value);
+        const endXValue = Number(n.children[5].value);
+        const endYValue = Number(n.children[6].value);
+        const x = new Keyframe({
+            property: "x",
+            from: startXValue,
+            to: endXValue,
+            controls: [xControl1, xControl2],
+            startAt,
+            endAt,
+        });
+        const y = new Keyframe({
+            property: "y",
+            from: startYValue,
+            to: endYValue,
+            controls: [yControl1, yControl2],
+            startAt: startAt,
+            endAt: endAt,
+        });
+        this.position.x = endXValue;
+        this.position.y = endYValue;
+        return [x, y];
+    }
+    relativeCurvedLine(n, startAt, endAt) {
+        const startXValue = this.position.x;
+        const startYValue = this.position.y;
+        const xControl1 = Number(n.children[1].value + startXValue);
+        const yControl1 = Number(n.children[2].value + startYValue);
+        const xControl2 = Number(n.children[3].value + startXValue);
+        const yControl2 = Number(n.children[4].value + startYValue);
+        const endXValue = Number(n.children[5].value + startXValue);
+        const endYValue = Number(n.children[6].value + startYValue);
+        const x = new Keyframe({
+            property: "x",
+            from: startXValue,
+            to: endXValue,
+            controls: [xControl1, xControl2],
+            startAt,
+            endAt,
+        });
+        const y = new Keyframe({
+            property: "y",
+            from: startYValue,
+            to: endYValue,
+            controls: [yControl1, yControl2],
+            startAt: startAt,
+            endAt: endAt,
+        });
+        this.position.x = endXValue;
+        this.position.y = endYValue;
+        return [x, y];
+    }
+    update(time) {
+        const adjustedTime = this.easing(time);
+        this.animation.update(adjustedTime);
+        return this;
+    }
+    clone() {
+        return new PathAnimation(this.pathString, this.easing);
+    }
+}
+
 const keyframesGenerator = new KeyframesGenerator();
 function createAnimation(animatedProperties) {
     const keyframes = keyframesGenerator.generate(animatedProperties);
@@ -2992,6 +3243,7 @@ exports.CssKeyframe = CssKeyframe;
 exports.CssKeyframesGenerator = CSSKeyframesGenerator;
 exports.Keyframe = Keyframe;
 exports.Motion = Motion;
+exports.PathAnimation = PathAnimation;
 exports.Player = Player;
 exports.createAnimation = createAnimation;
 exports.createCssAnimation = createCssAnimation;

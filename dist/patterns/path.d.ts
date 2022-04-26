@@ -1,0 +1,10 @@
+import { AndComposite, RepeatComposite, OrComposite } from "clarity-pattern-parser";
+export declare const moveTo: AndComposite;
+export declare const absoluteVerticalLine: AndComposite;
+export declare const relativeVerticalLine: AndComposite;
+export declare const absoluteHorizontalLine: AndComposite;
+export declare const relativeHorizontalLine: AndComposite;
+export declare const absoluteCurvedLine: AndComposite;
+export declare const relativeCurvedLine: AndComposite;
+export declare const pathCommands: OrComposite;
+export declare const path: RepeatComposite;

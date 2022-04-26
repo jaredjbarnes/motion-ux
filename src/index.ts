@@ -12,6 +12,7 @@ import CssKeyframesGenerator, {
   ICssPercentageKeyframes,
 } from "./CssKeyframesGenerator";
 import Motion from "./Motion";
+import { PathAnimation } from "./PathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
 
@@ -40,4 +41,5 @@ export {
   AnimationState,
   CssKeyframesGenerator,
   Motion,
+  PathAnimation,
 };

@@ -94,7 +94,7 @@ export class PathAnimation implements IAnimation<number> {
     startAt: number,
     endAt: number
   ) {
-    const yValue = Number(n.children[2].value);
+    const yValue = Number(n.children[1].value);
 
     const y = new Keyframe({
       property: "y",
@@ -114,7 +114,7 @@ export class PathAnimation implements IAnimation<number> {
     startAt: number,
     endAt: number
   ) {
-    const yValue = Number(n.children[2].value) + this.position.y;
+    const yValue = Number(n.children[1].value) + this.position.y;
 
     const y = new Keyframe({
       property: "y",

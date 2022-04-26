@@ -63,7 +63,7 @@ export default class Animation<T> implements IAnimation<T> {
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this.currentValues[keyframe.property] = keyframe.result;
+        this.currentValues[keyframe.property] = keyframe.from;
       }
     }
 

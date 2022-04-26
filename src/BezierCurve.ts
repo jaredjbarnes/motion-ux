@@ -1,44 +1,69 @@
 const defaultPoints: number[] = [];
 
 export default class BezierCurve {
-  points: number[] = defaultPoints;
-  reducedPoints: number[] = defaultPoints;
+  private coefficients: number[] = defaultPoints;
 
-  constructor(points: number[]) {
-    this.setPoints(points);
+  constructor(coefficients: number[]) {
+    if (coefficients.length < 0) {
+      throw new Error("Cannot have a curve with less than two coefficients.");
+    }
+    this.setCoefficients(coefficients);
   }
 
-  setPoints(points: number[]) {
-    this.points = points;
-    this.reducedPoints = new Array(points.length);
-
-    Object.freeze(this.points);
+  setCoefficients(coefficients: number[]) {
+    this.coefficients = coefficients;
+    Object.freeze(this.coefficients);
   }
 
   valueAt(percentage: number) {
-    const points = this.points;
-    const reducedPoints = this.reducedPoints;
-    const length = points.length;
+    let result = this.coefficients[0];
+    const length = this.coefficients.length;
 
-    for (let x = 0; x < length; x++) {
-      reducedPoints[x] = points[x];
+    for (let x = 1; x < length; x++) {
+      const lastCoefficient = this.coefficients[x - 1];
+      const coefficient = this.coefficients[x];
+
+      result +=
+        coefficient * Math.pow(percentage, x) -
+        lastCoefficient * Math.pow(percentage, x);
     }
 
-    for (let x = 0; x < length; x++) {
-      const innerLength = length - x - 1;
+    return result;
+  }
 
-      for (let y = 0; y < innerLength; y++) {
-        const nextPoint = reducedPoints[y + 1];
-        const point = reducedPoints[y];
+  integrationValueAt(percentage: number) {
+    let result = this.coefficients[0] * percentage;
+    const length = this.coefficients.length;
 
-        reducedPoints[y] = (nextPoint - point) * percentage + point;
-      }
+    for (let x = 1; x < length; x++) {
+      const lastCoefficient = this.coefficients[x - 1];
+      const coefficient = this.coefficients[x];
+
+      result +=
+        (coefficient * Math.pow(percentage, x + 1)) / (x + 1) -
+        (lastCoefficient * Math.pow(percentage, x + 1)) / (x + 1);
     }
 
-    return reducedPoints[0];
+    return result;
+  }
+
+  differentiationValueAt(percentage: number) {
+    let result = this.coefficients[1] - this.coefficients[0];
+    const length = this.coefficients.length;
+
+    for (let x = 2; x < length; x++) {
+      const lastCoefficient = this.coefficients[x - 1];
+      const coefficient = this.coefficients[x];
+
+      result +=
+        (x + 1) * coefficient * Math.pow(percentage, x) -
+        (x + 1) * lastCoefficient * Math.pow(percentage, x);
+    }
+
+    return result;
   }
 
   clone() {
-    return new BezierCurve(this.points.slice());
+    return new BezierCurve(this.coefficients.slice());
   }
 }

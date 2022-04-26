@@ -12,13 +12,7 @@ const firstAnimation = createCssAnimation({
       value: "50%",
       easeIn: "elastic",
     },
-  },
-  transform: {
-    from: "scale(1)",
-    "8%": "scale(1)",
-    "13%": "scale(1.5)",
-    to: "scale(2)",
-  },
+  }
 });
 
 const secondAnimation = createCssAnimation({

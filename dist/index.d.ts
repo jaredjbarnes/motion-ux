@@ -8,6 +8,7 @@ import BezierCurve from "./BezierCurve";
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import CssKeyframesGenerator, { ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes } from "./CssKeyframesGenerator";
 import Motion from "./Motion";
+import { PathAnimation } from "./PathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
-export { IAnimation, ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, createAnimation, createCssAnimation, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, CssKeyframesGenerator, Motion, };
+export { IAnimation, ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, createAnimation, createCssAnimation, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, CssKeyframesGenerator, Motion, PathAnimation, };

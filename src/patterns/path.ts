@@ -34,27 +34,23 @@ export const moveTo = new AndComposite("moveTo", [
 export const absoluteVerticalLine = new AndComposite("absoluteVerticalLine", [
   V,
   optionalSpaces,
-  x,
-  spaces,
   y,
 ]);
 
 export const relativeVerticalLine = new AndComposite("relativeVerticalLine", [
   v,
   optionalSpaces,
-  dx,
-  spaces,
   dy,
 ]);
 
 export const absoluteHorizontalLine = new AndComposite(
   "absoluteHorizontalLine",
-  [V, optionalSpaces, x, spaces, y]
+  [H, optionalSpaces, x]
 );
 
 export const relativeHorizontalLine = new AndComposite(
   "relativeHorizontalLine",
-  [v, optionalSpaces, dx, spaces, dy]
+  [h, optionalSpaces, dx]
 );
 
 export const absoluteCurvedLine = new AndComposite("absoluteCurvedLine", [
@@ -94,7 +90,7 @@ export const pathCommands = new OrComposite("pathCommands", [
   absoluteVerticalLine,
   relativeVerticalLine,
   absoluteHorizontalLine,
-  relativeVerticalLine,
+  relativeHorizontalLine,
   absoluteCurvedLine,
   relativeCurvedLine,
 ]);
