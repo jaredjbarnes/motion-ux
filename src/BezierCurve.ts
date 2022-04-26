@@ -28,7 +28,7 @@ export default class BezierCurve {
         lastCoefficient * Math.pow(percentage, x);
     }
 
-    return result;
+    return result + this.coefficients[0];
   }
 
   integrationValueAt(percentage: number) {
@@ -44,7 +44,7 @@ export default class BezierCurve {
         (lastCoefficient * Math.pow(percentage, x + 1)) / (x + 1);
     }
 
-    return result;
+    return result + this.coefficients[0];
   }
 
   differentiationValueAt(percentage: number) {
@@ -56,11 +56,11 @@ export default class BezierCurve {
       const coefficient = this.coefficients[x];
 
       result +=
-        (x + 1) * coefficient * Math.pow(percentage, x) -
-        (x + 1) * lastCoefficient * Math.pow(percentage, x);
+        x * coefficient * Math.pow(percentage, x - 1) -
+        x * lastCoefficient * Math.pow(percentage, x - 1);
     }
 
-    return result;
+    return result + this.coefficients[0];
   }
 
   clone() {
