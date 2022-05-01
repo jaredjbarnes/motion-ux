@@ -61,6 +61,10 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
     return this;
   }
 
+  extend(): IAnimation<T> {
+    throw new Error();
+  }
+
   clone() {
     return new ExtendedAnimation(
       this.animation.clone(),

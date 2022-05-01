@@ -1,7 +1,18 @@
 const defaultPoints: number[] = [];
 
+export function factorial(num: number) {
+  var rval = 1;
+  for (var i = 2; i <= num; i++) rval = rval * i;
+  return rval;
+}
+
+export function nChooseK(n: number, k: number) {
+  return factorial(n) / (factorial(k) * factorial(n - k));
+}
 export default class BezierCurve {
   private coefficients: number[] = defaultPoints;
+  private reducedCoefficients: number[] = [];
+  private integralCoefficients: number[][] = [];
 
   constructor(coefficients: number[]) {
     if (coefficients.length < 0) {
@@ -15,52 +26,80 @@ export default class BezierCurve {
     Object.freeze(this.coefficients);
   }
 
-  valueAt(percentage: number) {
-    let result = this.coefficients[0];
-    const length = this.coefficients.length;
+  valueAt(x: number) {
+    const coefficients = this.coefficients;
+    const reducedCoefficients = this.reducedCoefficients;
+    const length = coefficients.length;
 
-    for (let x = 1; x < length; x++) {
-      const lastCoefficient = this.coefficients[x - 1];
-      const coefficient = this.coefficients[x];
-
-      result +=
-        coefficient * Math.pow(percentage, x) -
-        lastCoefficient * Math.pow(percentage, x);
+    for (let x = 0; x < length; x++) {
+      reducedCoefficients[x] = coefficients[x];
     }
 
-    return result + this.coefficients[0];
+    for (let i = 0; i < length; i++) {
+      const innerLength = length - i - 1;
+
+      for (let y = 0; y < innerLength; y++) {
+        const nextPoint = reducedCoefficients[y + 1];
+        const point = reducedCoefficients[y];
+
+        reducedCoefficients[y] = (nextPoint - point) * x + point;
+      }
+    }
+    return reducedCoefficients[0];
   }
 
-  integrationValueAt(percentage: number) {
-    let result = this.coefficients[0] * percentage;
-    const length = this.coefficients.length;
+  newValueAt(t: number) {
+    const coefficients = this.coefficients;
+    const n = coefficients.length - 1;
+    let result = 0;
 
-    for (let x = 1; x < length; x++) {
-      const lastCoefficient = this.coefficients[x - 1];
-      const coefficient = this.coefficients[x];
-
-      result +=
-        (coefficient * Math.pow(percentage, x + 1)) / (x + 1) -
-        (lastCoefficient * Math.pow(percentage, x + 1)) / (x + 1);
+    for (let i = 0; i <= n; i++) {
+      const pointCoefficient = coefficients[i];
+      result += this.bernsteinPolynomial(n, i, t) * pointCoefficient;
     }
 
-    return result + this.coefficients[0];
+    return result;
   }
 
-  differentiationValueAt(percentage: number) {
-    let result = this.coefficients[1] - this.coefficients[0];
-    const length = this.coefficients.length;
+  bernsteinPolynomial(n: number, k: number, t: number) {
+    if (k > n || n < 0) {
+      return 0;
+    }
+    const binomialCoefficient = nChooseK(n, k);
+    const tValue = Math.pow(t, k);
+    const remainingT = Math.pow(1 - t, n - k);
 
-    for (let x = 2; x < length; x++) {
-      const lastCoefficient = this.coefficients[x - 1];
-      const coefficient = this.coefficients[x];
+    return binomialCoefficient * tValue * remainingT;
+  }
 
+  deltaAt(t: number) {
+    const coefficients = this.coefficients;
+    const n = coefficients.length - 1;
+    let result = 0;
+
+    for (let i = 0; i <= n; i++) {
+      const pointCoefficient = coefficients[i];
       result +=
-        x * coefficient * Math.pow(percentage, x - 1) -
-        x * lastCoefficient * Math.pow(percentage, x - 1);
+        n *
+        (this.bernsteinPolynomial(n - 1, i - 1, t) -
+          this.bernsteinPolynomial(n, i - 1, t)) *
+        pointCoefficient;
     }
 
-    return result + this.coefficients[0];
+    return result;
+  }
+
+  integralAt(t: number) {
+    const coefficients = this.coefficients;
+    const n = coefficients.length;
+    let result = 0;
+
+    for (let i = 0; i <= n; i++) {
+      const pointCoefficient = coefficients[i] || 1;
+      result += this.bernsteinPolynomial(n, i, t) * pointCoefficient;
+    }
+
+    return (1 / n) * result;
   }
 
   clone() {

@@ -1,6 +1,7 @@
 import Animation from "../Animation";
 import Keyframe from "../Keyframe";
 import CssKeyframe from "../CssKeyframe";
+import easings from "../easings";
 
 describe("Animation", () => {
   test("Get current values as 0.", () => {
@@ -57,7 +58,7 @@ describe("Animation", () => {
     expect(object.scrollTop).toBe(0);
 
     values = animation.update(0.5).currentValues;
-    
+
     expect(object.viewport.top).toBe(-50);
     expect(object.viewport.left).toBe(-50);
     expect(object.viewport.right).toBe(50);
@@ -166,5 +167,22 @@ describe("Animation", () => {
 
     expect(display).toBe("none");
     expect(opacity).toBe(1);
+  });
+
+  test("playground", () => {
+    const animation = new Animation("my-animation", [
+      new Keyframe({
+        property: "prop",
+        from: 0,
+        to: 1,
+        easing: easings.easeOutExpo
+      }),
+    ]);
+
+    animation.update(0.9);
+    const extendsAnimation = animation.extend();
+    const values = extendsAnimation.update(0.2).currentValues;
+
+    expect(values).toBe(null);
   });
 });

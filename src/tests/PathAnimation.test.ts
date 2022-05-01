@@ -1,6 +1,7 @@
 import easings from "../easings";
 import { NormalizedPathAnimation } from "../NormalizedPathAnimation";
 import { PathAnimation } from "../PathAnimation";
+import BezierCurve from "../BezierCurve";
 
 describe("PathAnimation", () => {
   test("Only a Move", () => {
@@ -20,7 +21,13 @@ describe("PathAnimation", () => {
       easings.linear,
       4
     );
-    const distance = animation.simpsonsRule(2, 10, (x: number) => Math.sqrt(x));
+    const bezierCurve = new BezierCurve([0, 0, 1]);
+    const distance = animation.simpsonsRule(0, 10, (x) => {
+      return Math.sqrt(
+        Math.pow(bezierCurve.deltaAt(x), 2) +
+          Math.pow(bezierCurve.deltaAt(x), 2)
+      );
+    });
 
     expect(distance).toBe(Math.sqrt(2));
   });

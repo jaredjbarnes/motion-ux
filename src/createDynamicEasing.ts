@@ -1,6 +1,6 @@
 import BezierCurve from "./BezierCurve";
 
-const easingOutMap = {
+export const easingOutMap = {
   linear: [1],
   quad: [1, 1],
   cubic: [1, 1, 1],
@@ -12,7 +12,7 @@ const easingOutMap = {
   elastic: [2, 2, -1, 1.5, 1.5, 0.75, 1.25, 0.85, 1, 1, 1],
 };
 
-const easingInMap = {
+export const easingInMap = {
   linear: [0],
   quad: [0, 0],
   cubic: [0, 0, 0],
@@ -24,16 +24,7 @@ const easingInMap = {
   elastic: [0, 0, 0, 0.15, -0.25, 0.25, -0.5, -0.5, 2, -1, -1],
 };
 
-export type DynamicEasingNames =
-  | "quad"
-  | "cubic"
-  | "quart"
-  | "back"
-  | "quint"
-  | "expo"
-  | "circ"
-  | "elastic"
-  | "linear";
+export type DynamicEasingNames = keyof typeof easingInMap;
 
 export default function createDynamicEasing(
   easingIn: DynamicEasingNames,

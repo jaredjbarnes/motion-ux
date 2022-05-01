@@ -7,6 +7,7 @@ export interface IAnimation<T> {
   name: string;
   currentValues: AnimationState<T>;
   update(time: number): IAnimation<T>;
+  extend(): IAnimation<T>;
   clone(): IAnimation<T>;
 }
 
@@ -17,6 +18,7 @@ const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
 export default class Animation<T> implements IAnimation<T> {
   protected animators: Animator<T>[] = [];
   protected time = 0;
+  protected offset = 0;
 
   public name: string;
   public currentValues: AnimationState<T>;
@@ -82,12 +84,19 @@ export default class Animation<T> implements IAnimation<T> {
     this.time = time;
 
     this.animators.forEach((animator) => {
-      animator.update(time);
+      animator.update(this.offset + this.time);
     });
 
     this._saveCurrentValues();
 
     return this;
+  }
+
+  extend() {
+    const animation = this.clone();
+    animation.offset = this.offset + this.time;
+    animation.update(0);
+    return animation;
   }
 
   clone() {

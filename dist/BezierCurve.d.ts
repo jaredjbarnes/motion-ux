@@ -1,8 +1,9 @@
 export default class BezierCurve {
-    points: number[];
-    reducedPoints: number[];
-    constructor(points: number[]);
-    setPoints(points: number[]): void;
-    valueAt(percentage: number): number;
+    private coefficients;
+    constructor(coefficients: number[]);
+    setCoefficients(coefficients: number[]): void;
+    valueAt(x: number): number;
+    integralAt(x: number): number;
+    deltaAt(x: number): number;
     clone(): BezierCurve;
 }

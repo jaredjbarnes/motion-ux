@@ -5,7 +5,7 @@ import Keyframe, { IComplexKeyframeValue, KeyframeConfig } from "./Keyframe";
 import CssKeyframe from "./CssKeyframe";
 import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
-import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
+import createDynamicEasing, { DynamicEasingNames, easingInMap, easingOutMap } from "./createDynamicEasing";
 import CssKeyframesGenerator, {
   ICssAnimatedProperties,
   ICssKeyframeControls,
@@ -29,6 +29,8 @@ export {
   BezierCurve,
   easings,
   createDynamicEasing,
+  easingOutMap,
+  easingInMap,
   createAnimation,
   createCssAnimation,
   DynamicEasingNames,

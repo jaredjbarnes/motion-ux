@@ -1,4 +1,4 @@
-import Animation, {IAnimation} from "./Animation";
+import Animation, { IAnimation } from "./Animation";
 import Keyframe from "./Keyframe";
 import easings, { EasingFunction } from "./easings";
 
@@ -64,8 +64,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
   }
 
   update(time: number) {
-    this.fromAnimation.update(time);
-    this.toAnimation.update(time);
+    this.fromAnimation.update(this.offset + time);
+    this.toAnimation.update(this.offset + time);
     this.updateKeyframes();
 
     super.update(time);

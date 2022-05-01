@@ -67,7 +67,7 @@ export class NormalizedPathAnimation implements IAnimation<number> {
     ).currentValues;
     const { x: lowerX, y: lowerY } =
       this.pathAnimation.update(time).currentValues;
-      
+
     const deltaX = Math.abs(upperX - lowerX);
     const deltaY = Math.abs(upperY - lowerY);
 
@@ -77,6 +77,10 @@ export class NormalizedPathAnimation implements IAnimation<number> {
   };
 
   update(time: number): IAnimation<number> {
+    throw new Error("Method not implemented.");
+  }
+
+  extend(): IAnimation<number> {
     throw new Error("Method not implemented.");
   }
 

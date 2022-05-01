@@ -2,9 +2,13 @@ We need to make Keyframes functions that have a start and end. The new interface
 
 ```ts
 interface Keyframe<T> {
+  property: string;
   startAt: number;
   endAt: number;
-  update(time)=>T;
+  from: T;
+  to: T;
+  controls: BezierCurve;
+  easing: BezierCurve;
 }
 ```
 

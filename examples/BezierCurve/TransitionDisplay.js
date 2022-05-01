@@ -1,18 +1,25 @@
 import "../../dist/index.browser.js";
 
-const { easings } = motionUX;
+const { easings, createDynamicEasing, easingInMap, easingOutMap } = motionUX;
+const dynamicEasingOutNames = Object.keys(easingInMap);
+const dynamicEasingInNames = Object.keys(easingOutMap);
 
 export default class TransitionDisplay {
   constructor(document) {
     this.document = document;
     this.easingInput = null;
+    this.dynamicEasingInInput = null;
+    this.dynamicEasingOutInput = null;
     this.transitionSpanInput = null;
     this.ball = null;
     this.easingCanvas = new EasingCanvas(document);
+    this.dynamicEasingCanvas = new EasingCanvas(document);
     this.timeline = null;
     this.blendedEasing = easings.linear;
 
     this.createDropDown();
+    this.createDynamicInEasing();
+    this.createDynamicOutEasing();
 
     this.build();
     this.update();
@@ -25,7 +32,29 @@ export default class TransitionDisplay {
     options.forEach((o) => this.easingInput.appendChild(o));
 
     this.easingInput.addEventListener("change", () => {
-      this.update();
+      this.updateEasingCanvas();
+    });
+  }
+
+  createDynamicInEasing() {
+    this.dynamicEasingInInput = this.document.createElement("select");
+    const options = this.createDynamicEasingInOptions();
+
+    options.forEach((o) => this.dynamicEasingInInput.appendChild(o));
+
+    this.dynamicEasingInInput.addEventListener("change", () => {
+      this.updateDynamicEasingCanvas();
+    });
+  }
+
+  createDynamicOutEasing() {
+    this.dynamicEasingOutInput = this.document.createElement("select");
+    const options = this.createDynamicEasingOutOptions();
+
+    options.forEach((o) => this.dynamicEasingOutInput.appendChild(o));
+
+    this.dynamicEasingOutInput.addEventListener("change", () => {
+      this.updateDynamicEasingCanvas();
     });
   }
 
@@ -41,10 +70,40 @@ export default class TransitionDisplay {
     });
   }
 
+  createDynamicEasingOutOptions() {
+    const keys = dynamicEasingOutNames;
+
+    return keys.map((key) => {
+      const option = this.document.createElement("option");
+      option.value = key;
+      option.innerHTML = key;
+
+      return option;
+    });
+  }
+
+  createDynamicEasingInOptions() {
+    const keys = dynamicEasingInNames;
+
+    return keys.map((key) => {
+      const option = this.document.createElement("option");
+      option.value = key;
+      option.innerHTML = key;
+
+      return option;
+    });
+  }
+
   build() {
     this.document.body.appendChild(this.easingInput);
     this.document.body.appendChild(this.document.createElement("br"));
     this.document.body.appendChild(this.easingCanvas.getCanvas());
+    this.document.body.appendChild(this.document.createElement("br"));
+    this.document.body.appendChild(this.document.createElement("br"));
+    this.document.body.appendChild(this.dynamicEasingInInput);
+    this.document.body.appendChild(this.dynamicEasingOutInput);
+    this.document.body.appendChild(this.document.createElement("br"));
+    this.document.body.appendChild(this.dynamicEasingCanvas.getCanvas());
   }
 
   getEasing() {
@@ -61,6 +120,7 @@ export default class TransitionDisplay {
 
   update() {
     this.updateEasingCanvas();
+    this.updateDynamicEasingCanvas();
   }
 
   updateEasingCanvas() {
@@ -68,6 +128,17 @@ export default class TransitionDisplay {
 
     this.easingCanvas.setSize(size);
     this.easingCanvas.draw(this.getEasing(), 0, 0, size, 1);
+  }
+
+  updateDynamicEasingCanvas() {
+    const size = 100;
+
+    const easing = createDynamicEasing(
+      this.dynamicEasingInInput.value,
+      this.dynamicEasingOutInput.value
+    );
+    this.dynamicEasingCanvas.setSize(size);
+    this.dynamicEasingCanvas.draw(easing, 0, 0, size, 1);
   }
 }
 

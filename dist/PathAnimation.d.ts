@@ -16,5 +16,6 @@ export declare class PathAnimation implements IAnimation<number> {
     private absoluteCurvedLine;
     private relativeCurvedLine;
     update(time: number): IAnimation<number>;
+    extend(): IAnimation<number>;
     clone(): IAnimation<number>;
 }

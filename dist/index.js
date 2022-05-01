@@ -4,35 +4,63 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 const defaultPoints = [];
 class BezierCurve {
-    constructor(points) {
-        this.points = defaultPoints;
-        this.reducedPoints = defaultPoints;
-        this.setPoints(points);
-    }
-    setPoints(points) {
-        this.points = points;
-        this.reducedPoints = new Array(points.length);
-        Object.freeze(this.points);
-    }
-    valueAt(percentage) {
-        const points = this.points;
-        const reducedPoints = this.reducedPoints;
-        const length = points.length;
-        for (let x = 0; x < length; x++) {
-            reducedPoints[x] = points[x];
+    constructor(coefficients) {
+        this.coefficients = defaultPoints;
+        if (coefficients.length < 0) {
+            throw new Error("Cannot have a curve with less than two coefficients.");
         }
-        for (let x = 0; x < length; x++) {
-            const innerLength = length - x - 1;
-            for (let y = 0; y < innerLength; y++) {
-                const nextPoint = reducedPoints[y + 1];
-                const point = reducedPoints[y];
-                reducedPoints[y] = (nextPoint - point) * percentage + point;
-            }
+        this.setCoefficients(coefficients);
+    }
+    setCoefficients(coefficients) {
+        this.coefficients = coefficients;
+        Object.freeze(this.coefficients);
+    }
+    valueAt(x) {
+        const firstCoefficient = this.coefficients[0];
+        const secondCoefficient = this.coefficients[1];
+        const length = this.coefficients.length;
+        const output = [];
+        const power = length - 1;
+        let result = secondCoefficient * Math.pow(x, power) -
+            firstCoefficient * Math.pow(x, power) +
+            firstCoefficient * Math.pow(x, power - 1);
+        output.push([secondCoefficient, power], [-firstCoefficient, power], [firstCoefficient, power - 1]);
+        for (let i = 2; i < length; i++) {
+            const coefficient = this.coefficients[i];
+            const power = length - i;
+            output.push([coefficient, power - 1], [-coefficient, power]);
+            result +=
+                coefficient * Math.pow(x, power - 1) - coefficient * Math.pow(x, power);
         }
-        return reducedPoints[0];
+        console.log(output);
+        return result;
+    }
+    integralAt(x) {
+        let result = this.coefficients[0] * x;
+        const length = this.coefficients.length;
+        for (let i = 1; i < length; i++) {
+            const lastCoefficient = this.coefficients[i - 1];
+            const coefficient = this.coefficients[i];
+            result +=
+                (coefficient * Math.pow(x, i + 1)) / (i + 1) -
+                    (lastCoefficient * Math.pow(x, i + 1)) / (i + 1);
+        }
+        return result;
+    }
+    deltaAt(x) {
+        let result = this.coefficients[1] - this.coefficients[0];
+        const length = this.coefficients.length;
+        for (let i = 2; i < length; i++) {
+            const lastCoefficient = this.coefficients[i - 1];
+            const coefficient = this.coefficients[i];
+            result +=
+                i * coefficient * Math.pow(x, i - 1) -
+                    i * lastCoefficient * Math.pow(x, i - 1);
+        }
+        return result;
     }
     clone() {
-        return new BezierCurve(this.points.slice());
+        return new BezierCurve(this.coefficients.slice());
     }
 }
 
@@ -48,7 +76,7 @@ class Animator {
         const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
         const timeWithEasing = this.keyframe.easing(elapsedTime / animationDuration);
         const points = [from, ...controls, to];
-        this.bezierCurve.setPoints(points);
+        this.bezierCurve.setCoefficients(points);
         return this.bezierCurve.valueAt(timeWithEasing);
     }
     getStringValue(from, to) {
@@ -98,6 +126,7 @@ class Animation {
     constructor(name, keyframes) {
         this.animators = [];
         this.time = 0;
+        this.offset = 0;
         this.name = name;
         this.currentValues = {};
         this.keyframes = keyframes;
@@ -129,7 +158,7 @@ class Animation {
             const key = keyframe.property;
             if (!visitedMap.has(key)) {
                 visitedMap.set(key, true);
-                this.currentValues[keyframe.property] = keyframe.result;
+                this.currentValues[keyframe.property] = keyframe.from;
             }
         }
         // Assign if the value of the start at was before the time now.
@@ -144,10 +173,16 @@ class Animation {
     update(time) {
         this.time = time;
         this.animators.forEach((animator) => {
-            animator.update(time);
+            animator.update(this.offset + this.time);
         });
         this._saveCurrentValues();
         return this;
+    }
+    extend() {
+        const animation = this.clone();
+        animation.offset = this.offset + this.time;
+        animation.update(0);
+        return animation;
     }
     clone() {
         const keyframes = this.animators.map((a) => a.keyframe.clone());
@@ -2614,6 +2649,9 @@ class ExtendedAnimation {
         }
         return this;
     }
+    extend() {
+        throw new Error();
+    }
     clone() {
         return new ExtendedAnimation(this.animation.clone(), this.duration, this.offset, this.extendDurationBy);
     }
@@ -2659,8 +2697,8 @@ class BlendedAnimation extends Animation {
         }
     }
     update(time) {
-        this.fromAnimation.update(time);
-        this.toAnimation.update(time);
+        this.fromAnimation.update(this.offset + time);
+        this.toAnimation.update(this.offset + time);
         this.updateKeyframes();
         super.update(time);
         return this;
@@ -2974,8 +3012,8 @@ class Motion {
 const m = new Literal("M", "M");
 const v = new Literal("v", "v");
 const V = new Literal("V", "V");
-new Literal("h", "h");
-new Literal("H", "H");
+const h = new Literal("h", "h");
+const H = new Literal("H", "H");
 const c = new Literal("c", "c");
 const C = new Literal("C", "C");
 const x = number.clone("x");
@@ -2992,19 +3030,15 @@ const moveTo = new AndComposite("moveTo", [
 const absoluteVerticalLine = new AndComposite("absoluteVerticalLine", [
     V,
     optionalSpaces,
-    x,
-    spaces,
     y,
 ]);
 const relativeVerticalLine = new AndComposite("relativeVerticalLine", [
     v,
     optionalSpaces,
-    dx,
-    spaces,
     dy,
 ]);
-const absoluteHorizontalLine = new AndComposite("absoluteHorizontalLine", [V, optionalSpaces, x, spaces, y]);
-new AndComposite("relativeHorizontalLine", [v, optionalSpaces, dx, spaces, dy]);
+const absoluteHorizontalLine = new AndComposite("absoluteHorizontalLine", [H, optionalSpaces, x]);
+const relativeHorizontalLine = new AndComposite("relativeHorizontalLine", [h, optionalSpaces, dx]);
 const absoluteCurvedLine = new AndComposite("absoluteCurvedLine", [
     C,
     optionalSpaces,
@@ -3040,7 +3074,7 @@ const pathCommands = new OrComposite("pathCommands", [
     absoluteVerticalLine,
     relativeVerticalLine,
     absoluteHorizontalLine,
-    relativeVerticalLine,
+    relativeHorizontalLine,
     absoluteCurvedLine,
     relativeCurvedLine,
 ]);
@@ -3107,7 +3141,7 @@ class PathAnimation {
         return [x, y];
     }
     absoluteVerticalLine(n, startAt, endAt) {
-        const yValue = Number(n.children[2].value);
+        const yValue = Number(n.children[1].value);
         const y = new Keyframe({
             property: "y",
             from: this.position.y,
@@ -3119,7 +3153,7 @@ class PathAnimation {
         return [y];
     }
     relativeVerticalLine(n, startAt, endAt) {
-        const yValue = Number(n.children[2].value) + this.position.y;
+        const yValue = Number(n.children[1].value) + this.position.y;
         const y = new Keyframe({
             property: "y",
             from: this.position.y,
@@ -3217,6 +3251,9 @@ class PathAnimation {
         this.animation.update(adjustedTime);
         return this;
     }
+    extend() {
+        throw new Error();
+    }
     clone() {
         return new PathAnimation(this.pathString, this.easing);
     }
@@ -3248,5 +3285,7 @@ exports.Player = Player;
 exports.createAnimation = createAnimation;
 exports.createCssAnimation = createCssAnimation;
 exports.createDynamicEasing = createDynamicEasing;
+exports.easingInMap = easingInMap;
+exports.easingOutMap = easingOutMap;
 exports.easings = easings;
 //# sourceMappingURL=index.js.map
