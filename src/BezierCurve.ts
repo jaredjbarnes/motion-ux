@@ -94,7 +94,7 @@ export default class BezierCurve {
     const n = coefficients.length;
     let result = 0;
 
-    for (let i = 0; i <= n; i++) {
+    for (let i = 1; i <= n; i++) {
       const pointCoefficient = coefficients[i] || 1;
       result += this.bernsteinPolynomial(n, i, t) * pointCoefficient;
     }
