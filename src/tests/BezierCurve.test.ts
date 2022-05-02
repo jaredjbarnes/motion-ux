@@ -41,9 +41,8 @@ describe("BezierCurve", () => {
     const value3 = Math.pow(0.5, 2);
     const delta = bezierCurve.deltaAt(0.5);
     const sum = bezierCurve.sumAt(1);
-    const distance = bezierCurve.distance(0, 0.5);
 
-    console.log(value2, distance);
+    console.log(value2);
   });
 
   test("x^3", () => {

@@ -1,14 +1,6 @@
+import { bernsteinPolynomial } from "./math";
+
 const defaultPoints: number[] = [];
-
-export function factorial(num: number) {
-  var rval = 1;
-  for (var i = 2; i <= num; i++) rval = rval * i;
-  return rval;
-}
-
-export function nChooseK(n: number, k: number) {
-  return factorial(n) / (factorial(k) * factorial(n - k));
-}
 
 export function simpsonsRule(
   lowerBound: number,
@@ -82,21 +74,10 @@ export default class BezierCurve {
 
     for (let v = 0; v <= n; v++) {
       const pointCoefficient = coefficients[v];
-      result += this.bernsteinPolynomial(v, n, x) * pointCoefficient;
+      result += bernsteinPolynomial(v, n, x) * pointCoefficient;
     }
 
     return result;
-  }
-
-  bernsteinPolynomial(v: number, n: number, x: number) {
-    if (v > n || v < 0) {
-      return 0;
-    }
-    const binomialCoefficient = nChooseK(n, v);
-    const tValue = Math.pow(x, v);
-    const remainingT = Math.pow(1 - x, n - v);
-
-    return binomialCoefficient * tValue * remainingT;
   }
 
   deltaAt(x: number) {
@@ -108,8 +89,8 @@ export default class BezierCurve {
       const pointCoefficient = coefficients[v];
       result +=
         n *
-        (this.bernsteinPolynomial(v - 1, n - 1, x) -
-          this.bernsteinPolynomial(v, n - 1, x)) *
+        (bernsteinPolynomial(v - 1, n - 1, x) -
+          bernsteinPolynomial(v, n - 1, x)) *
         pointCoefficient;
     }
 
@@ -126,7 +107,7 @@ export default class BezierCurve {
       let innerSum = 0;
 
       for (let j = v + 1; j <= n + 1; j++) {
-        innerSum += this.bernsteinPolynomial(j, n + 1, x);
+        innerSum += bernsteinPolynomial(j, n + 1, x);
       }
 
       result += (1 / (n + 1)) * innerSum * pointCoefficient;
@@ -137,17 +118,6 @@ export default class BezierCurve {
 
   area(lowerBound: number, upperBound: number) {
     return this.sumAt(upperBound) - this.sumAt(lowerBound);
-  }
-
-  distance(start = 0, end = 1, simpsonSteps = 4) {
-    return simpsonsRule(
-      start,
-      end,
-      (x) => {
-        return Math.abs(this.deltaAt(x));
-      },
-      simpsonSteps
-    );
   }
 
   clone() {
