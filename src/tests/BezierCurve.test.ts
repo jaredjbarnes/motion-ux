@@ -40,7 +40,9 @@ describe("BezierCurve", () => {
     const value2 = bezierCurve.newValueAt(0.5);
     const value3 = Math.pow(0.5, 2);
     const delta = bezierCurve.deltaAt(0.5);
-    const sum = bezierCurve.sumAt(1);
+    const sum = bezierCurve.sumAt(0.5);
+
+    expect(sum).toBe(Math.pow(0.5, 3)/3);
 
     console.log(value2);
   });

@@ -47,28 +47,6 @@ export default class BezierCurve {
 
   valueAt(x: number) {
     const coefficients = this.coefficients;
-    const reducedCoefficients = this.reducedCoefficients;
-    const length = coefficients.length;
-
-    for (let x = 0; x < length; x++) {
-      reducedCoefficients[x] = coefficients[x];
-    }
-
-    for (let i = 0; i < length; i++) {
-      const innerLength = length - i - 1;
-
-      for (let y = 0; y < innerLength; y++) {
-        const nextPoint = reducedCoefficients[y + 1];
-        const point = reducedCoefficients[y];
-
-        reducedCoefficients[y] = (nextPoint - point) * x + point;
-      }
-    }
-    return reducedCoefficients[0];
-  }
-
-  newValueAt(x: number) {
-    const coefficients = this.coefficients;
     const n = coefficients.length - 1;
     let result = 0;
 
