@@ -9,6 +9,33 @@ export function factorial(num: number) {
 export function nChooseK(n: number, k: number) {
   return factorial(n) / (factorial(k) * factorial(n - k));
 }
+
+export function simpsonsRule(
+  lowerBound: number,
+  upperBound: number,
+  f: (x: number) => number,
+  n: number = 4
+) {
+  // Use Simpsons Rule to calculate the distance.
+  let stripAmount = f(lowerBound);
+  const stepAmount = (upperBound - lowerBound) / n;
+  let currentX = lowerBound;
+
+  for (let x = 0; x < n - 1; x++) {
+    currentX += stepAmount;
+    let coefficient = 4;
+
+    if (x % 2 !== 0) {
+      coefficient = 2;
+    }
+
+    stripAmount += coefficient * f(currentX);
+  }
+
+  stripAmount += f(upperBound);
+
+  return (stepAmount / 3) * stripAmount;
+}
 export default class BezierCurve {
   private coefficients: number[] = defaultPoints;
   private reducedCoefficients: number[] = [];
@@ -62,7 +89,7 @@ export default class BezierCurve {
   }
 
   bernsteinPolynomial(v: number, n: number, x: number) {
-    if (v > n || n < 0) {
+    if (v > n || v < 0) {
       return 0;
     }
     const binomialCoefficient = nChooseK(n, v);
@@ -89,7 +116,7 @@ export default class BezierCurve {
     return result;
   }
 
-  integralAt(x: number) {
+  sumAt(x: number) {
     const coefficients = this.coefficients;
     const n = coefficients.length - 1;
     let result = 0;
@@ -109,7 +136,18 @@ export default class BezierCurve {
   }
 
   area(lowerBound: number, upperBound: number) {
-    return this.integralAt(upperBound) - this.integralAt(lowerBound);
+    return this.sumAt(upperBound) - this.sumAt(lowerBound);
+  }
+
+  distance(start = 0, end = 1, simpsonSteps = 4) {
+    return simpsonsRule(
+      start,
+      end,
+      (x) => {
+        return Math.abs(this.deltaAt(x));
+      },
+      simpsonSteps
+    );
   }
 
   clone() {
