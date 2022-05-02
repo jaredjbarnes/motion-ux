@@ -39,7 +39,7 @@ describe("BezierCurve", () => {
     const value1 = bezierCurve.valueAt(0.5);
     const value2 = bezierCurve.newValueAt(0.5);
     const value3 = Math.pow(0.5, 2);
-    const delta = bezierCurve.deltaAt(1);
+    const delta = bezierCurve.deltaAt(0.5);
     const sum = bezierCurve.integralAt(1);
     console.log(value2);
   });
@@ -47,8 +47,18 @@ describe("BezierCurve", () => {
   test("x^3", () => {
     const bezierCurve = new BezierCurve([0, 0, 0, 1]);
 
-    const delta = bezierCurve.deltaAt(1);
-    const sum = bezierCurve.integralAt(1);
+    const delta = bezierCurve.deltaAt(0.5);
+    const sum = bezierCurve.integralAt(0.5);
+    const expectedSum = Math.pow(0.5, 4)/4;
+    console.log(delta);
+  });
+
+  test("EaseInOut", () => {
+    const bezierCurve = new BezierCurve([0, 1]);
+    const value = bezierCurve.valueAt(0.5);
+    const newValue = bezierCurve.newValueAt(0.5);
+    const delta = bezierCurve.deltaAt(0.25);
+    const sum = bezierCurve.integralAt(0.25);
     console.log(delta);
   });
 });
