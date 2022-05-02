@@ -28,7 +28,6 @@ describe("BezierCurve", () => {
     const x = 0.75;
     const bezierCurve = new BezierCurve([4, 5, 1]);
     const value = bezierCurve.valueAt(x);
-    const value1 = bezierCurve.newValueAt(x);
 
     expect(value).toBe(Math.pow(x, 2));
   });
@@ -37,14 +36,11 @@ describe("BezierCurve", () => {
     const bezierCurve = new BezierCurve([0, 0, 1]);
 
     const value1 = bezierCurve.valueAt(0.5);
-    const value2 = bezierCurve.newValueAt(0.5);
     const value3 = Math.pow(0.5, 2);
     const delta = bezierCurve.deltaAt(0.5);
     const sum = bezierCurve.sumAt(0.5);
 
-    expect(sum).toBe(Math.pow(0.5, 3)/3);
-
-    console.log(value2);
+    expect(sum).toBe(Math.pow(0.5, 3) / 3);
   });
 
   test("x^3", () => {
@@ -59,7 +55,6 @@ describe("BezierCurve", () => {
   test("EaseInOut", () => {
     const bezierCurve = new BezierCurve([0, 1]);
     const value = bezierCurve.valueAt(0.5);
-    const newValue = bezierCurve.newValueAt(0.5);
     const delta = bezierCurve.deltaAt(0.25);
     const sum = bezierCurve.sumAt(0.25);
     console.log(delta);
