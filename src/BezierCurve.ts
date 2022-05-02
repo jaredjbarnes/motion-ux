@@ -2,56 +2,28 @@ import { bernsteinPolynomial } from "./math";
 
 const defaultPoints: number[] = [];
 
-export function simpsonsRule(
-  lowerBound: number,
-  upperBound: number,
-  f: (x: number) => number,
-  n: number = 4
-) {
-  // Use Simpsons Rule to calculate the distance.
-  let stripAmount = f(lowerBound);
-  const stepAmount = (upperBound - lowerBound) / n;
-  let currentX = lowerBound;
-
-  for (let x = 0; x < n - 1; x++) {
-    currentX += stepAmount;
-    let coefficient = 4;
-
-    if (x % 2 !== 0) {
-      coefficient = 2;
-    }
-
-    stripAmount += coefficient * f(currentX);
-  }
-
-  stripAmount += f(upperBound);
-
-  return (stepAmount / 3) * stripAmount;
-}
 export default class BezierCurve {
-  private coefficients: number[] = defaultPoints;
-  private reducedCoefficients: number[] = [];
-  private integralCoefficients: number[][] = [];
+  private points: number[] = defaultPoints;
 
-  constructor(coefficients: number[]) {
-    if (coefficients.length < 2) {
+  constructor(points: number[]) {
+    if (points.length < 2) {
       throw new Error("Cannot have a curve with less than two coefficients.");
     }
-    this.setCoefficients(coefficients);
+    this.setCoefficients(points);
   }
 
   setCoefficients(coefficients: number[]) {
-    this.coefficients = coefficients;
-    Object.freeze(this.coefficients);
+    this.points = coefficients;
+    Object.freeze(this.points);
   }
 
   valueAt(x: number) {
-    const coefficients = this.coefficients;
-    const n = coefficients.length - 1;
+    const pointCoefficients = this.points;
+    const n = pointCoefficients.length - 1;
     let result = 0;
 
     for (let v = 0; v <= n; v++) {
-      const pointCoefficient = coefficients[v];
+      const pointCoefficient = pointCoefficients[v];
       result += bernsteinPolynomial(v, n, x) * pointCoefficient;
     }
 
@@ -59,12 +31,12 @@ export default class BezierCurve {
   }
 
   deltaAt(x: number) {
-    const coefficients = this.coefficients;
-    const n = coefficients.length - 1;
+    const pointCoefficients = this.points;
+    const n = pointCoefficients.length - 1;
     let result = 0;
 
     for (let v = 0; v <= n; v++) {
-      const pointCoefficient = coefficients[v];
+      const pointCoefficient = pointCoefficients[v];
       result +=
         n *
         (bernsteinPolynomial(v - 1, n - 1, x) -
@@ -76,12 +48,12 @@ export default class BezierCurve {
   }
 
   sumAt(x: number) {
-    const coefficients = this.coefficients;
-    const n = coefficients.length - 1;
+    const pointCoefficients = this.points;
+    const n = pointCoefficients.length - 1;
     let result = 0;
 
     for (let v = 0; v <= n; v++) {
-      const pointCoefficient = coefficients[v];
+      const pointCoefficient = pointCoefficients[v];
       let innerSum = 0;
 
       for (let j = v + 1; j <= n + 1; j++) {
@@ -99,6 +71,6 @@ export default class BezierCurve {
   }
 
   clone() {
-    return new BezierCurve(this.coefficients.slice());
+    return new BezierCurve(this.points.slice());
   }
 }

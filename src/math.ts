@@ -4,7 +4,6 @@ export function simpsonsRule(
   f: (x: number) => number,
   n: number = 4
 ) {
-  // Use Simpsons Rule to calculate the distance.
   let stripAmount = f(lowerBound);
   const stepAmount = (upperBound - lowerBound) / n;
   let currentX = lowerBound;
@@ -37,8 +36,8 @@ export function bernsteinPolynomial(v: number, n: number, x: number) {
 }
 
 export function factorial(num: number) {
-  var rval = 1;
-  for (var i = 2; i <= num; i++) rval = rval * i;
+  let rval = 1;
+  for (let i = 2; i <= num; i++) rval = rval * i;
   return rval;
 }
 
