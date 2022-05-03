@@ -2,65 +2,78 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+function bernsteinPolynomial(v, n, x) {
+    if (v > n || v < 0) {
+        return 0;
+    }
+    const binomialCoefficient = nChooseK(n, v);
+    const tValue = Math.pow(x, v);
+    const remainingT = Math.pow(1 - x, n - v);
+    return binomialCoefficient * tValue * remainingT;
+}
+function factorial(num) {
+    let rval = 1;
+    for (let i = 2; i <= num; i++)
+        rval = rval * i;
+    return rval;
+}
+function nChooseK(n, k) {
+    return factorial(n) / (factorial(k) * factorial(n - k));
+}
+
 const defaultPoints = [];
 class BezierCurve {
-    constructor(coefficients) {
-        this.coefficients = defaultPoints;
-        if (coefficients.length < 0) {
-            throw new Error("Cannot have a curve with less than two coefficients.");
-        }
-        this.setCoefficients(coefficients);
+    constructor(points) {
+        this.points = defaultPoints;
+        this.setCoefficients(points);
     }
     setCoefficients(coefficients) {
-        this.coefficients = coefficients;
-        Object.freeze(this.coefficients);
+        this.points = coefficients;
+        Object.freeze(this.points);
     }
     valueAt(x) {
-        const firstCoefficient = this.coefficients[0];
-        const secondCoefficient = this.coefficients[1];
-        const length = this.coefficients.length;
-        const output = [];
-        const power = length - 1;
-        let result = secondCoefficient * Math.pow(x, power) -
-            firstCoefficient * Math.pow(x, power) +
-            firstCoefficient * Math.pow(x, power - 1);
-        output.push([secondCoefficient, power], [-firstCoefficient, power], [firstCoefficient, power - 1]);
-        for (let i = 2; i < length; i++) {
-            const coefficient = this.coefficients[i];
-            const power = length - i;
-            output.push([coefficient, power - 1], [-coefficient, power]);
-            result +=
-                coefficient * Math.pow(x, power - 1) - coefficient * Math.pow(x, power);
-        }
-        console.log(output);
-        return result;
-    }
-    integralAt(x) {
-        let result = this.coefficients[0] * x;
-        const length = this.coefficients.length;
-        for (let i = 1; i < length; i++) {
-            const lastCoefficient = this.coefficients[i - 1];
-            const coefficient = this.coefficients[i];
-            result +=
-                (coefficient * Math.pow(x, i + 1)) / (i + 1) -
-                    (lastCoefficient * Math.pow(x, i + 1)) / (i + 1);
+        const pointCoefficients = this.points;
+        const n = pointCoefficients.length - 1;
+        let result = 0;
+        for (let v = 0; v <= n; v++) {
+            const pointCoefficient = pointCoefficients[v];
+            result += bernsteinPolynomial(v, n, x) * pointCoefficient;
         }
         return result;
     }
     deltaAt(x) {
-        let result = this.coefficients[1] - this.coefficients[0];
-        const length = this.coefficients.length;
-        for (let i = 2; i < length; i++) {
-            const lastCoefficient = this.coefficients[i - 1];
-            const coefficient = this.coefficients[i];
+        const pointCoefficients = this.points;
+        const n = pointCoefficients.length - 1;
+        let result = 0;
+        for (let v = 0; v <= n; v++) {
+            const pointCoefficient = pointCoefficients[v];
             result +=
-                i * coefficient * Math.pow(x, i - 1) -
-                    i * lastCoefficient * Math.pow(x, i - 1);
+                n *
+                    (bernsteinPolynomial(v - 1, n - 1, x) -
+                        bernsteinPolynomial(v, n - 1, x)) *
+                    pointCoefficient;
         }
         return result;
     }
+    sumAt(x) {
+        const pointCoefficients = this.points;
+        const n = pointCoefficients.length - 1;
+        let result = 0;
+        for (let v = 0; v <= n; v++) {
+            const pointCoefficient = pointCoefficients[v];
+            let innerSum = 0;
+            for (let j = v + 1; j <= n + 1; j++) {
+                innerSum += bernsteinPolynomial(j, n + 1, x);
+            }
+            result += (1 / (n + 1)) * innerSum * pointCoefficient;
+        }
+        return result;
+    }
+    area(lowerBound, upperBound) {
+        return this.sumAt(upperBound) - this.sumAt(lowerBound);
+    }
     clone() {
-        return new BezierCurve(this.coefficients.slice());
+        return new BezierCurve(this.points.slice());
     }
 }
 

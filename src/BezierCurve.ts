@@ -6,9 +6,6 @@ export default class BezierCurve {
   private points: number[] = defaultPoints;
 
   constructor(points: number[]) {
-    if (points.length < 2) {
-      throw new Error("Cannot have a curve with less than two coefficients.");
-    }
     this.setCoefficients(points);
   }
 

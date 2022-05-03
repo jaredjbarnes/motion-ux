@@ -250,10 +250,6 @@ export class PathAnimation implements IAnimation<number> {
     return this;
   }
 
-  extend(): IAnimation<number>{
-    throw new Error();
-  }
-
   clone(): IAnimation<number> {
     return new PathAnimation(this.pathString, this.easing);
   }

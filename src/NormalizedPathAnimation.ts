@@ -80,10 +80,6 @@ export class NormalizedPathAnimation implements IAnimation<number> {
     throw new Error("Method not implemented.");
   }
 
-  extend(): IAnimation<number> {
-    throw new Error("Method not implemented.");
-  }
-
   clone(): IAnimation<number> {
     throw new Error("Method not implemented.");
   }

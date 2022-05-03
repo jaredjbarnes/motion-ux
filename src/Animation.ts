@@ -7,7 +7,6 @@ export interface IAnimation<T> {
   name: string;
   currentValues: AnimationState<T>;
   update(time: number): IAnimation<T>;
-  extend(): IAnimation<T>;
   clone(): IAnimation<T>;
 }
 
@@ -90,13 +89,6 @@ export default class Animation<T> implements IAnimation<T> {
     this._saveCurrentValues();
 
     return this;
-  }
-
-  extend() {
-    const animation = this.clone();
-    animation.offset = this.offset + this.time;
-    animation.update(0);
-    return animation;
   }
 
   clone() {
