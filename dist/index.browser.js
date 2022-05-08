@@ -3349,7 +3349,7 @@
           };
           const uniformTime = newtonsMethod((t) => {
               return simpsonsRule(0, t, integrand, 4) - adjustedDistance;
-          }, integrand, adjustedTime, 30, 0.01);
+          }, integrand, adjustedTime, 10);
           this.currentValues.x = curve.x.valueAt(uniformTime);
           this.currentValues.y = curve.y.valueAt(uniformTime);
           return this;

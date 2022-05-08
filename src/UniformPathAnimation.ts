@@ -100,8 +100,7 @@ export class UniformPathAnimation implements IAnimation<number> {
       },
       integrand,
       adjustedTime,
-      30,
-      0.01
+      10
     );
 
     this.currentValues.x = curve.x.valueAt(uniformTime);
