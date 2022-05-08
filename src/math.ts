@@ -29,8 +29,20 @@ export function bernsteinPolynomial(v: number, n: number, x: number) {
     return 0;
   }
   const binomialCoefficient = nChooseK(n, v);
-  const tValue = Math.pow(x, v);
-  const remainingT = Math.pow(1 - x, n - v);
+
+  // This is almost a 10 times faster than math.pow.
+  let tValue = x;
+  for (let i = 1; i < v; i++) {
+    tValue *= x;
+  }
+  tValue = v <= 0 ? 1 : tValue;
+
+  const remainder = 1 - x;
+  let remainingT = remainder;
+  for (let i = 1; i < n - v; i++) {
+    remainingT *= remainder;
+  }
+  remainingT = n - v <= 0 ? 1 : remainingT;
 
   return binomialCoefficient * tValue * remainingT;
 }
@@ -41,6 +53,42 @@ export function factorial(num: number) {
   return rval;
 }
 
+// We need to cache nChooseK for performance reasons.
+const nChooseKCache = new Map<string, number>();
 export function nChooseK(n: number, k: number) {
-  return factorial(n) / (factorial(k) * factorial(n - k));
+  const key = `${n}|${k}`;
+  const cache = nChooseKCache.get(key);
+
+  if (cache != null) {
+    return cache;
+  }
+
+  const result = factorial(n) / (factorial(k) * factorial(n - k));
+  nChooseKCache.set(key, result);
+  return result;
+}
+
+export function newtonsMethod(
+  fn: (x: number) => number,
+  deltaFn: (x: number) => number,
+  startAt: number,
+  maxIterations = Infinity,
+  tolerance = 0.001
+) {
+  let x = startAt;
+  let lastX = Infinity;
+  let difference = Math.abs(x - lastX);
+  let count = 0;
+
+  while (difference > tolerance) {
+    if (count >= maxIterations) {
+      return Infinity;
+    }
+    x = x - fn(x) / deltaFn(x);
+    difference = Math.abs(x - lastX);
+    lastX = x;
+    count++;
+  }
+
+  return x;
 }

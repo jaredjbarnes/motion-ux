@@ -4,13 +4,38 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.motionUX = {}));
 }(this, (function (exports) { 'use strict';
 
+  function simpsonsRule(lowerBound, upperBound, f, n = 4) {
+      let stripAmount = f(lowerBound);
+      const stepAmount = (upperBound - lowerBound) / n;
+      let currentX = lowerBound;
+      for (let x = 0; x < n - 1; x++) {
+          currentX += stepAmount;
+          let coefficient = 4;
+          if (x % 2 !== 0) {
+              coefficient = 2;
+          }
+          stripAmount += coefficient * f(currentX);
+      }
+      stripAmount += f(upperBound);
+      return (stepAmount / 3) * stripAmount;
+  }
   function bernsteinPolynomial(v, n, x) {
       if (v > n || v < 0) {
           return 0;
       }
       const binomialCoefficient = nChooseK(n, v);
-      const tValue = Math.pow(x, v);
-      const remainingT = Math.pow(1 - x, n - v);
+      // This is almost a 10 times faster than math.pow.
+      let tValue = x;
+      for (let i = 1; i < v; i++) {
+          tValue *= x;
+      }
+      tValue = v <= 0 ? 1 : tValue;
+      const remainder = 1 - x;
+      let remainingT = remainder;
+      for (let i = 1; i < n - v; i++) {
+          remainingT *= remainder;
+      }
+      remainingT = n - v <= 0 ? 1 : remainingT;
       return binomialCoefficient * tValue * remainingT;
   }
   function factorial(num) {
@@ -19,46 +44,89 @@
           rval = rval * i;
       return rval;
   }
+  // We need to cache nChooseK for performance reasons.
+  const nChooseKCache = new Map();
   function nChooseK(n, k) {
-      return factorial(n) / (factorial(k) * factorial(n - k));
+      const key = `${n}|${k}`;
+      const cache = nChooseKCache.get(key);
+      if (cache != null) {
+          return cache;
+      }
+      const result = factorial(n) / (factorial(k) * factorial(n - k));
+      nChooseKCache.set(key, result);
+      return result;
+  }
+  function newtonsMethod(fn, deltaFn, startAt, maxIterations = Infinity, tolerance = 0.001) {
+      let x = startAt;
+      let lastX = Infinity;
+      let difference = Math.abs(x - lastX);
+      let count = 0;
+      while (difference > tolerance) {
+          if (count >= maxIterations) {
+              return Infinity;
+          }
+          x = x - fn(x) / deltaFn(x);
+          difference = Math.abs(x - lastX);
+          lastX = x;
+          count++;
+      }
+      return x;
   }
 
   const defaultPoints = [];
+  function valueAt(x, points) {
+      const pointCoefficients = points;
+      const n = pointCoefficients.length - 1;
+      let result = 0;
+      for (let v = 0; v <= n; v++) {
+          const pointCoefficient = pointCoefficients[v];
+          result += bernsteinPolynomial(v, n, x) * pointCoefficient;
+      }
+      return result;
+  }
+  function deltaAt(x, points) {
+      const pointCoefficients = points;
+      const n = pointCoefficients.length - 1;
+      let result = 0;
+      for (let v = 0; v <= n; v++) {
+          const pointCoefficient = pointCoefficients[v];
+          result +=
+              n *
+                  (bernsteinPolynomial(v - 1, n - 1, x) -
+                      bernsteinPolynomial(v, n - 1, x)) *
+                  pointCoefficient;
+      }
+      return result;
+  }
   class BezierCurve {
       constructor(points) {
           this.points = defaultPoints;
-          this.setCoefficients(points);
+          this.normalizedPoints = defaultPoints;
+          this.setPoints(points);
       }
-      setCoefficients(coefficients) {
+      setPoints(coefficients) {
           this.points = coefficients;
+          const root = this.points[0];
+          this.normalizedPoints = this.points.map((point) => {
+              return point - root;
+          });
           Object.freeze(this.points);
+          Object.freeze(this.normalizedPoints);
       }
       valueAt(x) {
-          const pointCoefficients = this.points;
-          const n = pointCoefficients.length - 1;
-          let result = 0;
-          for (let v = 0; v <= n; v++) {
-              const pointCoefficient = pointCoefficients[v];
-              result += bernsteinPolynomial(v, n, x) * pointCoefficient;
-          }
-          return result;
+          return valueAt(x, this.points);
+      }
+      normalizedValueAt(x) {
+          return valueAt(x, this.normalizedPoints);
       }
       deltaAt(x) {
-          const pointCoefficients = this.points;
-          const n = pointCoefficients.length - 1;
-          let result = 0;
-          for (let v = 0; v <= n; v++) {
-              const pointCoefficient = pointCoefficients[v];
-              result +=
-                  n *
-                      (bernsteinPolynomial(v - 1, n - 1, x) -
-                          bernsteinPolynomial(v, n - 1, x)) *
-                      pointCoefficient;
-          }
-          return result;
+          return deltaAt(x, this.points);
+      }
+      normalizedDeltaAt(x) {
+          return deltaAt(x, this.normalizedPoints);
       }
       sumAt(x) {
-          const pointCoefficients = this.points;
+          const pointCoefficients = this.normalizedPoints;
           const n = pointCoefficients.length - 1;
           let result = 0;
           for (let v = 0; v <= n; v++) {
@@ -91,7 +159,7 @@
           const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
           const timeWithEasing = this.keyframe.easing(elapsedTime / animationDuration);
           const points = [from, ...controls, to];
-          this.bezierCurve.setCoefficients(points);
+          this.bezierCurve.setPoints(points);
           return this.bezierCurve.valueAt(timeWithEasing);
       }
       getStringValue(from, to) {
@@ -192,12 +260,6 @@
           });
           this._saveCurrentValues();
           return this;
-      }
-      extend() {
-          const animation = this.clone();
-          animation.offset = this.offset + this.time;
-          animation.update(0);
-          return animation;
       }
       clone() {
           const keyframes = this.animators.map((a) => a.keyframe.clone());
@@ -2664,9 +2726,6 @@
           }
           return this;
       }
-      extend() {
-          throw new Error();
-      }
       clone() {
           return new ExtendedAnimation(this.animation.clone(), this.duration, this.offset, this.extendDurationBy);
       }
@@ -3099,6 +3158,16 @@
   class PathAnimation {
       constructor(pathString, easing = easings.linear) {
           this.position = { x: 0, y: 0 };
+          this._currentValues = {
+              x: 0,
+              y: 0,
+          };
+          this._deltaValues = {
+              x: 0,
+              y: 0,
+          };
+          this.xBezierCurves = [];
+          this.yBezierCurves = [];
           this.name = "";
           const tree = path.parse(new Cursor(pathString));
           this.pathString = pathString;
@@ -3118,90 +3187,56 @@
               throw new Error("Invalid path.");
           }
           this.easing = easing;
-          let length = tree.children.filter((n) => n.name != "moveTo").length;
-          let moveToAmount = 0;
-          const keyframes = tree.children.reduce((acc, n, index) => {
-              const currentIndex = index - moveToAmount;
-              if (n.name === "moveTo") {
-                  moveToAmount++;
-              }
-              const nextIndex = index + 1 - moveToAmount;
-              const results = this[n.name](n, length > 0 ? currentIndex / length : 0, length > 0 ? nextIndex / length : 0);
-              return acc.concat(results);
-          }, []);
-          this.animation = new Animation("path", keyframes);
+          tree.children.forEach((n, index) => {
+              this[n.name](n);
+          });
+      }
+      get curveCount() {
+          return this.xBezierCurves.length;
       }
       get currentValues() {
-          return this.animation.currentValues;
+          return this._currentValues;
       }
-      moveTo(n, startAt, endAt) {
+      get deltaValues() {
+          return this._deltaValues;
+      }
+      moveTo(n) {
           const xValue = Number(n.children[1].value);
           const yValue = Number(n.children[2].value);
-          const x = new Keyframe({
-              property: "x",
-              from: xValue,
-              to: xValue,
-              startAt,
-              endAt,
-          });
-          const y = new Keyframe({
-              property: "y",
-              from: yValue,
-              to: yValue,
-              startAt: startAt,
-              endAt: endAt,
-          });
           this.position.x = xValue;
           this.position.y = yValue;
-          return [x, y];
       }
-      absoluteVerticalLine(n, startAt, endAt) {
+      absoluteVerticalLine(n) {
           const yValue = Number(n.children[1].value);
-          const y = new Keyframe({
-              property: "y",
-              from: this.position.y,
-              to: yValue,
-              startAt: startAt,
-              endAt: endAt,
-          });
+          const y = new BezierCurve([this.position.y, yValue]);
+          const x = new BezierCurve([this.position.x, this.position.x]);
           this.position.y = yValue;
-          return [y];
+          this.xBezierCurves.push(x);
+          this.yBezierCurves.push(y);
       }
-      relativeVerticalLine(n, startAt, endAt) {
+      relativeVerticalLine(n) {
           const yValue = Number(n.children[1].value) + this.position.y;
-          const y = new Keyframe({
-              property: "y",
-              from: this.position.y,
-              to: yValue,
-              startAt: startAt,
-              endAt: endAt,
-          });
+          const y = new BezierCurve([this.position.y, yValue]);
+          const x = new BezierCurve([this.position.x, this.position.x]);
           this.position.y = yValue;
-          return [y];
+          this.xBezierCurves.push(x);
+          this.yBezierCurves.push(y);
       }
-      absoluteHorizontalLine(n, startAt, endAt) {
+      absoluteHorizontalLine(n) {
           const xValue = Number(n.children[1].value);
-          const x = new Keyframe({
-              property: "x",
-              from: this.position.x,
-              to: xValue,
-              startAt,
-              endAt,
-          });
+          const x = new BezierCurve([this.position.x, xValue]);
+          const y = new BezierCurve([this.position.y, this.position.y]);
           this.position.x = xValue;
-          return [x];
+          this.xBezierCurves.push(x);
+          this.yBezierCurves.push(y);
       }
-      relativeHorizontalLine(n, startAt, endAt) {
+      relativeHorizontalLine(n) {
           const xValue = Number(n.children[1].value) + this.position.x;
-          const x = new Keyframe({
-              property: "x",
-              from: this.position.x,
-              to: xValue,
-              startAt,
-              endAt,
-          });
+          const x = new BezierCurve([this.position.x, xValue]);
+          const y = new BezierCurve([this.position.y, this.position.y]);
           this.position.x = xValue;
-          return [x];
+          this.xBezierCurves.push(x);
+          this.yBezierCurves.push(y);
       }
       absoluteCurvedLine(n, startAt, endAt) {
           const startXValue = this.position.x;
@@ -3212,25 +3247,12 @@
           const yControl2 = Number(n.children[4].value);
           const endXValue = Number(n.children[5].value);
           const endYValue = Number(n.children[6].value);
-          const x = new Keyframe({
-              property: "x",
-              from: startXValue,
-              to: endXValue,
-              controls: [xControl1, xControl2],
-              startAt,
-              endAt,
-          });
-          const y = new Keyframe({
-              property: "y",
-              from: startYValue,
-              to: endYValue,
-              controls: [yControl1, yControl2],
-              startAt: startAt,
-              endAt: endAt,
-          });
+          const x = new BezierCurve([startXValue, xControl1, xControl2, endXValue]);
+          const y = new BezierCurve([startYValue, yControl1, yControl2, endYValue]);
           this.position.x = endXValue;
           this.position.y = endYValue;
-          return [x, y];
+          this.xBezierCurves.push(x);
+          this.yBezierCurves.push(y);
       }
       relativeCurvedLine(n, startAt, endAt) {
           const startXValue = this.position.x;
@@ -3241,36 +3263,99 @@
           const yControl2 = Number(n.children[4].value + startYValue);
           const endXValue = Number(n.children[5].value + startXValue);
           const endYValue = Number(n.children[6].value + startYValue);
-          const x = new Keyframe({
-              property: "x",
-              from: startXValue,
-              to: endXValue,
-              controls: [xControl1, xControl2],
-              startAt,
-              endAt,
-          });
-          const y = new Keyframe({
-              property: "y",
-              from: startYValue,
-              to: endYValue,
-              controls: [yControl1, yControl2],
-              startAt: startAt,
-              endAt: endAt,
-          });
+          const x = new BezierCurve([startXValue, xControl1, xControl2, endXValue]);
+          const y = new BezierCurve([startYValue, yControl1, yControl2, endYValue]);
           this.position.x = endXValue;
           this.position.y = endYValue;
-          return [x, y];
+          this.xBezierCurves.push(x);
+          this.yBezierCurves.push(y);
       }
       update(time) {
+          const length = this.xBezierCurves.length;
+          const parts = 1 / length;
           const adjustedTime = this.easing(time);
-          this.animation.update(adjustedTime);
+          const index = Math.max(Math.min(Math.floor(adjustedTime / parts), length - 1), 0);
+          const indexTime = (adjustedTime % parts) / parts;
+          const x = this.xBezierCurves[index].valueAt(indexTime);
+          const y = this.yBezierCurves[index].valueAt(indexTime);
+          const deltaX = this.xBezierCurves[index].deltaAt(indexTime);
+          const deltaY = this.yBezierCurves[index].deltaAt(indexTime);
+          this._currentValues.x = x;
+          this._currentValues.y = y;
+          this._deltaValues.x = deltaX;
+          this._deltaValues.y = deltaY;
           return this;
-      }
-      extend() {
-          throw new Error();
       }
       clone() {
           return new PathAnimation(this.pathString, this.easing);
+      }
+  }
+
+  class NormalizedPathAnimation {
+      constructor(pathString, easing = easings.linear) {
+          this.name = "";
+          this.currentValues = {
+              x: 0,
+              y: 0,
+          };
+          this.pathString = pathString;
+          this.easing = easing;
+          this.pathAnimation = new PathAnimation(pathString);
+          this.curves = this.pathAnimation.xBezierCurves.map((xCurve, index) => {
+              const yCurve = this.pathAnimation.yBezierCurves[index];
+              const distance = simpsonsRule(0, 1, (t) => {
+                  const x = xCurve.deltaAt(t);
+                  const y = yCurve.deltaAt(t);
+                  return Math.sqrt(x * x + y * y);
+              }, 4);
+              return {
+                  x: xCurve,
+                  y: yCurve,
+                  distance,
+                  offsetDistance: 0,
+                  startAt: 0,
+                  endAt: 0,
+              };
+          });
+          this.distance = this.curves
+              .map((curve) => curve.distance)
+              .reduce((acc, next) => (acc += next), 0);
+          let lastTo = 0;
+          let distance = 0;
+          this.curves.forEach((curve) => {
+              const percentage = curve.distance / this.distance;
+              curve.startAt = lastTo;
+              lastTo = curve.endAt = lastTo + percentage;
+              curve.offsetDistance = distance;
+              distance += curve.distance;
+          });
+      }
+      update(time) {
+          const curve = this.curves.find((curve) => {
+              return time >= curve.startAt && time < curve.endAt;
+          });
+          if (curve == null) {
+              return this;
+          }
+          const distance = time * this.distance;
+          const adjustedDistance = distance - curve.offsetDistance;
+          const remainder = time - curve.startAt;
+          const adjustedTime = remainder / (curve.endAt - curve.startAt);
+          const integrand = (t) => {
+              const x = curve.x.normalizedDeltaAt(t);
+              const y = curve.y.normalizedDeltaAt(t);
+              return Math.sqrt(x * x + y * y);
+          };
+          const uniformTime = newtonsMethod((t) => {
+              return simpsonsRule(0, t, integrand, 4) - adjustedDistance;
+          }, integrand, adjustedTime, 30, 0.01);
+          this.currentValues.x = curve.x.valueAt(uniformTime);
+          this.currentValues.y = curve.y.valueAt(uniformTime);
+          console.log(time, adjustedTime, uniformTime);
+          return this;
+      }
+      clone() {
+          return new NormalizedPathAnimation(this.pathString, this.easing);
       }
   }
 
@@ -3295,6 +3380,7 @@
   exports.CssKeyframesGenerator = CSSKeyframesGenerator;
   exports.Keyframe = Keyframe;
   exports.Motion = Motion;
+  exports.NormalizedPathAnimation = NormalizedPathAnimation;
   exports.PathAnimation = PathAnimation;
   exports.Player = Player;
   exports.createAnimation = createAnimation;

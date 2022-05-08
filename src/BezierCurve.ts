@@ -2,50 +2,71 @@ import { bernsteinPolynomial } from "./math";
 
 const defaultPoints: number[] = [];
 
-export default class BezierCurve {
-  private points: number[] = defaultPoints;
+function valueAt(x: number, points: number[]) {
+  const pointCoefficients = points;
+  const n = pointCoefficients.length - 1;
+  let result = 0;
 
-  constructor(points: number[]) {
-    this.setCoefficients(points);
+  for (let v = 0; v <= n; v++) {
+    const pointCoefficient = pointCoefficients[v];
+    result += bernsteinPolynomial(v, n, x) * pointCoefficient;
+  }
+  return result;
+}
+
+function deltaAt(x: number, points: number[]) {
+  const pointCoefficients = points;
+  const n = pointCoefficients.length - 1;
+  let result = 0;
+
+  for (let v = 0; v <= n; v++) {
+    const pointCoefficient = pointCoefficients[v];
+    result +=
+      n *
+      (bernsteinPolynomial(v - 1, n - 1, x) -
+        bernsteinPolynomial(v, n - 1, x)) *
+      pointCoefficient;
   }
 
-  setCoefficients(coefficients: number[]) {
+  return result;
+}
+export default class BezierCurve {
+  private points: number[] = defaultPoints;
+  private normalizedPoints: number[] = defaultPoints;
+
+  constructor(points: number[]) {
+    this.setPoints(points);
+  }
+
+  setPoints(coefficients: number[]) {
     this.points = coefficients;
+    const root = this.points[0];
+    this.normalizedPoints = this.points.map((point) => {
+      return point - root;
+    });
+
     Object.freeze(this.points);
+    Object.freeze(this.normalizedPoints);
   }
 
   valueAt(x: number) {
-    const pointCoefficients = this.points;
-    const n = pointCoefficients.length - 1;
-    let result = 0;
+    return valueAt(x, this.points);
+  }
 
-    for (let v = 0; v <= n; v++) {
-      const pointCoefficient = pointCoefficients[v];
-      result += bernsteinPolynomial(v, n, x) * pointCoefficient;
-    }
-
-    return result;
+  normalizedValueAt(x: number) {
+    return valueAt(x, this.normalizedPoints);
   }
 
   deltaAt(x: number) {
-    const pointCoefficients = this.points;
-    const n = pointCoefficients.length - 1;
-    let result = 0;
+    return deltaAt(x, this.points);
+  }
 
-    for (let v = 0; v <= n; v++) {
-      const pointCoefficient = pointCoefficients[v];
-      result +=
-        n *
-        (bernsteinPolynomial(v - 1, n - 1, x) -
-          bernsteinPolynomial(v, n - 1, x)) *
-        pointCoefficient;
-    }
-
-    return result;
+  normalizedDeltaAt(x: number) {
+    return deltaAt(x, this.normalizedPoints);
   }
 
   sumAt(x: number) {
-    const pointCoefficients = this.points;
+    const pointCoefficients = this.normalizedPoints;
     const n = pointCoefficients.length - 1;
     let result = 0;
 

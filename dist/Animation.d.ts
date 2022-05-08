@@ -7,7 +7,6 @@ export interface IAnimation<T> {
     name: string;
     currentValues: AnimationState<T>;
     update(time: number): IAnimation<T>;
-    extend(): IAnimation<T>;
     clone(): IAnimation<T>;
 }
 export default class Animation<T> implements IAnimation<T> {
@@ -22,6 +21,5 @@ export default class Animation<T> implements IAnimation<T> {
     protected _createCurrentValues(): void;
     private _saveCurrentValues;
     update(time: number): this;
-    extend(): Animation<T>;
     clone(): Animation<T>;
 }

@@ -1,86 +1,115 @@
 import { PathAnimation } from "./PathAnimation";
 import { AnimationState, IAnimation } from "./Animation";
 import easings, { EasingFunction } from "./easings";
+import { newtonsMethod, simpsonsRule } from "./math";
+import { BezierCurve } from ".";
+
+interface CurveData {
+  x: BezierCurve;
+  y: BezierCurve;
+  distance: number;
+  offsetDistance: number;
+  startAt: number;
+  endAt: number;
+}
 
 export class NormalizedPathAnimation implements IAnimation<number> {
-  private easing: EasingFunction;
-  private simpsonStripAmount: number;
-  private pathAnimation: PathAnimation;
-  private pathDistance: number;
-  private delta: number;
+  protected pathAnimation: PathAnimation;
+  protected pathString: string;
+  protected easing: EasingFunction;
+  protected distance: number;
+  protected curves: CurveData[];
 
-  name: string = "";
-  currentValues: AnimationState<number> = {};
+  name = "";
 
-  constructor(
-    pathString: string,
-    easing: EasingFunction = easings.linear,
-    simpsonStripAmount: number = 4,
-    delta: number = 0.001
-  ) {
-    this.easing = easing;
-    this.delta = delta;
-    this.simpsonStripAmount = simpsonStripAmount - (simpsonStripAmount % 2);
-    this.pathAnimation = new PathAnimation(pathString);
-    this.pathDistance = this.simpsonsRule(
-      0,
-      1,
-      this.distanceAtTime,
-      this.simpsonStripAmount
-    );
-  }
-
-  simpsonsRule(
-    lowerBound: number,
-    upperBound: number,
-    f: (x: number) => number,
-    n: number = 4
-  ) {
-    // Use Simpsons Rule to calculate the distance.
-    let stripAmount = f(lowerBound);
-    const stepAmount = (upperBound - lowerBound) / n;
-    let currentX = lowerBound;
-
-    for (let x = 0; x < n - 1; x++) {
-      currentX += stepAmount;
-      let coefficient = 4;
-
-      if (x % 2 !== 0) {
-        coefficient = 2;
-      }
-
-      stripAmount += coefficient * f(currentX);
-    }
-
-    stripAmount += f(upperBound);
-
-    return (stepAmount / 3) * stripAmount;
-  }
-
-  distanceAtTime = (time: number) => {
-    if (time === 1) {
-      time = time - this.delta;
-    }
-
-    const { x: upperX, y: upperY } = this.pathAnimation.update(
-      time + this.delta
-    ).currentValues;
-    const { x: lowerX, y: lowerY } =
-      this.pathAnimation.update(time).currentValues;
-
-    const deltaX = Math.abs(upperX - lowerX);
-    const deltaY = Math.abs(upperY - lowerY);
-
-    return Math.sqrt(
-      Math.pow(deltaX / this.delta, 2) + Math.pow(deltaY / this.delta, 2)
-    );
+  readonly currentValues = {
+    x: 0,
+    y: 0,
   };
 
-  update(time: number): IAnimation<number> {
-    throw new Error("Method not implemented.");
+  constructor(pathString: string, easing: EasingFunction = easings.linear) {
+    this.pathString = pathString;
+    this.easing = easing;
+    this.pathAnimation = new PathAnimation(pathString);
+
+    this.curves = this.pathAnimation.xBezierCurves.map((xCurve, index) => {
+      const yCurve = this.pathAnimation.yBezierCurves[index];
+
+      const distance = simpsonsRule(
+        0,
+        1,
+        (t: number) => {
+          const x = xCurve.deltaAt(t);
+          const y = yCurve.deltaAt(t);
+
+          return Math.sqrt(x * x + y * y);
+        },
+        4
+      );
+
+      return {
+        x: xCurve,
+        y: yCurve,
+        distance,
+        offsetDistance: 0,
+        startAt: 0,
+        endAt: 0,
+      };
+    });
+
+    this.distance = this.curves
+      .map((curve) => curve.distance)
+      .reduce((acc, next) => (acc += next), 0);
+
+    let lastTo = 0;
+    let distance = 0;
+    this.curves.forEach((curve) => {
+      const percentage = curve.distance / this.distance;
+      curve.startAt = lastTo;
+      lastTo = curve.endAt = lastTo + percentage;
+      curve.offsetDistance = distance;
+      distance += curve.distance;
+    });
   }
 
-  clone(): IAnimation<number> {
-    throw new Error("Method not implemented.");
+  update(time: number) {
+    const curve = this.curves.find((curve) => {
+      return time >= curve.startAt && time < curve.endAt;
+    });
+
+    if (curve == null) {
+      return this;
+    }
+
+    const distance = time * this.distance;
+    const adjustedDistance = distance - curve.offsetDistance;
+    const remainder = time - curve.startAt;
+    const adjustedTime = remainder / (curve.endAt - curve.startAt);
+
+    const integrand = (t: number) => {
+      const x = curve.x.normalizedDeltaAt(t);
+      const y = curve.y.normalizedDeltaAt(t);
+
+      return Math.sqrt(x * x + y * y);
+    };
+
+    const uniformTime = newtonsMethod(
+      (t) => {
+        return simpsonsRule(0, t, integrand, 4) - adjustedDistance;
+      },
+      integrand,
+      adjustedTime,
+      30,
+      0.01
+    );
+
+    this.currentValues.x = curve.x.valueAt(uniformTime);
+    this.currentValues.y = curve.y.valueAt(uniformTime);
+
+    return this;
+  }
+
+  clone() {
+    return new NormalizedPathAnimation(this.pathString, this.easing);
   }
 }

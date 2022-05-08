@@ -59,4 +59,13 @@ describe("BezierCurve", () => {
     const sum = bezierCurve.sumAt(0.25);
     console.log(delta);
   });
+
+  test("performance", () => {
+    const bezierCurve = new BezierCurve([0, 1]);
+    console.time("performance");
+    for (let x = 0; x < 1000; x++) {
+      const value = bezierCurve.valueAt(0.5);
+    }
+    console.timeEnd("performance");
+  });
 });

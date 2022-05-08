@@ -5,7 +5,11 @@ import Keyframe, { IComplexKeyframeValue, KeyframeConfig } from "./Keyframe";
 import CssKeyframe from "./CssKeyframe";
 import easings, { EasingNames, EasingFunction } from "./easings";
 import BezierCurve from "./BezierCurve";
-import createDynamicEasing, { DynamicEasingNames, easingInMap, easingOutMap } from "./createDynamicEasing";
+import createDynamicEasing, {
+  DynamicEasingNames,
+  easingInMap,
+  easingOutMap,
+} from "./createDynamicEasing";
 import CssKeyframesGenerator, {
   ICssAnimatedProperties,
   ICssKeyframeControls,
@@ -13,6 +17,7 @@ import CssKeyframesGenerator, {
 } from "./CssKeyframesGenerator";
 import Motion from "./Motion";
 import { PathAnimation } from "./PathAnimation";
+import { NormalizedPathAnimation } from "./NormalizedPathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
 
@@ -44,4 +49,5 @@ export {
   CssKeyframesGenerator,
   Motion,
   PathAnimation,
+  NormalizedPathAnimation,
 };

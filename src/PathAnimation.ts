@@ -1,4 +1,5 @@
 import { CompositeNode, Cursor, Visitor } from "clarity-pattern-parser";
+import BezierCurve from "./BezierCurve";
 import Animation, { AnimationState, IAnimation } from "./Animation";
 import easings, { EasingFunction } from "./easings";
 import Keyframe from "./Keyframe";
@@ -7,15 +8,33 @@ import { path } from "./patterns/path";
 const visitor = new Visitor();
 
 export class PathAnimation implements IAnimation<number> {
-  private easing: EasingFunction;
-  private animation: Animation<number>;
-  private position = { x: 0, y: 0 };
-  private pathString: string;
+  protected easing: EasingFunction;
+  protected position = { x: 0, y: 0 };
+  protected pathString: string;
+  protected _currentValues = {
+    x: 0,
+    y: 0,
+  };
+  protected _deltaValues = {
+    x: 0,
+    y: 0,
+  };
+
+  readonly xBezierCurves: BezierCurve[] = [];
+  readonly yBezierCurves: BezierCurve[] = [];
 
   name: string = "";
 
+  get curveCount() {
+    return this.xBezierCurves.length;
+  }
+
   get currentValues(): AnimationState<number> {
-    return this.animation.currentValues;
+    return this._currentValues;
+  }
+
+  get deltaValues(): AnimationState<number> {
+    return this._deltaValues;
   }
 
   constructor(pathString: string, easing: EasingFunction = easings.linear) {
@@ -40,133 +59,61 @@ export class PathAnimation implements IAnimation<number> {
     }
 
     this.easing = easing;
-    let length = tree.children.filter((n) => n.name != "moveTo").length;
-    let moveToAmount = 0;
 
-    const keyframes = tree.children.reduce((acc, n, index) => {
-      const currentIndex = index - moveToAmount;
-
-      if (n.name === "moveTo") {
-        moveToAmount++;
-      }
-
-      const nextIndex = index + 1 - moveToAmount;
-
-      const results = (this as any)[n.name](
-        n,
-        length > 0 ? currentIndex / length : 0,
-        length > 0 ? nextIndex / length : 0
-      );
-      return acc.concat(results);
-    }, []);
-
-    this.animation = new Animation("path", keyframes);
+    tree.children.forEach((n, index) => {
+      (this as any)[n.name](n);
+    });
   }
 
-  private moveTo(n: CompositeNode, startAt: number, endAt: number) {
+  private moveTo(n: CompositeNode) {
     const xValue = Number(n.children[1].value);
     const yValue = Number(n.children[2].value);
 
-    const x = new Keyframe({
-      property: "x",
-      from: xValue,
-      to: xValue,
-      startAt,
-      endAt,
-    });
-
-    const y = new Keyframe({
-      property: "y",
-      from: yValue,
-      to: yValue,
-      startAt: startAt,
-      endAt: endAt,
-    });
-
     this.position.x = xValue;
     this.position.y = yValue;
-
-    return [x, y];
   }
 
-  private absoluteVerticalLine(
-    n: CompositeNode,
-    startAt: number,
-    endAt: number
-  ) {
+  private absoluteVerticalLine(n: CompositeNode) {
     const yValue = Number(n.children[1].value);
-
-    const y = new Keyframe({
-      property: "y",
-      from: this.position.y,
-      to: yValue,
-      startAt: startAt,
-      endAt: endAt,
-    });
+    const y = new BezierCurve([this.position.y, yValue]);
+    const x = new BezierCurve([this.position.x, this.position.x]);
 
     this.position.y = yValue;
 
-    return [y];
+    this.xBezierCurves.push(x);
+    this.yBezierCurves.push(y);
   }
 
-  private relativeVerticalLine(
-    n: CompositeNode,
-    startAt: number,
-    endAt: number
-  ) {
+  private relativeVerticalLine(n: CompositeNode) {
     const yValue = Number(n.children[1].value) + this.position.y;
-
-    const y = new Keyframe({
-      property: "y",
-      from: this.position.y,
-      to: yValue,
-      startAt: startAt,
-      endAt: endAt,
-    });
+    const y = new BezierCurve([this.position.y, yValue]);
+    const x = new BezierCurve([this.position.x, this.position.x]);
 
     this.position.y = yValue;
 
-    return [y];
+    this.xBezierCurves.push(x);
+    this.yBezierCurves.push(y);
   }
 
-  private absoluteHorizontalLine(
-    n: CompositeNode,
-    startAt: number,
-    endAt: number
-  ) {
+  private absoluteHorizontalLine(n: CompositeNode) {
     const xValue = Number(n.children[1].value);
-
-    const x = new Keyframe({
-      property: "x",
-      from: this.position.x,
-      to: xValue,
-      startAt,
-      endAt,
-    });
-
+    const x = new BezierCurve([this.position.x, xValue]);
+    const y = new BezierCurve([this.position.y, this.position.y]);
     this.position.x = xValue;
 
-    return [x];
+    this.xBezierCurves.push(x);
+    this.yBezierCurves.push(y);
   }
 
-  private relativeHorizontalLine(
-    n: CompositeNode,
-    startAt: number,
-    endAt: number
-  ) {
+  private relativeHorizontalLine(n: CompositeNode) {
     const xValue = Number(n.children[1].value) + this.position.x;
-
-    const x = new Keyframe({
-      property: "x",
-      from: this.position.x,
-      to: xValue,
-      startAt,
-      endAt,
-    });
+    const x = new BezierCurve([this.position.x, xValue]);
+    const y = new BezierCurve([this.position.y, this.position.y]);
 
     this.position.x = xValue;
 
-    return [x];
+    this.xBezierCurves.push(x);
+    this.yBezierCurves.push(y);
   }
 
   private absoluteCurvedLine(n: CompositeNode, startAt: number, endAt: number) {
@@ -182,28 +129,14 @@ export class PathAnimation implements IAnimation<number> {
     const endXValue = Number(n.children[5].value);
     const endYValue = Number(n.children[6].value);
 
-    const x = new Keyframe({
-      property: "x",
-      from: startXValue,
-      to: endXValue,
-      controls: [xControl1, xControl2],
-      startAt,
-      endAt,
-    });
-
-    const y = new Keyframe({
-      property: "y",
-      from: startYValue,
-      to: endYValue,
-      controls: [yControl1, yControl2],
-      startAt: startAt,
-      endAt: endAt,
-    });
+    const x = new BezierCurve([startXValue, xControl1, xControl2, endXValue]);
+    const y = new BezierCurve([startYValue, yControl1, yControl2, endYValue]);
 
     this.position.x = endXValue;
     this.position.y = endYValue;
 
-    return [x, y];
+    this.xBezierCurves.push(x);
+    this.yBezierCurves.push(y);
   }
 
   private relativeCurvedLine(n: CompositeNode, startAt: number, endAt: number) {
@@ -219,33 +152,35 @@ export class PathAnimation implements IAnimation<number> {
     const endXValue = Number(n.children[5].value + startXValue);
     const endYValue = Number(n.children[6].value + startYValue);
 
-    const x = new Keyframe({
-      property: "x",
-      from: startXValue,
-      to: endXValue,
-      controls: [xControl1, xControl2],
-      startAt,
-      endAt,
-    });
-
-    const y = new Keyframe({
-      property: "y",
-      from: startYValue,
-      to: endYValue,
-      controls: [yControl1, yControl2],
-      startAt: startAt,
-      endAt: endAt,
-    });
+    const x = new BezierCurve([startXValue, xControl1, xControl2, endXValue]);
+    const y = new BezierCurve([startYValue, yControl1, yControl2, endYValue]);
 
     this.position.x = endXValue;
     this.position.y = endYValue;
 
-    return [x, y];
+    this.xBezierCurves.push(x);
+    this.yBezierCurves.push(y);
   }
 
   update(time: number): IAnimation<number> {
+    const length = this.xBezierCurves.length;
+    const parts = 1 / length;
     const adjustedTime = this.easing(time);
-    this.animation.update(adjustedTime);
+    const index = Math.max(
+      Math.min(Math.floor(adjustedTime / parts), length - 1),
+      0
+    );
+    const indexTime = (adjustedTime % parts) / parts;
+
+    const x = this.xBezierCurves[index].valueAt(indexTime);
+    const y = this.yBezierCurves[index].valueAt(indexTime);
+    const deltaX = this.xBezierCurves[index].deltaAt(indexTime);
+    const deltaY = this.yBezierCurves[index].deltaAt(indexTime);
+
+    this._currentValues.x = x;
+    this._currentValues.y = y;
+    this._deltaValues.x = deltaX;
+    this._deltaValues.y = deltaY;
 
     return this;
   }

@@ -1,4 +1,9 @@
-import { PathAnimation, Player, easings } from "../../dist/index.esm.js";
+import {
+  NormalizedPathAnimation,
+  Player,
+  easings,
+  PathAnimation,
+} from "../../dist/index.esm.js";
 
 const first = document.querySelector("#first-circle");
 const second = document.querySelector("#second-circle");
@@ -95,7 +100,9 @@ C ${controlX16} ${controlY16},
 ${controlX17} ${controlY17},
 ${controlX18} ${controlY18}`;
 
-const firstAnimation = new PathAnimation(pathString, easings.linear);
+//const firstAnimation = new PathAnimation(pathString, easings.linear);
+const firstAnimation = new NormalizedPathAnimation(pathString, easings.easeOutExpo);
+//const firstAnimation = new NormalizedPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
 
 function scale(strings, ...keys) {
   return strings
@@ -133,6 +140,6 @@ player.render = (time) => {
     });
   });
 };
-player.repeat = Infinity;
+player.repeat = 1;
 player.duration = 5000;
 player.play();

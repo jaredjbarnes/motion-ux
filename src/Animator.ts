@@ -21,7 +21,7 @@ export default class Animator<T> {
       elapsedTime / animationDuration
     );
     const points = [from, ...controls, to];
-    this.bezierCurve.setCoefficients(points);
+    this.bezierCurve.setPoints(points);
     return this.bezierCurve.valueAt(timeWithEasing);
   }
 
