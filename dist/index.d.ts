@@ -9,7 +9,7 @@ import createDynamicEasing, { DynamicEasingNames, easingInMap, easingOutMap } fr
 import CssKeyframesGenerator, { ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes } from "./CssKeyframesGenerator";
 import Motion from "./Motion";
 import { PathAnimation } from "./PathAnimation";
-import { NormalizedPathAnimation } from "./NormalizedPathAnimation";
+import { UniformPathAnimation } from "./UniformPathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
-export { IAnimation, ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, easingOutMap, easingInMap, createAnimation, createCssAnimation, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, CssKeyframesGenerator, Motion, PathAnimation, NormalizedPathAnimation, };
+export { IAnimation, ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, easingOutMap, easingInMap, createAnimation, createCssAnimation, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, CssKeyframesGenerator, Motion, PathAnimation, UniformPathAnimation, };

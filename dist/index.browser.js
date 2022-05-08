@@ -3291,7 +3291,7 @@
       }
   }
 
-  class NormalizedPathAnimation {
+  class UniformPathAnimation {
       constructor(pathString, easing = easings.linear) {
           this.name = "";
           this.currentValues = {
@@ -3331,15 +3331,16 @@
           });
       }
       update(time) {
+          const easingTime = this.easing(time);
           const curve = this.curves.find((curve) => {
-              return time >= curve.startAt && time < curve.endAt;
+              return easingTime >= curve.startAt && easingTime < curve.endAt;
           });
           if (curve == null) {
               return this;
           }
-          const distance = time * this.distance;
+          const distance = easingTime * this.distance;
           const adjustedDistance = distance - curve.offsetDistance;
-          const remainder = time - curve.startAt;
+          const remainder = easingTime - curve.startAt;
           const adjustedTime = remainder / (curve.endAt - curve.startAt);
           const integrand = (t) => {
               const x = curve.x.normalizedDeltaAt(t);
@@ -3351,11 +3352,10 @@
           }, integrand, adjustedTime, 30, 0.01);
           this.currentValues.x = curve.x.valueAt(uniformTime);
           this.currentValues.y = curve.y.valueAt(uniformTime);
-          console.log(time, adjustedTime, uniformTime);
           return this;
       }
       clone() {
-          return new NormalizedPathAnimation(this.pathString, this.easing);
+          return new UniformPathAnimation(this.pathString, this.easing);
       }
   }
 
@@ -3380,9 +3380,9 @@
   exports.CssKeyframesGenerator = CSSKeyframesGenerator;
   exports.Keyframe = Keyframe;
   exports.Motion = Motion;
-  exports.NormalizedPathAnimation = NormalizedPathAnimation;
   exports.PathAnimation = PathAnimation;
   exports.Player = Player;
+  exports.UniformPathAnimation = UniformPathAnimation;
   exports.createAnimation = createAnimation;
   exports.createCssAnimation = createCssAnimation;
   exports.createDynamicEasing = createDynamicEasing;

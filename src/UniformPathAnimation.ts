@@ -13,7 +13,7 @@ interface CurveData {
   endAt: number;
 }
 
-export class NormalizedPathAnimation implements IAnimation<number> {
+export class UniformPathAnimation implements IAnimation<number> {
   protected pathAnimation: PathAnimation;
   protected pathString: string;
   protected easing: EasingFunction;
@@ -73,17 +73,18 @@ export class NormalizedPathAnimation implements IAnimation<number> {
   }
 
   update(time: number) {
+    const easingTime = this.easing(time);
     const curve = this.curves.find((curve) => {
-      return time >= curve.startAt && time < curve.endAt;
+      return easingTime >= curve.startAt && easingTime < curve.endAt;
     });
 
     if (curve == null) {
       return this;
     }
 
-    const distance = time * this.distance;
+    const distance = easingTime * this.distance;
     const adjustedDistance = distance - curve.offsetDistance;
-    const remainder = time - curve.startAt;
+    const remainder = easingTime - curve.startAt;
     const adjustedTime = remainder / (curve.endAt - curve.startAt);
 
     const integrand = (t: number) => {
@@ -110,6 +111,6 @@ export class NormalizedPathAnimation implements IAnimation<number> {
   }
 
   clone() {
-    return new NormalizedPathAnimation(this.pathString, this.easing);
+    return new UniformPathAnimation(this.pathString, this.easing);
   }
 }

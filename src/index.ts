@@ -17,7 +17,7 @@ import CssKeyframesGenerator, {
 } from "./CssKeyframesGenerator";
 import Motion from "./Motion";
 import { PathAnimation } from "./PathAnimation";
-import { NormalizedPathAnimation } from "./NormalizedPathAnimation";
+import { UniformPathAnimation } from "./UniformPathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
 
@@ -49,5 +49,5 @@ export {
   CssKeyframesGenerator,
   Motion,
   PathAnimation,
-  NormalizedPathAnimation,
+  UniformPathAnimation,
 };

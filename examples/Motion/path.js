@@ -1,5 +1,5 @@
 import {
-  NormalizedPathAnimation,
+  UniformPathAnimation,
   Player,
   easings,
   PathAnimation,
@@ -101,8 +101,11 @@ ${controlX17} ${controlY17},
 ${controlX18} ${controlY18}`;
 
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
-const firstAnimation = new NormalizedPathAnimation(pathString, easings.easeOutExpo);
-//const firstAnimation = new NormalizedPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
+const firstAnimation = new UniformPathAnimation(
+  pathString,
+  easings.easeOutExpo
+);
+//const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
 
 function scale(strings, ...keys) {
   return strings
@@ -140,6 +143,6 @@ player.render = (time) => {
     });
   });
 };
-player.repeat = 1;
+player.repeat = Infinity;
 player.duration = 5000;
 player.play();
