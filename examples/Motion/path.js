@@ -12,7 +12,7 @@ const fourth = document.querySelector("#fourth-circle");
 
 const SCALE = 100;
 const CIRCLE_CONTROL_RATIO = 0.552284749;
-const POSITION = 4;
+const POSITION = 6;
 
 const pointX1 = 1;
 const pointY1 = 0;
@@ -103,7 +103,7 @@ ${controlX18} ${controlY18}`;
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
   pathString,
-  easings.easeOutExpo
+  easings.easeOutElastic
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
 
@@ -144,5 +144,5 @@ player.render = (time) => {
   });
 };
 player.repeat = Infinity;
-player.duration = 5000;
+player.duration = 9000;
 player.play();

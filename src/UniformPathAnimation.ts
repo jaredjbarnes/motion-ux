@@ -74,8 +74,14 @@ export class UniformPathAnimation implements IAnimation<number> {
 
   update(time: number) {
     const easingTime = this.easing(time);
-    const curve = this.curves.find((curve) => {
-      return easingTime >= curve.startAt && easingTime < curve.endAt;
+    const curve = this.curves.find((curve, index) => {
+      const isLowerBounds = easingTime < 0 && index === 1;
+      const isOverBounds = easingTime > 1 && index === this.curves.length - 1;
+      return (
+        isLowerBounds ||
+        isOverBounds ||
+        (easingTime >= curve.startAt && easingTime < curve.endAt)
+      );
     });
 
     if (curve == null) {
