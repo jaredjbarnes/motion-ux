@@ -103,7 +103,7 @@ ${controlX18} ${controlY18}`;
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
   pathString,
-  easings.easeOutElastic
+  easings.linear
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
 
@@ -144,5 +144,5 @@ player.render = (time) => {
   });
 };
 player.repeat = Infinity;
-player.duration = 9000;
+player.duration = 5000;
 player.play();
