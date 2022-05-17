@@ -3478,5 +3478,36 @@ class SvgPath {
     }
 }
 
-export { Animation, Animator, BezierCurve, CssKeyframe, CSSKeyframesGenerator as CssKeyframesGenerator, Keyframe, Motion, PathAnimation, Player, PlayerState, RepeatDirection, SvgPath, UniformPathAnimation, createAnimation, createCssAnimation, createDynamicEasing, easingInMap, easingOutMap, easings };
+class PointPath {
+    constructor(points) {
+        this._xCurves = [];
+        this._yCurves = [];
+        const position = [points[0], points[1]];
+        if ((points.length - 2) % 6 !== 0) {
+            throw new Error("Needs to be two more than a factor of six.");
+        }
+        for (let i = 2; i < points.length; i += 6) {
+            this._xCurves.push(new BezierCurve([position[0], points[i], points[i + 2], points[i + 4]]));
+            this._yCurves.push(new BezierCurve([
+                position[1],
+                points[i + 1],
+                points[i + 3],
+                points[i + 5],
+            ]));
+            position[0] = points[i + 4];
+            position[1] = points[i + 5];
+        }
+    }
+    get xCurves() {
+        return this._xCurves;
+    }
+    get yCurves() {
+        return this._yCurves;
+    }
+    get curveCount() {
+        return this._xCurves.length;
+    }
+}
+
+export { Animation, Animator, BezierCurve, CssKeyframe, CSSKeyframesGenerator as CssKeyframesGenerator, Keyframe, Motion, PathAnimation, Player, PlayerState, PointPath, RepeatDirection, SvgPath, UniformPathAnimation, createAnimation, createCssAnimation, createDynamicEasing, easingInMap, easingOutMap, easings };
 //# sourceMappingURL=index.esm.js.map

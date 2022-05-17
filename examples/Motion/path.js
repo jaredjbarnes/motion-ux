@@ -2,7 +2,7 @@ import {
   UniformPathAnimation,
   Player,
   easings,
-  SvgPath as Path,
+  PointPath as Path,
 } from "../../dist/index.esm.js";
 
 const first = document.querySelector("#first-circle");
@@ -100,9 +100,50 @@ C ${controlX16} ${controlY16},
 ${controlX17} ${controlY17},
 ${controlX18} ${controlY18}`;
 
+const pathPoints = [
+  pointX1,
+  pointY1,
+  controlX1,
+  controlY1,
+  controlX2,
+  controlY2,
+  controlX3,
+  controlY3,
+  controlX4,
+  controlY4,
+  controlX5,
+  controlY5,
+  controlX6,
+  controlY6,
+  controlX7,
+  controlY7,
+  controlX8,
+  controlY8,
+  controlX9,
+  controlY9,
+  controlX10,
+  controlY10,
+  controlX11,
+  controlY11,
+  controlX12,
+  controlY12,
+  controlX13,
+  controlY13,
+  controlX14,
+  controlY14,
+  controlX15,
+  controlY15,
+  controlX16,
+  controlY16,
+  controlX17,
+  controlY17,
+  controlX18,
+  controlY18,
+].map((p) => p * 200);
+
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
-  new Path(pathString),
+  new Path(pathPoints),
   easings.linear
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);

@@ -1,7 +1,7 @@
 import BezierCurve from "./BezierCurve";
 export interface Path {
-    xCurves: ReadonlyArray<BezierCurve>;
-    yCurves: ReadonlyArray<BezierCurve>;
+    xCurves: readonly BezierCurve[];
+    yCurves: readonly BezierCurve[];
     curveCount: number;
 }
 export declare class SvgPath implements Path {
@@ -12,8 +12,8 @@ export declare class SvgPath implements Path {
     protected pathString: string;
     protected _xBezierCurves: BezierCurve[];
     protected _yBezierCurves: BezierCurve[];
-    get xCurves(): ReadonlyArray<BezierCurve>;
-    get yCurves(): ReadonlyArray<BezierCurve>;
+    get xCurves(): readonly BezierCurve[];
+    get yCurves(): readonly BezierCurve[];
     get curveCount(): number;
     constructor(pathString: string);
     private moveTo;

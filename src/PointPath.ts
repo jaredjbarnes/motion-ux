@@ -1,13 +1,6 @@
 import BezierCurve from "./BezierCurve";
 import { Path } from "./SvgPath";
 
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export type BezierCurvePoints = [Position, Position, Position];
-
 export class PointPath implements Path {
   private _xCurves: BezierCurve[] = [];
   private _yCurves: BezierCurve[] = [];
@@ -17,31 +10,35 @@ export class PointPath implements Path {
   }
 
   get yCurves(): readonly BezierCurve[] {
-    return this.yCurves;
+    return this._yCurves;
   }
 
   get curveCount(): number {
     return this._xCurves.length;
   }
 
-  constructor(startPosition: Position, points: BezierCurvePoints[]) {
-    const position = startPosition;
+  constructor(points: number[]) {
+    const position = [points[0], points[1]];
 
-    points.forEach((point) => {
-      const xPoints = [];
-      const yPoints = [];
+    if ((points.length - 2) % 6 !== 0) {
+      throw new Error("Needs to be two more than a factor of six.");
+    }
 
-      xPoints.push(position.x);
-      yPoints.push(position.y);
+    for (let i = 2; i < points.length; i += 6) {
+      this._xCurves.push(
+        new BezierCurve([position[0], points[i], points[i + 2], points[i + 4]])
+      );
 
-      xPoints.concat(point.map((p) => p.x));
-      yPoints.concat(point.map((p) => p.y));
-
-      position.x = point[2].x;
-      position.y = point[2].y;
-
-      this._xCurves.push(new BezierCurve(xPoints));
-      this._yCurves.push(new BezierCurve(yPoints));
-    });
+      this._yCurves.push(
+        new BezierCurve([
+          position[1],
+          points[i + 1],
+          points[i + 3],
+          points[i + 5],
+        ])
+      );
+      position[0] = points[i + 4];
+      position[1] = points[i + 5];
+    }
   }
 }
