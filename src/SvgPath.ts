@@ -4,14 +4,28 @@ import { path } from "./patterns/path";
 
 const visitor = new Visitor();
 
-export class Path {
+export interface Path {
+  xCurves: readonly BezierCurve[];
+  yCurves: readonly BezierCurve[];
+  curveCount: number;
+}
+
+export class SvgPath implements Path {
   protected position = { x: 0, y: 0 };
   protected pathString: string;
-  readonly xBezierCurves: BezierCurve[] = [];
-  readonly yBezierCurves: BezierCurve[] = [];
+  protected _xBezierCurves: BezierCurve[] = [];
+  protected _yBezierCurves: BezierCurve[] = [];
+
+  get xCurves(): readonly BezierCurve[] {
+    return this._xBezierCurves;
+  }
+
+  get yCurves(): readonly BezierCurve[] {
+    return this._yBezierCurves;
+  }
 
   get curveCount() {
-    return this.xBezierCurves.length;
+    return this._xBezierCurves.length;
   }
 
   constructor(pathString: string) {
@@ -55,8 +69,8 @@ export class Path {
 
     this.position.y = yValue;
 
-    this.xBezierCurves.push(x);
-    this.yBezierCurves.push(y);
+    this._xBezierCurves.push(x);
+    this._yBezierCurves.push(y);
   }
 
   private relativeVerticalLine(n: CompositeNode) {
@@ -66,8 +80,8 @@ export class Path {
 
     this.position.y = yValue;
 
-    this.xBezierCurves.push(x);
-    this.yBezierCurves.push(y);
+    this._xBezierCurves.push(x);
+    this._yBezierCurves.push(y);
   }
 
   private absoluteHorizontalLine(n: CompositeNode) {
@@ -76,8 +90,8 @@ export class Path {
     const y = new BezierCurve([this.position.y, this.position.y]);
     this.position.x = xValue;
 
-    this.xBezierCurves.push(x);
-    this.yBezierCurves.push(y);
+    this._xBezierCurves.push(x);
+    this._yBezierCurves.push(y);
   }
 
   private relativeHorizontalLine(n: CompositeNode) {
@@ -87,8 +101,8 @@ export class Path {
 
     this.position.x = xValue;
 
-    this.xBezierCurves.push(x);
-    this.yBezierCurves.push(y);
+    this._xBezierCurves.push(x);
+    this._yBezierCurves.push(y);
   }
 
   private absoluteCurvedLine(n: CompositeNode, startAt: number, endAt: number) {
@@ -110,8 +124,8 @@ export class Path {
     this.position.x = endXValue;
     this.position.y = endYValue;
 
-    this.xBezierCurves.push(x);
-    this.yBezierCurves.push(y);
+    this._xBezierCurves.push(x);
+    this._yBezierCurves.push(y);
   }
 
   private relativeCurvedLine(n: CompositeNode, startAt: number, endAt: number) {
@@ -133,7 +147,7 @@ export class Path {
     this.position.x = endXValue;
     this.position.y = endYValue;
 
-    this.xBezierCurves.push(x);
-    this.yBezierCurves.push(y);
+    this._xBezierCurves.push(x);
+    this._yBezierCurves.push(y);
   }
 }

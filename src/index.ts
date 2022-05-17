@@ -20,6 +20,7 @@ import { PathAnimation } from "./PathAnimation";
 import { UniformPathAnimation } from "./UniformPathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
+import { Path, SvgPath } from "./SvgPath";
 
 export {
   IAnimation,
@@ -50,4 +51,6 @@ export {
   Motion,
   PathAnimation,
   UniformPathAnimation,
+  Path,
+  SvgPath,
 };

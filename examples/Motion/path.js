@@ -2,7 +2,7 @@ import {
   UniformPathAnimation,
   Player,
   easings,
-  PathAnimation,
+  SvgPath as Path,
 } from "../../dist/index.esm.js";
 
 const first = document.querySelector("#first-circle");
@@ -102,7 +102,7 @@ ${controlX18} ${controlY18}`;
 
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
-  pathString,
+  new Path(pathString),
   easings.linear
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);

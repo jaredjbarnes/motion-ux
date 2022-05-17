@@ -2212,13 +2212,13 @@ const values = new RepeatComposite("values", value, spaces);
 
 const cssValue = new RepeatComposite("css-value", values, divider);
 
-const visitor$1 = new Visitor();
+const visitor$2 = new Visitor();
 const convertValue = (value) => {
     const node = cssValue.exec(String(value));
     if (node == null) {
         return [];
     }
-    visitor$1
+    visitor$2
         .setRoot(node)
         .selectRoot()
         .flatten()
@@ -3152,7 +3152,7 @@ const pathCommands = new OrComposite("pathCommands", [
 ]);
 const path = new RepeatComposite("path", pathCommands, spaces);
 
-const visitor = new Visitor();
+const visitor$1 = new Visitor();
 class PathAnimation {
     constructor(pathString, easing = easings.linear) {
         this.position = { x: 0, y: 0 };
@@ -3169,7 +3169,7 @@ class PathAnimation {
         this.name = "";
         const tree = path.parse(new Cursor(pathString));
         this.pathString = pathString;
-        visitor
+        visitor$1
             .setRoot(tree)
             .selectRoot()
             .clear()
@@ -3290,17 +3290,16 @@ class PathAnimation {
 }
 
 class UniformPathAnimation {
-    constructor(pathString, easing = easings.linear) {
+    constructor(path, easing = easings.linear) {
         this.name = "";
         this.currentValues = {
             x: 0,
             y: 0,
         };
-        this.pathString = pathString;
         this.easing = easing;
-        this.pathAnimation = new PathAnimation(pathString);
-        this.curves = this.pathAnimation.xBezierCurves.map((xCurve, index) => {
-            const yCurve = this.pathAnimation.yBezierCurves[index];
+        this.path = path;
+        this.curves = this.path.xCurves.map((xCurve, index) => {
+            const yCurve = this.path.yCurves[index];
             const distance = simpsonsRule(0, 1, (t) => {
                 const x = xCurve.deltaAt(t);
                 const y = yCurve.deltaAt(t);
@@ -3357,7 +3356,7 @@ class UniformPathAnimation {
         return this;
     }
     clone() {
-        return new UniformPathAnimation(this.pathString, this.easing);
+        return new UniformPathAnimation(this.path, this.easing);
     }
 }
 
@@ -3375,6 +3374,114 @@ function createCssAnimation(animatedProperties) {
     return animation;
 }
 
+const visitor = new Visitor();
+class SvgPath {
+    constructor(pathString) {
+        this.position = { x: 0, y: 0 };
+        this._xBezierCurves = [];
+        this._yBezierCurves = [];
+        const tree = path.parse(new Cursor(pathString));
+        this.pathString = pathString;
+        visitor
+            .setRoot(tree)
+            .selectRoot()
+            .clear()
+            .select((n) => n.name === "optional-spaces")
+            .remove()
+            .clear()
+            .select((n) => n.name === "spaces")
+            .remove()
+            .clear()
+            .select((n) => n.name === "divider")
+            .remove();
+        if (tree == null) {
+            throw new Error("Invalid path.");
+        }
+        tree.children.forEach((n, index) => {
+            this[n.name](n);
+        });
+    }
+    get xCurves() {
+        return this._xBezierCurves;
+    }
+    get yCurves() {
+        return this._yBezierCurves;
+    }
+    get curveCount() {
+        return this._xBezierCurves.length;
+    }
+    moveTo(n) {
+        const xValue = Number(n.children[1].value);
+        const yValue = Number(n.children[2].value);
+        this.position.x = xValue;
+        this.position.y = yValue;
+    }
+    absoluteVerticalLine(n) {
+        const yValue = Number(n.children[1].value);
+        const y = new BezierCurve([this.position.y, yValue]);
+        const x = new BezierCurve([this.position.x, this.position.x]);
+        this.position.y = yValue;
+        this._xBezierCurves.push(x);
+        this._yBezierCurves.push(y);
+    }
+    relativeVerticalLine(n) {
+        const yValue = Number(n.children[1].value) + this.position.y;
+        const y = new BezierCurve([this.position.y, yValue]);
+        const x = new BezierCurve([this.position.x, this.position.x]);
+        this.position.y = yValue;
+        this._xBezierCurves.push(x);
+        this._yBezierCurves.push(y);
+    }
+    absoluteHorizontalLine(n) {
+        const xValue = Number(n.children[1].value);
+        const x = new BezierCurve([this.position.x, xValue]);
+        const y = new BezierCurve([this.position.y, this.position.y]);
+        this.position.x = xValue;
+        this._xBezierCurves.push(x);
+        this._yBezierCurves.push(y);
+    }
+    relativeHorizontalLine(n) {
+        const xValue = Number(n.children[1].value) + this.position.x;
+        const x = new BezierCurve([this.position.x, xValue]);
+        const y = new BezierCurve([this.position.y, this.position.y]);
+        this.position.x = xValue;
+        this._xBezierCurves.push(x);
+        this._yBezierCurves.push(y);
+    }
+    absoluteCurvedLine(n, startAt, endAt) {
+        const startXValue = this.position.x;
+        const startYValue = this.position.y;
+        const xControl1 = Number(n.children[1].value);
+        const yControl1 = Number(n.children[2].value);
+        const xControl2 = Number(n.children[3].value);
+        const yControl2 = Number(n.children[4].value);
+        const endXValue = Number(n.children[5].value);
+        const endYValue = Number(n.children[6].value);
+        const x = new BezierCurve([startXValue, xControl1, xControl2, endXValue]);
+        const y = new BezierCurve([startYValue, yControl1, yControl2, endYValue]);
+        this.position.x = endXValue;
+        this.position.y = endYValue;
+        this._xBezierCurves.push(x);
+        this._yBezierCurves.push(y);
+    }
+    relativeCurvedLine(n, startAt, endAt) {
+        const startXValue = this.position.x;
+        const startYValue = this.position.y;
+        const xControl1 = Number(n.children[1].value + startXValue);
+        const yControl1 = Number(n.children[2].value + startYValue);
+        const xControl2 = Number(n.children[3].value + startXValue);
+        const yControl2 = Number(n.children[4].value + startYValue);
+        const endXValue = Number(n.children[5].value + startXValue);
+        const endYValue = Number(n.children[6].value + startYValue);
+        const x = new BezierCurve([startXValue, xControl1, xControl2, endXValue]);
+        const y = new BezierCurve([startYValue, yControl1, yControl2, endYValue]);
+        this.position.x = endXValue;
+        this.position.y = endYValue;
+        this._xBezierCurves.push(x);
+        this._yBezierCurves.push(y);
+    }
+}
+
 exports.Animation = Animation;
 exports.Animator = Animator;
 exports.BezierCurve = BezierCurve;
@@ -3384,6 +3491,7 @@ exports.Keyframe = Keyframe;
 exports.Motion = Motion;
 exports.PathAnimation = PathAnimation;
 exports.Player = Player;
+exports.SvgPath = SvgPath;
 exports.UniformPathAnimation = UniformPathAnimation;
 exports.createAnimation = createAnimation;
 exports.createCssAnimation = createCssAnimation;

@@ -1,7 +1,7 @@
-import { PathAnimation } from "./PathAnimation";
 import { IAnimation } from "./Animation";
 import { EasingFunction } from "./easings";
 import { BezierCurve } from ".";
+import { Path } from "./SvgPath";
 interface CurveData {
     x: BezierCurve;
     y: BezierCurve;
@@ -11,8 +11,7 @@ interface CurveData {
     endAt: number;
 }
 export declare class UniformPathAnimation implements IAnimation<number> {
-    protected pathAnimation: PathAnimation;
-    protected pathString: string;
+    protected path: Path;
     protected easing: EasingFunction;
     protected distance: number;
     protected curves: CurveData[];
@@ -21,7 +20,7 @@ export declare class UniformPathAnimation implements IAnimation<number> {
         x: number;
         y: number;
     };
-    constructor(pathString: string, easing?: EasingFunction);
+    constructor(path: Path, easing?: EasingFunction);
     update(time: number): this;
     clone(): UniformPathAnimation;
 }

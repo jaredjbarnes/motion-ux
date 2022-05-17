@@ -1,8 +1,9 @@
 import { PathAnimation } from "./PathAnimation";
-import { AnimationState, IAnimation } from "./Animation";
+import { IAnimation } from "./Animation";
 import easings, { EasingFunction } from "./easings";
 import { newtonsMethod, simpsonsRule } from "./math";
 import { BezierCurve } from ".";
+import { Path } from "./SvgPath";
 
 interface CurveData {
   x: BezierCurve;
@@ -14,8 +15,7 @@ interface CurveData {
 }
 
 export class UniformPathAnimation implements IAnimation<number> {
-  protected pathAnimation: PathAnimation;
-  protected pathString: string;
+  protected path: Path;
   protected easing: EasingFunction;
   protected distance: number;
   protected curves: CurveData[];
@@ -27,13 +27,11 @@ export class UniformPathAnimation implements IAnimation<number> {
     y: 0,
   };
 
-  constructor(pathString: string, easing: EasingFunction = easings.linear) {
-    this.pathString = pathString;
+  constructor(path: Path, easing: EasingFunction = easings.linear) {
     this.easing = easing;
-    this.pathAnimation = new PathAnimation(pathString);
-
-    this.curves = this.pathAnimation.xBezierCurves.map((xCurve, index) => {
-      const yCurve = this.pathAnimation.yBezierCurves[index];
+    this.path = path;
+    this.curves = this.path.xCurves.map((xCurve, index) => {
+      const yCurve = this.path.yCurves[index];
 
       const distance = simpsonsRule(
         0,
@@ -116,6 +114,6 @@ export class UniformPathAnimation implements IAnimation<number> {
   }
 
   clone() {
-    return new UniformPathAnimation(this.pathString, this.easing);
+    return new UniformPathAnimation(this.path, this.easing);
   }
 }

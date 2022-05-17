@@ -12,4 +12,5 @@ import { PathAnimation } from "./PathAnimation";
 import { UniformPathAnimation } from "./UniformPathAnimation";
 import { createAnimation } from "./createAnimation";
 import { createCssAnimation } from "./createCssAnimation";
-export { IAnimation, ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, easingOutMap, easingInMap, createAnimation, createCssAnimation, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, CssKeyframesGenerator, Motion, PathAnimation, UniformPathAnimation, };
+import { Path, SvgPath } from "./SvgPath";
+export { IAnimation, ICssAnimatedProperties, ICssKeyframeControls, ICssPercentageKeyframes, Player, Animator, Animation, Keyframe, CssKeyframe, BezierCurve, easings, createDynamicEasing, easingOutMap, easingInMap, createAnimation, createCssAnimation, DynamicEasingNames, EasingNames, EasingFunction, IComplexKeyframeValue, KeyframeConfig, PlayerState, RepeatDirection, AnimationState, CssKeyframesGenerator, Motion, PathAnimation, UniformPathAnimation, Path, SvgPath, };
