@@ -100,50 +100,53 @@ C ${controlX16} ${controlY16},
 ${controlX17} ${controlY17},
 ${controlX18} ${controlY18}`;
 
-const pathPoints = [
-  pointX1,
-  pointY1,
-  controlX1,
-  controlY1,
-  controlX2,
-  controlY2,
-  controlX3,
-  controlY3,
-  controlX4,
-  controlY4,
-  controlX5,
-  controlY5,
-  controlX6,
-  controlY6,
-  controlX7,
-  controlY7,
-  controlX8,
-  controlY8,
-  controlX9,
-  controlY9,
-  controlX10,
-  controlY10,
-  controlX11,
-  controlY11,
-  controlX12,
-  controlY12,
-  controlX13,
-  controlY13,
-  controlX14,
-  controlY14,
-  controlX15,
-  controlY15,
-  controlX16,
-  controlY16,
-  controlX17,
-  controlY17,
-  controlX18,
-  controlY18,
-].map((p) => p * 200);
+const pathPoints = rotatePoints(
+  [
+    pointX1,
+    pointY1,
+    controlX1,
+    controlY1,
+    controlX2,
+    controlY2,
+    controlX3,
+    controlY3,
+    controlX4,
+    controlY4,
+    controlX5,
+    controlY5,
+    controlX6,
+    controlY6,
+    controlX7,
+    controlY7,
+    controlX8,
+    controlY8,
+    controlX9,
+    controlY9,
+    controlX10,
+    controlY10,
+    controlX11,
+    controlY11,
+    controlX12,
+    controlY12,
+    controlX13,
+    controlY13,
+    controlX14,
+    controlY14,
+    controlX15,
+    controlY15,
+    controlX16,
+    controlY16,
+    controlX17,
+    controlY17,
+    controlX18,
+    controlY18,
+  ].map((p) => p * 100),
+  -Math.PI / 4
+);
 
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
-  new Path(pathPoints),
+  new Path(createPathForTick(2, 100)),
   easings.linear
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
@@ -169,6 +172,66 @@ const animations = [
 ];
 
 const circles = [first, second, third, fourth];
+
+function rotatePoints(points, theta) {
+  for (let i = 0; i < points.length; i += 2) {
+    const x = points[i];
+    const y = points[i + 1];
+
+    points[i] = x * Math.cos(theta) - y * Math.sin(theta);
+    points[i + 1] = y * Math.cos(theta) + x * Math.sin(theta);
+  }
+  return points;
+}
+
+// https://pomax.github.io/bezierinfo/#circles_cubic
+function kScale(theta) {
+  return (4 / 3) * Math.tan(theta / 4);
+}
+
+function createPathForTick(index, radius, finalY) {
+  const points = [];
+  const offset = (Math.PI * index) / 6;
+  const smallRemainder = (Math.PI / 2) % offset;
+  const largeRemainder = 2 * Math.PI - (smallRemainder + offset);
+
+  points.push(radius);
+  points.push(0);
+
+  const k = kScale(smallRemainder);
+  const sin = Math.sin(smallRemainder);
+  const cos = Math.cos(smallRemainder);
+
+  points.push(radius);
+  points.push(radius * k);
+  points.push(radius * (cos + k * sin));
+  points.push(radius * (sin - k * cos));
+  points.push(radius * cos);
+  points.push(radius * sin);
+
+  rotatePoints(points, offset);
+
+  const remainingParts = largeRemainder / (Math.PI / 2);
+  for (let i = 0; i < remainingParts; i++) {
+    const quarterCircle = Math.PI / 2;
+    const innerPoints = [];
+    const k = kScale(quarterCircle);
+    const sin = Math.sin(quarterCircle);
+    const cos = Math.cos(quarterCircle);
+
+    innerPoints.push(radius);
+    innerPoints.push(radius * k);
+    innerPoints.push(radius * (cos + k * sin));
+    innerPoints.push(radius * (sin - k * cos));
+    innerPoints.push(radius * cos);
+    innerPoints.push(radius * sin);
+
+    rotatePoints(innerPoints, i * quarterCircle + (offset + smallRemainder));
+    points.push(...innerPoints);
+  }
+
+  return points;
+}
 
 const player = new Player();
 player.render = (time) => {
