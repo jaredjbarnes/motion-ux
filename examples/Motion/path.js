@@ -146,8 +146,8 @@ const pathPoints = rotatePoints(
 
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
-  new Path(createPathForTick(0, 100)),
-  easings.linear
+  new Path(createPathForTick(0, 100, 800)),
+  easings.easeOutExpo
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
 
@@ -194,6 +194,7 @@ function createPathForTick(index, radius, finalY) {
   const offset = (Math.PI * index) / 6;
   const smallRemainder = offset === 0 ? 0 : (Math.PI / 2) % offset;
   const largeRemainder = 2 * Math.PI - (smallRemainder + offset);
+  const correctionOffset = -Math.PI / 2; // We need to rotate to start at top.
 
   points.push(radius);
   points.push(0);
@@ -209,7 +210,7 @@ function createPathForTick(index, radius, finalY) {
   points.push(radius * cos);
   points.push(radius * sin);
 
-  rotatePoints(points, offset);
+  rotatePoints(points, offset + correctionOffset);
 
   const remainingParts = largeRemainder / (Math.PI / 2);
   for (let i = 0; i < remainingParts; i++) {
@@ -226,9 +227,33 @@ function createPathForTick(index, radius, finalY) {
     innerPoints.push(radius * cos);
     innerPoints.push(radius * sin);
 
-    rotatePoints(innerPoints, i * quarterCircle + (offset + smallRemainder));
+    rotatePoints(
+      innerPoints,
+      i * quarterCircle + (offset + smallRemainder) + correctionOffset
+    );
     points.push(...innerPoints);
   }
+
+  const quarterCircle = Math.PI / 2;
+  const lastQuarterPoints = [];
+  const lastK = kScale(quarterCircle);
+  const sinQuarter = Math.sin(quarterCircle);
+  const cosQuarter = Math.cos(quarterCircle);
+
+  lastQuarterPoints.push(radius);
+  lastQuarterPoints.push(radius * lastK);
+  lastQuarterPoints.push(radius * (cosQuarter + lastK * sinQuarter));
+  lastQuarterPoints.push(radius * (sinQuarter - lastK * cosQuarter));
+  lastQuarterPoints.push(radius * cosQuarter);
+  lastQuarterPoints.push(radius * sinQuarter);
+
+  rotatePoints(lastQuarterPoints, correctionOffset);
+  points.push(...lastQuarterPoints);
+  points.push(radius);
+  points.push(radius * lastK);
+  points.push(radius * (cosQuarter + lastK * sinQuarter));
+  points.push(radius * (sinQuarter - lastK * cosQuarter));
+  points.push(0, finalY);
 
   return points;
 }

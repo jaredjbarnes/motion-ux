@@ -3299,9 +3299,9 @@
               y: 0,
           };
           this.easing = easing;
-          this.path = path;
-          this.curves = this.path.xCurves.map((xCurve, index) => {
-              const yCurve = this.path.yCurves[index];
+          this._path = path;
+          this._curveData = this._path.xCurves.map((xCurve, index) => {
+              const yCurve = this._path.yCurves[index];
               const distance = simpsonsRule(0, 1, (t) => {
                   const x = xCurve.deltaAt(t);
                   const y = yCurve.deltaAt(t);
@@ -3316,24 +3316,27 @@
                   endAt: 0,
               };
           });
-          this.distance = this.curves
+          this._distance = this._curveData
               .map((curve) => curve.distance)
               .reduce((acc, next) => (acc += next), 0);
           let lastTo = 0;
           let distance = 0;
-          this.curves.forEach((curve) => {
-              const percentage = curve.distance / this.distance;
+          this._curveData.forEach((curve) => {
+              const percentage = curve.distance / this._distance;
               curve.startAt = lastTo;
               lastTo = curve.endAt = lastTo + percentage;
               curve.offsetDistance = distance;
               distance += curve.distance;
           });
       }
+      get distance() {
+          return this._distance;
+      }
       update(time) {
           const easingTime = this.easing(time);
-          const curve = this.curves.find((curve, index) => {
+          const curve = this._curveData.find((curve, index) => {
               const isLowerBounds = easingTime < 0 && index === 1;
-              const isOverBounds = easingTime > 1 && index === this.curves.length - 1;
+              const isOverBounds = easingTime > 1 && index === this._curveData.length - 1;
               return (isLowerBounds ||
                   isOverBounds ||
                   (easingTime >= curve.startAt && easingTime < curve.endAt));
@@ -3341,7 +3344,7 @@
           if (curve == null) {
               return this;
           }
-          const distance = easingTime * this.distance;
+          const distance = easingTime * this._distance;
           const adjustedDistance = distance - curve.offsetDistance;
           const remainder = easingTime - curve.startAt;
           const adjustedTime = remainder / (curve.endAt - curve.startAt);
@@ -3358,7 +3361,7 @@
           return this;
       }
       clone() {
-          return new UniformPathAnimation(this.path, this.easing);
+          return new UniformPathAnimation(this._path, this.easing);
       }
   }
 
