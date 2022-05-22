@@ -146,7 +146,7 @@ const pathPoints = rotatePoints(
 
 //const firstAnimation = new PathAnimation(pathString, easings.linear);
 const firstAnimation = new UniformPathAnimation(
-  new Path(createPathForTick(2, 100)),
+  new Path(createPathForTick(0, 100)),
   easings.linear
 );
 //const firstAnimation = new UniformPathAnimation("M0 0 C 50 50, 50 50, 100 100", easings.linear);
@@ -192,7 +192,7 @@ function kScale(theta) {
 function createPathForTick(index, radius, finalY) {
   const points = [];
   const offset = (Math.PI * index) / 6;
-  const smallRemainder = (Math.PI / 2) % offset;
+  const smallRemainder = offset === 0 ? 0 : (Math.PI / 2) % offset;
   const largeRemainder = 2 * Math.PI - (smallRemainder + offset);
 
   points.push(radius);
