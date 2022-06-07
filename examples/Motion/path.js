@@ -9,14 +9,11 @@ const circles = [];
 const animations = [];
 const wrapper = document.querySelector("#wrapper");
 
-for (let x = 11; x < 12; x++) {
+for (let x = 0; x < 12; x++) {
   const circle = document.createElement("div");
   const points = createPathForTick(x, 100, 800);
   console.log(points);
-  const animation = new UniformPathAnimation(
-    new Path(points),
-    easings.linear
-  );
+  const animation = new UniformPathAnimation(new Path(points), easings.linear);
 
   circle.className = "circle";
 
@@ -44,8 +41,8 @@ function kScale(theta) {
 function createPathForTick(index, radius, finalY) {
   const points = [];
   const offset = (Math.PI * index) / 6;
-  const smallRemainder = offset === 0 ? 0 : (Math.PI / 2) % offset;
-  const largeRemainder = 2 * Math.PI - (smallRemainder + offset);
+  const smallRemainder = (3 - (index % 3)) * (Math.PI / 6);
+  const largeRemainder = Math.PI * 2 - smallRemainder - offset;
   const correctionOffset = -Math.PI / 2; // We need to rotate to start at top.
 
   points.push(radius);
@@ -64,7 +61,7 @@ function createPathForTick(index, radius, finalY) {
 
   rotatePoints(points, offset + correctionOffset);
 
-  const remainingParts = largeRemainder / (Math.PI / 2);
+  const remainingParts = Math.round(largeRemainder / (Math.PI / 2));
   for (let i = 0; i < remainingParts; i++) {
     const quarterCircle = Math.PI / 2;
     const innerPoints = [];
