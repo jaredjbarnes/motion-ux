@@ -8,11 +8,12 @@ import TimeObserver from "./TimeObserver";
 
 export default class Motion<T> {
   protected setOnFirst: boolean;
-  protected animation: IAnimation<T> | null = null;
-  protected player = new Player<T>();
   protected currentDuration = 0;
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
+  
+  animation: IAnimation<T> | null = null;
+  player = new Player<T>();
 
   constructor(render: (animation: IAnimation<T>) => void, setOnFirst = false) {
     this.player.render = (time: number) => {
@@ -141,13 +142,5 @@ export default class Motion<T> {
       "last-animation",
       this.keyframeGenerator.generate(keyframes)
     );
-  }
-
-  stop() {
-    this.player.stop();
-  }
-
-  play() {
-    this.player.play();
   }
 }

@@ -13,7 +13,7 @@ for (let x = 0; x < 12; x++) {
   const circle = document.createElement("div");
   const points = createPathForTick(x, 100, 800);
   console.log(points);
-  const animation = new UniformPathAnimation(new Path(points), easings.linear);
+  const animation = new UniformPathAnimation(new Path(points), easings.easeOutExpo);
 
   circle.className = "circle";
 
