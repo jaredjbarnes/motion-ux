@@ -74,6 +74,7 @@ export default class Motion<T> {
 
       this.observer?.dispose();
       this.observer = this.player.observeTimeOnce(1, () => {
+        newAnimation.update(1);
         const values = newAnimation.currentValues;
         const animation = this.makeAnimationFromLastValues(values);
         this.animation = animation;
