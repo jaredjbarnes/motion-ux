@@ -7,7 +7,7 @@ import { path } from "./patterns/path";
 
 const visitor = new Visitor();
 
-export class PathAnimation implements IAnimation<number> {
+export class PathAnimation implements IAnimation<{ x: number; y: number }> {
   protected easing: EasingFunction;
   protected position = { x: 0, y: 0 };
   protected pathString: string;
@@ -29,7 +29,7 @@ export class PathAnimation implements IAnimation<number> {
     return this.xBezierCurves.length;
   }
 
-  get currentValues(): AnimationState<number> {
+  get currentValues(): { x: number; y: number } {
     return this._currentValues;
   }
 
@@ -162,7 +162,7 @@ export class PathAnimation implements IAnimation<number> {
     this.yBezierCurves.push(y);
   }
 
-  update(time: number): IAnimation<number> {
+  update(time: number): IAnimation<{ x: number; y: number }> {
     const length = this.xBezierCurves.length;
     const parts = 1 / length;
     const adjustedTime = this.easing(time);
@@ -185,7 +185,7 @@ export class PathAnimation implements IAnimation<number> {
     return this;
   }
 
-  clone(): IAnimation<number> {
+  clone(): IAnimation<{ x: number; y: number }> {
     return new PathAnimation(this.pathString, this.easing);
   }
 }

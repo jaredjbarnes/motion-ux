@@ -1,7 +1,10 @@
 import BezierCurve from "./BezierCurve";
 import { AnimationState, IAnimation } from "./Animation";
 import { EasingFunction } from "./easings";
-export declare class PathAnimation implements IAnimation<number> {
+export declare class PathAnimation implements IAnimation<{
+    x: number;
+    y: number;
+}> {
     protected easing: EasingFunction;
     protected position: {
         x: number;
@@ -20,7 +23,10 @@ export declare class PathAnimation implements IAnimation<number> {
     readonly yBezierCurves: BezierCurve[];
     name: string;
     get curveCount(): number;
-    get currentValues(): AnimationState<number>;
+    get currentValues(): {
+        x: number;
+        y: number;
+    };
     get deltaValues(): AnimationState<number>;
     constructor(pathString: string, easing?: EasingFunction);
     private moveTo;
@@ -30,6 +36,12 @@ export declare class PathAnimation implements IAnimation<number> {
     private relativeHorizontalLine;
     private absoluteCurvedLine;
     private relativeCurvedLine;
-    update(time: number): IAnimation<number>;
-    clone(): IAnimation<number>;
+    update(time: number): IAnimation<{
+        x: number;
+        y: number;
+    }>;
+    clone(): IAnimation<{
+        x: number;
+        y: number;
+    }>;
 }

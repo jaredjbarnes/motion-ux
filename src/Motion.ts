@@ -11,7 +11,7 @@ export default class Motion<T> {
   protected currentDuration = 0;
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
-  
+
   animation: IAnimation<T> | null = null;
   player = new Player<T>();
 
@@ -129,7 +129,7 @@ export default class Motion<T> {
     this.player.play();
   }
 
-  protected makeAnimationFromLastValues(values: AnimationState<T>) {
+  protected makeAnimationFromLastValues(values: any) {
     const keyframes = Object.keys(values).reduce((acc, key) => {
       acc[key] = {
         from: JSON.parse(JSON.stringify(values[key])),

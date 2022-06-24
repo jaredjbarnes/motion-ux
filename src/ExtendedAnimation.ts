@@ -10,7 +10,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   private duration;
   private extendDurationBy;
 
-  public currentValues: AnimationState<T>;
+  public currentValues: T;
   public name: string;
   public time: number = 0;
 

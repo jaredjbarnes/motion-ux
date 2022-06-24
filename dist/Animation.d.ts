@@ -5,19 +5,19 @@ export declare type AnimationState<T> = {
 };
 export interface IAnimation<T> {
     name: string;
-    currentValues: AnimationState<T>;
+    currentValues: T;
     update(time: number): IAnimation<T>;
     clone(): IAnimation<T>;
 }
 export default class Animation<T> implements IAnimation<T> {
-    protected animators: Animator<T>[];
+    protected animators: Animator<unknown>[];
     protected time: number;
     protected offset: number;
     name: string;
-    currentValues: AnimationState<T>;
-    constructor(name: string, keyframes: Keyframe<T>[]);
-    set keyframes(keyframes: Keyframe<T>[]);
-    get keyframes(): Keyframe<T>[];
+    currentValues: T;
+    constructor(name: string, keyframes: Keyframe<unknown>[]);
+    set keyframes(keyframes: Keyframe<unknown>[]);
+    get keyframes(): Keyframe<unknown>[];
     protected _createCurrentValues(): void;
     private _saveCurrentValues;
     update(time: number): this;

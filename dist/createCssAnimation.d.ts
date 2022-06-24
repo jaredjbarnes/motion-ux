@@ -1,3 +1,7 @@
 import { ICssAnimatedProperties } from "./CssKeyframesGenerator";
 import Animation from "./Animation";
-export declare function createCssAnimation<T>(animatedProperties: ICssAnimatedProperties<T>): Animation<(string | number)[]>;
+declare type CssType<T> = {
+    [P in keyof T]: (string | number)[];
+};
+export declare function createCssAnimation<T>(animatedProperties: ICssAnimatedProperties<T>): Animation<CssType<T>>;
+export {};

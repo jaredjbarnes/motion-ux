@@ -2974,11 +2974,11 @@ class KeyframesGenerator {
 
 class Motion {
     constructor(render, setOnFirst = false) {
-        this.animation = null;
-        this.player = new Player();
         this.currentDuration = 0;
         this.keyframeGenerator = new KeyframesGenerator();
         this.observer = null;
+        this.animation = null;
+        this.player = new Player();
         this.player.render = (time) => {
             if (this.animation != null) {
                 this.animation.update(time);
@@ -3068,12 +3068,6 @@ class Motion {
             return acc;
         }, {});
         return new Animation("last-animation", this.keyframeGenerator.generate(keyframes));
-    }
-    stop() {
-        this.player.stop();
-    }
-    play() {
-        this.player.play();
     }
 }
 

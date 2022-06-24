@@ -10,7 +10,10 @@ interface CurveData {
     startAt: number;
     endAt: number;
 }
-export declare class UniformPathAnimation implements IAnimation<number> {
+export declare class UniformPathAnimation implements IAnimation<{
+    x: number;
+    y: number;
+}> {
     protected _path: Path;
     protected _distance: number;
     protected _curveData: CurveData[];

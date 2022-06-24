@@ -19,8 +19,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
 
     const keyframes = properties
       .map((name) => {
-        const from = fromValues[name];
-        const to = toValues[name];
+        const from = (fromValues as any)[name];
+        const to = (toValues as any)[name];
 
         if (to == null) {
           throw new Error(
@@ -58,8 +58,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
       const property = animator.keyframe.property;
       const keyframe = animator.keyframe;
 
-      keyframe.to = this.toAnimation.currentValues[property];
-      keyframe.from = this.fromAnimation.currentValues[property];
+      keyframe.to = (this.toAnimation.currentValues as any)[property];
+      keyframe.from = (this.fromAnimation.currentValues as any)[property];
     }
   }
 

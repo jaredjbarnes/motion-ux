@@ -14,7 +14,9 @@ interface CurveData {
   endAt: number;
 }
 
-export class UniformPathAnimation implements IAnimation<number> {
+export class UniformPathAnimation
+  implements IAnimation<{ x: number; y: number }>
+{
   protected _path: Path;
   protected _distance: number;
   protected _curveData: CurveData[];

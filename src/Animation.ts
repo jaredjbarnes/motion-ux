@@ -5,7 +5,7 @@ export type AnimationState<T> = { [key: string]: T };
 
 export interface IAnimation<T> {
   name: string;
-  currentValues: AnimationState<T>;
+  currentValues: T;
   update(time: number): IAnimation<T>;
   clone(): IAnimation<T>;
 }
@@ -15,20 +15,20 @@ const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
 };
 
 export default class Animation<T> implements IAnimation<T> {
-  protected animators: Animator<T>[] = [];
+  protected animators: Animator<unknown>[] = [];
   protected time = 0;
   protected offset = 0;
 
   public name: string;
-  public currentValues: AnimationState<T>;
+  public currentValues: T;
 
-  constructor(name: string, keyframes: Keyframe<T>[]) {
+  constructor(name: string, keyframes: Keyframe<unknown>[]) {
     this.name = name;
-    this.currentValues = {};
+    this.currentValues = {} as T;
     this.keyframes = keyframes;
   }
 
-  set keyframes(keyframes: Keyframe<T>[]) {
+  set keyframes(keyframes: Keyframe<unknown>[]) {
     this.animators = keyframes.map((keyframe) => new Animator(keyframe));
     this._createCurrentValues();
     this.animators.sort(sortTime);
@@ -39,16 +39,13 @@ export default class Animation<T> implements IAnimation<T> {
   }
 
   protected _createCurrentValues() {
-    this.currentValues = this.animators.reduce(
-      (results: AnimationState<T>, animator) => {
-        const keyframe = animator.keyframe;
-        const property = keyframe.property;
-        results[property] = keyframe.result;
+    this.currentValues = this.animators.reduce((results: any, animator) => {
+      const keyframe = animator.keyframe;
+      const property = keyframe.property;
+      results[property] = keyframe.result;
 
-        return results;
-      },
-      {}
-    );
+      return results;
+    }, {} as T);
   }
 
   private _saveCurrentValues() {
@@ -64,7 +61,7 @@ export default class Animation<T> implements IAnimation<T> {
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        this.currentValues[keyframe.property] = keyframe.from;
+        (this.currentValues as any)[keyframe.property] = keyframe.from;
       }
     }
 
@@ -74,7 +71,7 @@ export default class Animation<T> implements IAnimation<T> {
       const keyframe = animators[x].keyframe;
 
       if (keyframe.startAt <= this.time) {
-        this.currentValues[keyframe.property] = keyframe.result;
+        (this.currentValues as any)[keyframe.property] = keyframe.result;
       }
     }
   }
@@ -93,6 +90,6 @@ export default class Animation<T> implements IAnimation<T> {
 
   clone() {
     const keyframes = this.animators.map((a) => a.keyframe.clone());
-    return new Animation(this.name, keyframes);
+    return new Animation<T>(this.name, keyframes);
   }
 }
