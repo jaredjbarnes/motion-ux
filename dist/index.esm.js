@@ -3020,6 +3020,7 @@ class Motion {
             this.animation = newAnimation;
             (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
             this.observer = this.player.observeTimeOnce(1, () => {
+                newAnimation.update(1);
                 const values = newAnimation.currentValues;
                 const animation = this.makeAnimationFromLastValues(values);
                 this.animation = animation;
