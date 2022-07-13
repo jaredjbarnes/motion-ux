@@ -30,6 +30,10 @@ export default class KeyframesGenerator {
     return value.hasOwnProperty("value");
   }
 
+  isPercentageKeyframe(value: any) {
+    return value.hasOwnProperty("from") && value.hasOwnProperty("to");
+  }
+
   isObject(value: any) {
     return typeof value === "object" && value != null;
   }
@@ -172,7 +176,7 @@ export default class KeyframesGenerator {
       return this.wrapValue(value);
     } else if (this.isObject(value) && !this.isComplexKeyframe(value)) {
       return this.wrapValue(value as T);
-    } {
+    } else {
       return value as IKeyframeControls<T>;
     }
   }
@@ -185,7 +189,7 @@ export default class KeyframesGenerator {
         from: this.wrapValue(value),
         to: this.wrapValue(value),
       };
-    } else if (this.isObject(value)) {
+    } else if (this.isObject(value) && this.isPercentageKeyframe(value)) {
       const keyframes: any = value;
       const keys = Object.keys(keyframes);
       keys.forEach((key) => {
@@ -194,6 +198,11 @@ export default class KeyframesGenerator {
       });
 
       return value as IPercentageKeyframes<T>;
+    } else if (this.isObject(value)) {
+      return {
+        from: this.wrapValue(value as T),
+        to: this.wrapValue(value as T),
+      };
     } else {
       throw new Error("Unknown value type.");
     }

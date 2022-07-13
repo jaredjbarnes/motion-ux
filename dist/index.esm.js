@@ -2811,6 +2811,9 @@ class KeyframesGenerator {
     isComplexKeyframe(value) {
         return value.hasOwnProperty("value");
     }
+    isPercentageKeyframe(value) {
+        return value.hasOwnProperty("from") && value.hasOwnProperty("to");
+    }
     isObject(value) {
         return typeof value === "object" && value != null;
     }
@@ -2908,7 +2911,7 @@ class KeyframesGenerator {
         else if (this.isObject(value) && !this.isComplexKeyframe(value)) {
             return this.wrapValue(value);
         }
-        {
+        else {
             return value;
         }
     }
@@ -2919,13 +2922,19 @@ class KeyframesGenerator {
                 to: this.wrapValue(value),
             };
         }
-        else if (this.isObject(value)) {
+        else if (this.isObject(value) && this.isPercentageKeyframe(value)) {
             const keyframes = value;
             const keys = Object.keys(keyframes);
             keys.forEach((key) => {
                 this.normalizeValue(keyframes[key]);
             });
             return value;
+        }
+        else if (this.isObject(value)) {
+            return {
+                from: this.wrapValue(value),
+                to: this.wrapValue(value),
+            };
         }
         else {
             throw new Error("Unknown value type.");

@@ -19,11 +19,12 @@ export default class KeyframesGenerator {
     private transformValue;
     setTransformValue(transformValue: (value: any) => any): void;
     isComplexKeyframe(value: any): any;
+    isPercentageKeyframe(value: any): any;
     isObject(value: any): boolean;
-    sortPercentages: (keyA: string, keyB: string) => 1 | 0 | -1;
+    sortPercentages: (keyA: string, keyB: string) => 0 | 1 | -1;
     getDecimalFromPercentage(percentage: string): number;
-    getEaseIn<T>(currentValue: IKeyframeControls<T>): DynamicEasingNames;
-    getEaseOut<T>(nextValue: IKeyframeControls<T>): DynamicEasingNames;
+    getEaseIn<T>(currentValue: IKeyframeControls<T>): "linear" | "quad" | "cubic" | "quart" | "back" | "quint" | "expo" | "circ" | "elastic";
+    getEaseOut<T>(nextValue: IKeyframeControls<T>): "linear" | "quad" | "cubic" | "quart" | "back" | "quint" | "expo" | "circ" | "elastic";
     getControlsIn<T>(currentValue: IKeyframeControls<T>): any[];
     getControlsOut<T>(nextValue: IKeyframeControls<T>): any[];
     getFrom<T>(currentValue: IKeyframeControls<T>): any;
