@@ -27,7 +27,7 @@ export default class Motion<T> {
 
   segueTo(
     animation: IAnimation<T>,
-    duration: number = 0,
+    duration: number = 0.001,
     easing?: EasingFunction
   ) {
     const currentDuration = this.currentDuration;
