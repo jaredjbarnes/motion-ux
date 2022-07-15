@@ -3002,7 +3002,7 @@
           };
           this.setOnFirst = setOnFirst;
       }
-      segueTo(animation, duration = 0, easing) {
+      segueTo(animation, duration = 0.001, easing) {
           var _a;
           const currentDuration = this.currentDuration;
           const currentAnimation = this.animation;
