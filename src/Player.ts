@@ -30,7 +30,7 @@ export default class Player<T = any> extends Observable {
   private _state: PlayerState;
   private _render: (time: number) => void;
 
-  constructor() {
+  constructor(clock?: IClock) {
     super();
     this._timeScale = 1;
     this._time = 0;
@@ -40,7 +40,7 @@ export default class Player<T = any> extends Observable {
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = RepeatDirection.DEFAULT;
-    this._clock = defaultClock;
+    this._clock = clock || defaultClock;
     this._state = PlayerState.STOPPED;
     this._render = defaultRender;
     this.tick = this.tick.bind(this);

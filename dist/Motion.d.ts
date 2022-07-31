@@ -8,9 +8,9 @@ export default class Motion<T> {
     protected currentDuration: number;
     protected keyframeGenerator: KeyframeGenerator;
     protected observer: TimeObserver<any> | null;
+    protected player: Player;
     animation: IAnimation<T> | null;
-    player: Player<T>;
-    constructor(render: (animation: IAnimation<T>) => void, setOnFirst?: boolean);
+    constructor(render: (animation: IAnimation<T>) => void, setOnFirst?: boolean, player?: Player);
     segueTo(animation: IAnimation<T>, duration?: number, easing?: EasingFunction): void;
     segueToLoop(animation: IAnimation<T>, duration?: number, easing?: EasingFunction): void;
     protected makeAnimationFromLastValues(values: any): Animation<T>;

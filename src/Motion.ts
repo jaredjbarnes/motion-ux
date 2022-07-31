@@ -11,11 +11,16 @@ export default class Motion<T> {
   protected currentDuration = 0;
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
-
+  protected player: Player;
+  
   animation: IAnimation<T> | null = null;
-  player = new Player<T>();
 
-  constructor(render: (animation: IAnimation<T>) => void, setOnFirst = false) {
+  constructor(
+    render: (animation: IAnimation<T>) => void,
+    setOnFirst = false,
+    player?: Player
+  ) {
+    this.player = player || new Player<T>();
     this.player.render = (time: number) => {
       if (this.animation != null) {
         this.animation.update(time);

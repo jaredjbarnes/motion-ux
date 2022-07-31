@@ -17,7 +17,6 @@ const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
 export default class Animation<T> implements IAnimation<T> {
   protected animators: Animator<unknown>[] = [];
   protected time = 0;
-  protected offset = 0;
 
   public name: string;
   public currentValues: T;
@@ -80,7 +79,7 @@ export default class Animation<T> implements IAnimation<T> {
     this.time = time;
 
     this.animators.forEach((animator) => {
-      animator.update(this.offset + this.time);
+      animator.update( this.time);
     });
 
     this._saveCurrentValues();

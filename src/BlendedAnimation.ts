@@ -11,7 +11,7 @@ export default class BlendedAnimation<T> extends Animation<T> {
   constructor(
     fromAnimation: IAnimation<T>,
     toAnimation: IAnimation<T>,
-    easing: EasingFunction = easings.linear
+    easing: EasingFunction = easings.easeInExpo
   ) {
     const fromValues = fromAnimation.currentValues;
     const toValues = toAnimation.currentValues;
@@ -64,8 +64,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
   }
 
   update(time: number) {
-    this.fromAnimation.update(this.offset + time);
-    this.toAnimation.update(this.offset + time);
+    this.fromAnimation.update(time);
+    this.toAnimation.update(time);
     this.updateKeyframes();
 
     super.update(time);

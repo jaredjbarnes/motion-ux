@@ -21,7 +21,7 @@ export default class Player<T = any> extends Observable {
     private _clock;
     private _state;
     private _render;
-    constructor();
+    constructor(clock?: IClock);
     get time(): number;
     set time(value: number);
     get timeScale(): number;

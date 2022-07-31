@@ -1,7 +1,7 @@
 import { IClock, TickCallback } from "./IClock";
 
 export default class MockClock implements IClock {
-  private requests: any;
+  private requests: Map<TickCallback, TickCallback>;
   private time: any;
 
   constructor() {
@@ -29,9 +29,7 @@ export default class MockClock implements IClock {
 
   tick(time: number) {
     this.setTime(time);
-    const values = this.requests.values() as any[];
-
-    values.forEach((callback) => {
+    this.requests.forEach((callback) => {
       callback();
     });
   }

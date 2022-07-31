@@ -10,7 +10,7 @@ const firstAnimation = createCssAnimation({
     from: "calc(0% - 0px)",
     to: {
       value: "calc(50% - 200px)",
-      easeIn: "elastic",
+      easeIn: "back",
     },
   },
 });
@@ -21,7 +21,7 @@ const secondAnimation = createCssAnimation({
     "5%": "calc(0% - 0px)",
     to: {
       value: "calc(50% - 150px)",
-      easeIn: "elastic",
+      easeIn: "back",
     },
   },
 });
@@ -32,7 +32,7 @@ const thirdAnimation = createCssAnimation({
     "10%": "calc(0% - 0px)",
     to: {
       value: "calc(50% - 100px)",
-      easeIn: "elastic",
+      easeIn: "back",
     },
   },
 });
@@ -43,7 +43,7 @@ const fourthAnimation = createCssAnimation({
     "15%": "calc(0% - 0px)",
     to: {
       value: "calc(50% - 50px)",
-      easeIn: "elastic",
+      easeIn: "back",
     },
   },
 });

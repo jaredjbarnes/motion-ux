@@ -203,7 +203,6 @@ class Animation {
     constructor(name, keyframes) {
         this.animators = [];
         this.time = 0;
-        this.offset = 0;
         this.name = name;
         this.currentValues = {};
         this.keyframes = keyframes;
@@ -250,7 +249,7 @@ class Animation {
     update(time) {
         this.time = time;
         this.animators.forEach((animator) => {
-            animator.update(this.offset + this.time);
+            animator.update(this.time);
         });
         this._saveCurrentValues();
         return this;
@@ -406,7 +405,7 @@ var RepeatDirection;
     RepeatDirection[RepeatDirection["ALTERNATE"] = 1] = "ALTERNATE";
 })(RepeatDirection || (RepeatDirection = {}));
 class Player extends Observable {
-    constructor() {
+    constructor(clock) {
         super();
         this._timeScale = 1;
         this._time = 0;
@@ -416,7 +415,7 @@ class Player extends Observable {
         this._iterations = 0;
         this._repeat = 1;
         this._repeatDirection = RepeatDirection.DEFAULT;
-        this._clock = defaultClock;
+        this._clock = clock || defaultClock;
         this._state = PlayerState.STOPPED;
         this._render = defaultRender;
         this.tick = this.tick.bind(this);
@@ -2251,7 +2250,7 @@ const easingOutMap = {
     quad: [1, 1],
     cubic: [1, 1, 1],
     quart: [1, 1, 1, 1],
-    back: [1.5, 1, 1],
+    back: [2, 1, 1],
     quint: [1, 1, 1, 1, 1],
     expo: [1, 1, 1, 1, 1, 1],
     circ: [0.65, 0.75, 0.85, 0.95, 1, 1, 1, 1],
@@ -2262,7 +2261,7 @@ const easingInMap = {
     quad: [0, 0],
     cubic: [0, 0, 0],
     quart: [0, 0, 0, 0],
-    back: [-0.5, 0, 0],
+    back: [0, 0, -1],
     quint: [0, 0, 0, 0, 0],
     expo: [0, 0, 0, 0, 0, 0],
     circ: [0, 0, 0, 0, 0.05, 0.15, 0.25, 0.35],
@@ -2726,7 +2725,7 @@ class ExtendedAnimation {
 }
 
 class BlendedAnimation extends Animation {
-    constructor(fromAnimation, toAnimation, easing = easings.linear) {
+    constructor(fromAnimation, toAnimation, easing = easings.easeInExpo) {
         const fromValues = fromAnimation.currentValues;
         const toValues = toAnimation.currentValues;
         const properties = Object.keys(fromValues);
@@ -2765,8 +2764,8 @@ class BlendedAnimation extends Animation {
         }
     }
     update(time) {
-        this.fromAnimation.update(this.offset + time);
-        this.toAnimation.update(this.offset + time);
+        this.fromAnimation.update(time);
+        this.toAnimation.update(time);
         this.updateKeyframes();
         super.update(time);
         return this;
@@ -2982,12 +2981,12 @@ class KeyframesGenerator {
 }
 
 class Motion {
-    constructor(render, setOnFirst = false) {
+    constructor(render, setOnFirst = false, player) {
         this.currentDuration = 0;
         this.keyframeGenerator = new KeyframesGenerator();
         this.observer = null;
         this.animation = null;
-        this.player = new Player();
+        this.player = player || new Player();
         this.player.render = (time) => {
             if (this.animation != null) {
                 this.animation.update(time);

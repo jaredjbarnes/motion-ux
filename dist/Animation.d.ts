@@ -12,7 +12,6 @@ export interface IAnimation<T> {
 export default class Animation<T> implements IAnimation<T> {
     protected animators: Animator<unknown>[];
     protected time: number;
-    protected offset: number;
     name: string;
     currentValues: T;
     constructor(name: string, keyframes: Keyframe<unknown>[]);
