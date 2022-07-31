@@ -11,7 +11,7 @@ export default class BlendedAnimation<T> extends Animation<T> {
   constructor(
     fromAnimation: IAnimation<T>,
     toAnimation: IAnimation<T>,
-    easing: EasingFunction = easings.easeInExpo
+    easing: EasingFunction = easings.easeOutExpo
   ) {
     const fromValues = fromAnimation.currentValues;
     const toValues = toAnimation.currentValues;

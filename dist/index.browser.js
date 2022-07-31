@@ -2731,7 +2731,7 @@
   }
 
   class BlendedAnimation extends Animation {
-      constructor(fromAnimation, toAnimation, easing = easings.easeInExpo) {
+      constructor(fromAnimation, toAnimation, easing = easings.easeOutExpo) {
           const fromValues = fromAnimation.currentValues;
           const toValues = toAnimation.currentValues;
           const properties = Object.keys(fromValues);
