@@ -15,7 +15,7 @@ export default class BlendedAnimation<T> extends Animation<T> {
   ) {
     const fromValues = fromAnimation.currentValues;
     const toValues = toAnimation.currentValues;
-    const properties = Object.keys(fromValues);
+    const properties = Object.keys(fromValues as any);
 
     const keyframes = properties
       .map((name) => {

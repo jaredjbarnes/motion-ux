@@ -19,10 +19,10 @@ export default class CSSKeyframesGenerator {
     private transformValue;
     setTransformValue(transformValue: (value: any) => any): void;
     isComplexKeyframe(value: any): any;
-    sortPercentages: (keyA: string, keyB: string) => 1 | 0 | -1;
+    sortPercentages: (keyA: string, keyB: string) => 0 | 1 | -1;
     getDecimalFromPercentage(percentage: string): number;
-    getEaseIn<T>(currentValue: ICssKeyframeControls<T>): DynamicEasingNames;
-    getEaseOut<T>(nextValue: ICssKeyframeControls<T>): DynamicEasingNames;
+    getEaseIn<T>(currentValue: ICssKeyframeControls<T>): "linear" | "quad" | "cubic" | "quart" | "back" | "quint" | "expo" | "circ" | "elastic";
+    getEaseOut<T>(nextValue: ICssKeyframeControls<T>): "linear" | "quad" | "cubic" | "quart" | "back" | "quint" | "expo" | "circ" | "elastic";
     getControlsIn<T>(currentValue: ICssKeyframeControls<T>): any[];
     getControlsOut<T>(nextValue: ICssKeyframeControls<T>): any[];
     getFrom<T>(currentValue: ICssKeyframeControls<T>): any;

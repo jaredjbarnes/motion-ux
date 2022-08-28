@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.motionUX = {}));
-}(this, (function (exports) { 'use strict';
+})(this, (function (exports) { 'use strict';
 
   function simpsonsRule(lowerBound, upperBound, f, n = 4) {
       let stripAmount = f(lowerBound);
@@ -3001,6 +3001,13 @@
           };
           this.setOnFirst = setOnFirst;
       }
+      inject(animation) {
+          this.animation = animation;
+          this.player.duration = 16.667;
+          this.player.time = 0.999;
+          this.player.play();
+          return this;
+      }
       segueTo(animation, duration = 0.001, easing) {
           var _a;
           const currentDuration = this.currentDuration;
@@ -3542,5 +3549,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=index.browser.js.map

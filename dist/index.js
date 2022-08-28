@@ -2999,6 +2999,13 @@ class Motion {
         };
         this.setOnFirst = setOnFirst;
     }
+    inject(animation) {
+        this.animation = animation;
+        this.player.duration = 16.667;
+        this.player.time = 0.999;
+        this.player.play();
+        return this;
+    }
     segueTo(animation, duration = 0.001, easing) {
         var _a;
         const currentDuration = this.currentDuration;

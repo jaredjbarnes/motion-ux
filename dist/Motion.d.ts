@@ -11,6 +11,7 @@ export default class Motion<T> {
     protected player: Player;
     animation: IAnimation<T> | null;
     constructor(render: (animation: IAnimation<T>) => void, setOnFirst?: boolean, player?: Player);
+    inject(animation: IAnimation<T>): this;
     segueTo(animation: IAnimation<T>, duration?: number, easing?: EasingFunction): void;
     segueToLoop(animation: IAnimation<T>, duration?: number, easing?: EasingFunction): void;
     protected makeAnimationFromLastValues(values: any): Animation<T>;
