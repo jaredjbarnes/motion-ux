@@ -12,7 +12,7 @@ export default class Motion<T> {
   protected keyframeGenerator = new KeyframeGenerator();
   protected observer: TimeObserver<any> | null = null;
   protected player: Player;
-  
+
   animation: IAnimation<T> | null = null;
 
   constructor(
@@ -28,6 +28,16 @@ export default class Motion<T> {
       }
     };
     this.setOnFirst = setOnFirst;
+  }
+
+  inject(animation: IAnimation<T>) {
+    this.animation = animation;
+
+    this.player.duration = 16.667;
+    this.player.time = 0.999;
+    this.player.play();
+
+    return this;
   }
 
   segueTo(
