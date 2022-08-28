@@ -14,5 +14,7 @@ export default class Motion<T> {
     inject(animation: IAnimation<T>): this;
     segueTo(animation: IAnimation<T>, duration?: number, easing?: EasingFunction): void;
     segueToLoop(animation: IAnimation<T>, duration?: number, easing?: EasingFunction): void;
+    stop(): this;
+    play(): this;
     protected makeAnimationFromLastValues(values: any): Animation<T>;
 }

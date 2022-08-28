@@ -3081,6 +3081,14 @@
           this.player.time = 0;
           this.player.play();
       }
+      stop() {
+          this.player.stop();
+          return this;
+      }
+      play() {
+          this.player.play();
+          return this;
+      }
       makeAnimationFromLastValues(values) {
           const keyframes = Object.keys(values).reduce((acc, key) => {
               acc[key] = {

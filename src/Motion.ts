@@ -145,6 +145,16 @@ export default class Motion<T> {
     this.player.play();
   }
 
+  stop() {
+    this.player.stop();
+    return this;
+  }
+
+  play() {
+    this.player.play();
+    return this;
+  }
+
   protected makeAnimationFromLastValues(values: any) {
     const keyframes = Object.keys(values).reduce((acc, key) => {
       acc[key] = {
