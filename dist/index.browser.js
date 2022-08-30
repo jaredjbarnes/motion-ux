@@ -603,6 +603,7 @@
       stop() {
           if (this._state !== exports.PlayerState.STOPPED) {
               this._state = exports.PlayerState.STOPPED;
+              this._render(this._time);
               this._clock.unregister(this.tick);
               this.notify({
                   type: "STOPPED",
