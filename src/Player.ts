@@ -266,6 +266,8 @@ export default class Player<T = any> extends Observable {
   stop() {
     if (this._state !== PlayerState.STOPPED) {
       this._state = PlayerState.STOPPED;
+      this._render(this._time);
+
       this._clock.unregister(this.tick);
 
       this.notify({
