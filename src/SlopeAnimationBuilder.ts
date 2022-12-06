@@ -13,19 +13,19 @@ const objectOperator = new ObjectOperator();
 const FORWARD = 1;
 
 export default class SlopeAnimationBuilder {
-  public direction = 0;
-  public newDuration = 0;
-  public duration = 0;
-  public offset = 0;
+  private direction = 0;
+  private newDuration = 0;
+  private duration = 0;
+  private offset = 0;
   public delta = 0.01;
-  public animation: IAnimation<any> = nullableAnimation;
-  public slopeAnimation!: IAnimation<any>;
-  public deltaStepValues: any;
-  public deltaValues: any;
-  public nowValues: any;
-  public toValues: any;
-  public scaleValues: any;
-  public dynamicValues: any;
+  private animation: IAnimation<any> = nullableAnimation;
+  private slopeAnimation!: IAnimation<any>;
+  private deltaStepValues: any;
+  private deltaValues: any;
+  private nowValues: any;
+  private toValues: any;
+  private scaleValues: any;
+  private dynamicValues: any;
 
   private cloneValues(values: any) {
     return deepClone(values);
@@ -40,7 +40,7 @@ export default class SlopeAnimationBuilder {
   ) {
     this.animation = animation;
     this.offset = offset;
-    this.duration = duration;
+    this.duration = this.getSafeDuration(duration);
     this.newDuration = extendDurationBy;
     this.direction = direction;
 
@@ -53,6 +53,18 @@ export default class SlopeAnimationBuilder {
     this.createSlopeTimeline();
 
     return this.slopeAnimation as IAnimation<T>;
+  }
+
+  private getSafeDuration(value: number) {
+    if (typeof value !== "number") {
+      value = 0;
+    }
+
+    // Virtually Nothing. All Math blows up if the duration is "0".
+    if (value <= 0) {
+      value = 0.00001;
+    }
+    return value;
   }
 
   private cacheValues() {

@@ -20,7 +20,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
     offset: number,
     extendDurationBy = 0
   ) {
-    this.duration = duration;
+    this.duration = this.getSafeDuration(duration);
     this.offset = offset;
     this.extendDurationBy = extendDurationBy;
 
@@ -35,6 +35,18 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
       extendDurationBy,
       1
     );
+  }
+
+  private getSafeDuration(value: number) {
+    if (typeof value !== "number") {
+      value = 0;
+    }
+
+    // Virtually Nothing. All Math blows up if the duration is "0".
+    if (value <= 0) {
+      value = 0.00001;
+    }
+    return value;
   }
 
   update(time: number) {

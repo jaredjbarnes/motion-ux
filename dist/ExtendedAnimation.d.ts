@@ -9,6 +9,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
     name: string;
     time: number;
     constructor(animation: IAnimation<T>, duration: number, offset: number, extendDurationBy?: number);
+    private getSafeDuration;
     update(time: number): this;
     clone(): ExtendedAnimation<T>;
 }

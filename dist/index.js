@@ -2601,7 +2601,7 @@ class SlopeAnimationBuilder {
     build(animation, duration, offset, extendDurationBy, direction = 0) {
         this.animation = animation;
         this.offset = offset;
-        this.duration = duration;
+        this.duration = this.getSafeDuration(duration);
         this.newDuration = extendDurationBy;
         this.direction = direction;
         // If the offset is at or near the end get the last slope.
@@ -2611,6 +2611,16 @@ class SlopeAnimationBuilder {
         this.calculate();
         this.createSlopeTimeline();
         return this.slopeAnimation;
+    }
+    getSafeDuration(value) {
+        if (typeof value !== "number") {
+            value = 0;
+        }
+        // Virtually Nothing. All Math blows up if the duration is "0".
+        if (value <= 0) {
+            value = 0.00001;
+        }
+        return value;
     }
     cacheValues() {
         this.deltaStepValues = this.cloneValues(this.nowValues);
@@ -2704,13 +2714,23 @@ const slopeAnimationBuilder = new SlopeAnimationBuilder();
 class ExtendedAnimation {
     constructor(animation, duration, offset, extendDurationBy = 0) {
         this.time = 0;
-        this.duration = duration;
+        this.duration = this.getSafeDuration(duration);
         this.offset = offset;
         this.extendDurationBy = extendDurationBy;
         this.animation = animation;
         this.currentValues = this.animation.currentValues;
         this.name = this.animation.name;
         this.slopeAnimation = slopeAnimationBuilder.build(this.animation, duration, 1, extendDurationBy, 1);
+    }
+    getSafeDuration(value) {
+        if (typeof value !== "number") {
+            value = 0;
+        }
+        // Virtually Nothing. All Math blows up if the duration is "0".
+        if (value <= 0) {
+            value = 0.00001;
+        }
+        return value;
     }
     update(time) {
         this.time = time;
