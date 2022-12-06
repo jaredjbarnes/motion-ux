@@ -57,22 +57,22 @@ export default class Motion<T> {
     this.player.repeat = 1;
 
     if (duration === 0) {
-      const finishedAnimation = animation.clone();
-      finishedAnimation.update(1);
+      animation.update(1);
+      const values = animation.currentValues;
+      this.animation = this.makeAnimationFromLastValues(values);
       this.player.duration = 0;
       this.player.time = 1;
-      this.animation = finishedAnimation;
       onComplete();
       return;
     }
 
     if (currentAnimation == null) {
       if (this.setOnFirst) {
-        const finishedAnimation = animation.clone();
-        finishedAnimation.update(1);
+        animation.update(1);
+        const values = animation.currentValues;
+        this.animation = this.makeAnimationFromLastValues(values);
         this.player.duration = 0;
         this.player.time = 1;
-        this.animation = finishedAnimation;
         onComplete();
         return;
       } else {
@@ -108,8 +108,7 @@ export default class Motion<T> {
       this.observer = this.player.observeTimeOnce(1, () => {
         newAnimation.update(1);
         const values = newAnimation.currentValues;
-        const animation = this.makeAnimationFromLastValues(values);
-        this.animation = animation;
+        this.animation = this.makeAnimationFromLastValues(values);
         onComplete && onComplete();
       });
     }
