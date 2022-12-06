@@ -1,12 +1,11 @@
 import Animation from "../Animation";
 import Keyframe from "../Keyframe";
 import CssKeyframe from "../CssKeyframe";
-import easings from "../easings";
 
 describe("Animation", () => {
   test("Get current values as 0.", () => {
     const name = "my-animation";
-    const animation = new Animation("css", [
+    const animation = new Animation<{ opacity: number }>("css", [
       new Keyframe({
         property: "opacity",
         startAt: 0,
@@ -27,7 +26,12 @@ describe("Animation", () => {
 
   test("Nested Object Animation.", () => {
     const name = "my-animation";
-    const animation = new Animation("css", [
+    const animation = new Animation<{
+      object: {
+        scrollTop: number;
+        viewport: { top: number; left: number; right: number; bottom: number };
+      };
+    }>("css", [
       new Keyframe({
         property: "object",
         startAt: 0,
@@ -69,7 +73,7 @@ describe("Animation", () => {
     const from = "M 0 0 C 0 0, 0 0, 0 0";
     const to = "M 10 10 C 150 150,30 30,20 20";
 
-    const animation = new Animation("css", [
+    const animation = new Animation<{ path: (number | string)[] }>("css", [
       new CssKeyframe({
         property: "path",
         from,
@@ -85,43 +89,46 @@ describe("Animation", () => {
 
   test("Multiple startAts on same property.", () => {
     const name = "my-animation";
-    const animation = new Animation<string | number>("css", [
-      new Keyframe({
-        property: "opacity",
-        startAt: 0,
-        endAt: 1,
-        from: 1,
-        to: 0,
-      }),
-      new Keyframe({
-        property: "display",
-        startAt: 0.01,
-        endAt: 0.01,
-        from: "none",
-        to: "block",
-      }),
-      new Keyframe({
-        property: "display",
-        startAt: 0.25,
-        endAt: 0.25,
-        from: "block",
-        to: "none",
-      }),
-      new Keyframe({
-        property: "display",
-        startAt: 0.5,
-        endAt: 0.5,
-        from: "none",
-        to: "block",
-      }),
-      new Keyframe({
-        property: "display",
-        startAt: 0.99,
-        endAt: 0.99,
-        from: "block",
-        to: "none",
-      }),
-    ]);
+    const animation = new Animation<{ opacity: number; display: string }>(
+      "css",
+      [
+        new Keyframe({
+          property: "opacity",
+          startAt: 0,
+          endAt: 1,
+          from: 1,
+          to: 0,
+        }),
+        new Keyframe({
+          property: "display",
+          startAt: 0.01,
+          endAt: 0.01,
+          from: "none",
+          to: "block",
+        }),
+        new Keyframe({
+          property: "display",
+          startAt: 0.25,
+          endAt: 0.25,
+          from: "block",
+          to: "none",
+        }),
+        new Keyframe({
+          property: "display",
+          startAt: 0.5,
+          endAt: 0.5,
+          from: "none",
+          to: "block",
+        }),
+        new Keyframe({
+          property: "display",
+          startAt: 0.99,
+          endAt: 0.99,
+          from: "block",
+          to: "none",
+        }),
+      ]
+    );
 
     animation.update(1);
 
@@ -169,20 +176,4 @@ describe("Animation", () => {
     expect(opacity).toBe(1);
   });
 
-  test("playground", () => {
-    const animation = new Animation("my-animation", [
-      new Keyframe({
-        property: "prop",
-        from: 0,
-        to: 1,
-        easing: easings.easeOutExpo
-      }),
-    ]);
-
-    animation.update(0.9);
-    const extendsAnimation = animation.extend();
-    const values = extendsAnimation.update(0.2).currentValues;
-
-    expect(values).toBe(null);
-  });
 });

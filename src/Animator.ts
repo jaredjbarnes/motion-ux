@@ -25,6 +25,17 @@ export default class Animator<T> {
     return this.bezierCurve.valueAt(timeWithEasing);
   }
 
+  getDeltaValue(from: any, controls: any[] = emptyArray, to: any) {
+    const elapsedTime = this.time - this.keyframe.startAt;
+    const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
+    const timeWithEasing = this.keyframe.easing(
+      elapsedTime / animationDuration
+    );
+    const points = [from, ...controls, to];
+    this.bezierCurve.setPoints(points);
+    return this.bezierCurve.deltaAt(timeWithEasing);
+  }
+
   getStringValue(from: any, to: any) {
     if (this.time >= this.keyframe.startAt) {
       return to;

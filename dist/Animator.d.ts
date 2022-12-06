@@ -6,6 +6,7 @@ export default class Animator<T> {
     time: number;
     constructor(keyframe: Keyframe<T>);
     getNumberValue(from: any, controls: any[] | undefined, to: any): number;
+    getDeltaValue(from: any, controls: any[] | undefined, to: any): number;
     getStringValue(from: any, to: any): any;
     traverse(fromObject: any, controlsObject: any, toObject: any, resultObject: any): void;
     update(time: number): T;

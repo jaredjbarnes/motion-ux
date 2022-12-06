@@ -5,16 +5,19 @@ import Keyframe from "../Keyframe";
 
 describe("SlopeAnimationBuilder", () => {
   test("Forward", () => {
-    const animation = new Animation("position", [
-      new Keyframe({
-        property: "left",
-        from: 100,
-        to: 200,
-        startAt: 0,
-        endAt: 1,
-        easing: easings.linear,
-      }),
-    ]);
+    const animation = new Animation<{ left: { property: number } }>(
+      "position",
+      [
+        new Keyframe({
+          property: "left",
+          from: 100,
+          to: 200,
+          startAt: 0,
+          endAt: 1,
+          easing: easings.linear,
+        }),
+      ]
+    );
 
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 1000, 0.5, 1000, 1);
@@ -25,16 +28,19 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Forward with longer duration.", () => {
-    const animation = new Animation("position", [
-      new Keyframe({
-        property: "left",
-        from: 100,
-        to: 200,
-        startAt: 0,
-        endAt: 1,
-        easing: easings.linear,
-      }),
-    ]);
+    const animation = new Animation<{ left: { property: number } }>(
+      "position",
+      [
+        new Keyframe({
+          property: "left",
+          from: 100,
+          to: 200,
+          startAt: 0,
+          endAt: 1,
+          easing: easings.linear,
+        }),
+      ]
+    );
 
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 1000, 0.5, 2000, 1);
@@ -45,7 +51,7 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Stopped", () => {
-    const animation = new Animation("position", [
+    const animation = new Animation<{ left: number }>("position", [
       new Keyframe({
         property: "left",
         from: 100,
@@ -57,7 +63,7 @@ describe("SlopeAnimationBuilder", () => {
     ]);
 
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build<number>(animation, 1000, 0.5, 1000);
+    const slopeAnimation = builder.build(animation, 1000, 0.5, 1000);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -65,7 +71,7 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Forward Array", () => {
-    const animation = new Animation("position", [
+    const animation = new Animation<{ left: number[] }>("position", [
       new Keyframe({
         property: "left",
         from: [100],
@@ -85,7 +91,7 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Forward Array with longer duration.", () => {
-    const animation = new Animation("position", [
+    const animation = new Animation<{ left: number[] }>("position", [
       new Keyframe({
         property: "left",
         from: [100],
@@ -105,7 +111,7 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Stopped Array", () => {
-    const animation = new Animation("position", [
+    const animation = new Animation<{ left: number[] }>("position", [
       new Keyframe({
         property: "left",
         from: [100],
@@ -117,7 +123,7 @@ describe("SlopeAnimationBuilder", () => {
     ]);
 
     const builder = new SlopeAnimationBuilder();
-    const slopeAnimation = builder.build<number[]>(animation, 1000, 0.5, 1000);
+    const slopeAnimation = builder.build(animation, 1000, 0.5, 1000);
     slopeAnimation.update(1);
     const values = slopeAnimation.currentValues;
 
@@ -125,16 +131,19 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Forward Object", () => {
-    const animation = new Animation("position", [
-      new Keyframe({
-        property: "left",
-        from: { property: 100 },
-        to: { property: 200 },
-        startAt: 0,
-        endAt: 1,
-        easing: easings.linear,
-      }),
-    ]);
+    const animation = new Animation<{ left: { property: number } }>(
+      "position",
+      [
+        new Keyframe({
+          property: "left",
+          from: { property: 100 },
+          to: { property: 200 },
+          startAt: 0,
+          endAt: 1,
+          easing: easings.linear,
+        }),
+      ]
+    );
 
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 1000, 0.5, 1000, 1);
@@ -145,7 +154,7 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Forward Object with longer duration.", () => {
-    const animation = new Animation("position", [
+    const animation = new Animation<{ left: { property: number } }>("left", [
       new Keyframe({
         property: "left",
         from: { property: 100 },
@@ -164,16 +173,19 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Stopped Object", () => {
-    const animation = new Animation("position", [
-      new Keyframe({
-        property: "left",
-        from: { property: 100 },
-        to: { property: 200 },
-        startAt: 0,
-        endAt: 1,
-        easing: easings.linear,
-      }),
-    ]);
+    const animation = new Animation<{ left: { property: number } }>(
+      "position",
+      [
+        new Keyframe({
+          property: "left",
+          from: { property: 100 },
+          to: { property: 200 },
+          startAt: 0,
+          endAt: 1,
+          easing: easings.linear,
+        }),
+      ]
+    );
 
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 1000, 0.5, 1000);

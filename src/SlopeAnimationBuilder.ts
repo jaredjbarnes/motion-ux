@@ -2,7 +2,6 @@ import easings from "./easings";
 import Keyframe from "./Keyframe";
 import Animation, { IAnimation } from "./Animation";
 import ObjectOperator from "./ObjectOperator";
-import Player, { PlayerState } from "./Player";
 import { deepClone } from "./deepClone";
 
 const nullableAnimation = new Animation("null", [

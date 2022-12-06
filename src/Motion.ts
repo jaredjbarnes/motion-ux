@@ -1,10 +1,12 @@
 import ExtendedAnimation from "./ExtendedAnimation";
-import Animation, { IAnimation, AnimationState } from "./Animation";
+import Animation, { IAnimation } from "./Animation";
 import Player, { RepeatDirection } from "./Player";
 import BlendedAnimation from "./BlendedAnimation";
 import { EasingFunction } from "./easings";
 import KeyframeGenerator from "./KeyframesGenerator";
 import TimeObserver from "./TimeObserver";
+
+function defaultOnComplete() {}
 
 export default class Motion<T> {
   protected setOnFirst: boolean;
@@ -42,8 +44,9 @@ export default class Motion<T> {
 
   segueTo(
     animation: IAnimation<T>,
-    duration: number = 0.001,
-    easing?: EasingFunction
+    duration: number = 0,
+    easing?: EasingFunction,
+    onComplete = defaultOnComplete
   ) {
     const currentDuration = this.currentDuration;
     const currentAnimation = this.animation;
@@ -53,11 +56,25 @@ export default class Motion<T> {
     this.player.iterations = 0;
     this.player.repeat = 1;
 
+    if (duration === 0) {
+      const finishedAnimation = animation.clone();
+      finishedAnimation.update(1);
+      this.player.duration = 0;
+      this.player.time = 1;
+      this.animation = finishedAnimation;
+      onComplete();
+      return;
+    }
+
     if (currentAnimation == null) {
       if (this.setOnFirst) {
         const finishedAnimation = animation.clone();
-        this.player.duration = 0.001;
+        finishedAnimation.update(1);
+        this.player.duration = 0;
+        this.player.time = 1;
         this.animation = finishedAnimation;
+        onComplete();
+        return;
       } else {
         this.animation = animation;
       }
@@ -93,6 +110,7 @@ export default class Motion<T> {
         const values = newAnimation.currentValues;
         const animation = this.makeAnimationFromLastValues(values);
         this.animation = animation;
+        onComplete && onComplete();
       });
     }
 

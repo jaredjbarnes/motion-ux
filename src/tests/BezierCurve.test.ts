@@ -1,35 +1,27 @@
 import BezierCurve from "../BezierCurve";
 
 describe("BezierCurve", () => {
-  // test("linear", () => {
-  //   const bezierCurve = new BezierCurve([0, 1]);
-  //   const value = bezierCurve.valueAt(0.5);
-  //   const integrationValue = bezierCurve.integralAt(0.5);
-  //   const differentiationValueAt = bezierCurve.deltaAt(0.5);
+  test("linear", () => {
+    const bezierCurve = new BezierCurve([0, 1]);
+    const value = bezierCurve.valueAt(0.5);
+    const integrationValue = bezierCurve.sumAt(0.5);
+    const differentiationValueAt = bezierCurve.deltaAt(0.5);
 
-  //   expect(value).toBe(0.5);
-  //   expect(integrationValue).toBe((0.5 * 0.5) / 2);
-  //   expect(differentiationValueAt).toBe(1);
-  // });
+    expect(value).toBe(0.5);
+    expect(integrationValue).toBe((0.5 * 0.5) / 2);
+    expect(differentiationValueAt).toBe(1);
+  });
 
-  // test("exponential", () => {
-  //   const x = 0.5;
-  //   const bezierCurve = new BezierCurve([0, 0, 1]);
-  //   const value = bezierCurve.valueAt(x);
-  //   const integrationValue = bezierCurve.integralAt(x);
-  //   const differentiationValueAt = bezierCurve.deltaAt(x);
-
-  //   expect(value).toBe(Math.pow(x, 2));
-  //   expect(integrationValue).toBe(Math.pow(x, 3) / 3);
-  //   expect(differentiationValueAt).toBe(2 * x);
-  // });
-
-  test("playground2", () => {
-    const x = 0.75;
-    const bezierCurve = new BezierCurve([4, 5, 1]);
+  test("exponential", () => {
+    const x = 0.5;
+    const bezierCurve = new BezierCurve([0, 0, 1]);
     const value = bezierCurve.valueAt(x);
+    const integrationValue = bezierCurve.sumAt(x);
+    const differentiationValueAt = bezierCurve.deltaAt(x);
 
     expect(value).toBe(Math.pow(x, 2));
+    expect(integrationValue).toBe(Math.pow(x, 3) / 3);
+    expect(differentiationValueAt).toBe(2 * x);
   });
 
   test("x^2", () => {
@@ -49,7 +41,8 @@ describe("BezierCurve", () => {
     const delta = bezierCurve.deltaAt(0);
     const sum = bezierCurve.sumAt(0.5);
     const expectedSum = Math.pow(0.5, 4) / 4;
-    console.log(delta);
+
+    expect(sum).toBe(expectedSum);
   });
 
   test("EaseInOut", () => {
@@ -57,15 +50,10 @@ describe("BezierCurve", () => {
     const value = bezierCurve.valueAt(0.5);
     const delta = bezierCurve.deltaAt(0);
     const sum = bezierCurve.sumAt(0.25);
-    console.log(delta);
+
+    expect(sum).toBe(0.03125);
+    expect(value).toBe(0.5);
+    expect(delta).toBe(1);
   });
 
-  test("performance", () => {
-    const bezierCurve = new BezierCurve([0, 1]);
-    console.time("performance");
-    for (let x = 0; x < 1000; x++) {
-      const value = bezierCurve.valueAt(0.5);
-    }
-    console.timeEnd("performance");
-  });
 });

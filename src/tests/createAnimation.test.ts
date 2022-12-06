@@ -1,4 +1,5 @@
 import { createAnimation } from "../createAnimation";
+import { approximatelyEqual } from "./approximatelyEqual";
 
 describe("createAnimation", () => {
   test("Many Steps.", () => {
@@ -81,7 +82,7 @@ describe("createAnimation", () => {
 
     let currentValues = animation.currentValues;
 
-    expect(currentValues.opacity).toBe(-0.08);
+    expect(approximatelyEqual(currentValues.opacity, -0.08)).toBe(true);
     expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
@@ -115,7 +116,7 @@ describe("createAnimation", () => {
 
     let currentValues = animation.currentValues;
 
-    expect(currentValues.opacity).toBe(-0.08);
+    expect(approximatelyEqual(currentValues.opacity, -0.08)).toBe(true);
     expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
@@ -129,7 +130,7 @@ describe("createAnimation", () => {
 
     currentValues = animation.currentValues;
 
-    expect(currentValues.opacity).toBe(0.9702000000000001);
+    expect(approximatelyEqual(0.9702, currentValues.opacity)).toBe(true);
     expect(currentValues.display).toBe("block");
   });
 
@@ -160,7 +161,7 @@ describe("createAnimation", () => {
 
     currentValues = animation.currentValues;
 
-    expect(currentValues.opacity).toBe(1.0097999999999998);
+    expect(approximatelyEqual(currentValues.opacity, 1.00979)).toBe(true);
     expect(currentValues.display).toBe("block");
   });
 
@@ -183,7 +184,7 @@ describe("createAnimation", () => {
 
     let currentValues = animation.currentValues;
 
-    expect(currentValues.opacity).toBe(0.028);
+    expect(approximatelyEqual(0.028, currentValues.opacity)).toBe(true);
     expect(currentValues.display).toBe("block");
 
     animation.update(0.75);
@@ -251,7 +252,7 @@ describe("createAnimation", () => {
 
     let currentValues = animation.currentValues;
 
-    expect(currentValues.opacity).toBe(0.19);
+    expect(approximatelyEqual(0.19, currentValues.opacity)).toBe(true);
     expect(currentValues.display).toBe("block");
 
     animation.update(0.75);

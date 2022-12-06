@@ -1,13 +1,11 @@
 import ExtendedAnimation from "../ExtendedAnimation";
 import Animation from "../Animation";
 import Keyframe from "../Keyframe";
-import Player from "../Player";
-import MockClock from "../MockClock";
 import easings from "../easings";
 
 describe("Animation", () => {
   test("Extend Linearly", () => {
-    const animation = new Animation("css", [
+    const animation = new Animation<{ opacity: number }>("css", [
       new Keyframe({
         property: "opacity",
         startAt: 0,
@@ -28,7 +26,7 @@ describe("Animation", () => {
   });
 
   test("Extend Exponentially", () => {
-    const animation = new Animation("css", [
+    const animation = new Animation<{ opacity: number }>("css", [
       new Keyframe({
         property: "opacity",
         startAt: 0,

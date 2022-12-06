@@ -160,6 +160,14 @@ class Animator {
         this.bezierCurve.setPoints(points);
         return this.bezierCurve.valueAt(timeWithEasing);
     }
+    getDeltaValue(from, controls = emptyArray, to) {
+        const elapsedTime = this.time - this.keyframe.startAt;
+        const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
+        const timeWithEasing = this.keyframe.easing(elapsedTime / animationDuration);
+        const points = [from, ...controls, to];
+        this.bezierCurve.setPoints(points);
+        return this.bezierCurve.deltaAt(timeWithEasing);
+    }
     getStringValue(from, to) {
         if (this.time >= this.keyframe.startAt) {
             return to;
@@ -2985,6 +2993,7 @@ class KeyframesGenerator {
     }
 }
 
+function defaultOnComplete() { }
 class Motion {
     constructor(render, setOnFirst = false, player) {
         this.currentDuration = 0;
@@ -3007,7 +3016,7 @@ class Motion {
         this.player.play();
         return this;
     }
-    segueTo(animation, duration = 0.001, easing) {
+    segueTo(animation, duration = 0, easing, onComplete = defaultOnComplete) {
         var _a;
         const currentDuration = this.currentDuration;
         const currentAnimation = this.animation;
@@ -3015,11 +3024,24 @@ class Motion {
         this.player.duration = this.currentDuration = duration;
         this.player.iterations = 0;
         this.player.repeat = 1;
+        if (duration === 0) {
+            const finishedAnimation = animation.clone();
+            finishedAnimation.update(1);
+            this.player.duration = 0;
+            this.player.time = 1;
+            this.animation = finishedAnimation;
+            onComplete();
+            return;
+        }
         if (currentAnimation == null) {
             if (this.setOnFirst) {
                 const finishedAnimation = animation.clone();
-                this.player.duration = 0.001;
+                finishedAnimation.update(1);
+                this.player.duration = 0;
+                this.player.time = 1;
                 this.animation = finishedAnimation;
+                onComplete();
+                return;
             }
             else {
                 this.animation = animation;
@@ -3044,6 +3066,7 @@ class Motion {
                 const values = newAnimation.currentValues;
                 const animation = this.makeAnimationFromLastValues(values);
                 this.animation = animation;
+                onComplete && onComplete();
             });
         }
         this.player.time = 0;
