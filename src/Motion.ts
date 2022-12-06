@@ -62,6 +62,7 @@ export default class Motion<T> {
       this.animation = this.makeAnimationFromLastValues(values);
       this.player.duration = 0;
       this.player.time = 1;
+      this.player.render(1);
       onComplete();
       return;
     }
@@ -73,6 +74,7 @@ export default class Motion<T> {
         this.animation = this.makeAnimationFromLastValues(values);
         this.player.duration = 0;
         this.player.time = 1;
+        this.player.render(1);
         onComplete();
         return;
       } else {
