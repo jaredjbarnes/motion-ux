@@ -4,51 +4,65 @@ import Keyframe from "./Keyframe";
 const emptyArray: any[] = [];
 
 export default class Animator<T> {
-  public keyframe: Keyframe<T>;
-  public bezierCurve: BezierCurve;
-  public time: number;
+  private _keyframe: Keyframe<T>;
+  private _bezierCurve: BezierCurve;
+  private _time: number;
+
+  get keyframe() {
+    return this._keyframe;
+  }
 
   constructor(keyframe: Keyframe<T>) {
-    this.keyframe = keyframe;
-    this.time = 0;
-    this.bezierCurve = new BezierCurve([]);
+    this._keyframe = keyframe;
+    this._time = 0;
+    this._bezierCurve = new BezierCurve([]);
+    this.update(0);
   }
 
-  getNumberValue(from: any, controls: any[] = emptyArray, to: any) {
-    const elapsedTime = this.time - this.keyframe.startAt;
-    const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
-    const timeWithEasing = this.keyframe.easing(
+  private getNumberValue(
+    from: number,
+    controls: number[] = emptyArray,
+    to: number
+  ) {
+    const elapsedTime = this._time - this._keyframe.startAt;
+    const animationDuration = this._keyframe.endAt - this._keyframe.startAt;
+    const timeWithEasing = this._keyframe.easing(
       elapsedTime / animationDuration
     );
     const points = [from, ...controls, to];
-    this.bezierCurve.setPoints(points);
-    return this.bezierCurve.valueAt(timeWithEasing);
+    this._bezierCurve.setPoints(points);
+    return this._bezierCurve.valueAt(timeWithEasing);
   }
 
-  getDeltaValue(from: any, controls: any[] = emptyArray, to: any) {
-    const elapsedTime = this.time - this.keyframe.startAt;
-    const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
-    const timeWithEasing = this.keyframe.easing(
+  private getDeltaValue(
+    from: number,
+    controls: number[] = emptyArray,
+    to: number
+  ) {
+    const elapsedTime = this._time - this._keyframe.startAt;
+    const animationDuration = this._keyframe.endAt - this._keyframe.startAt;
+    const timeWithEasing = this._keyframe.easing(
       elapsedTime / animationDuration
     );
     const points = [from, ...controls, to];
-    this.bezierCurve.setPoints(points);
-    return this.bezierCurve.deltaAt(timeWithEasing);
+    this._bezierCurve.setPoints(points);
+    return this._bezierCurve.deltaAt(timeWithEasing);
   }
 
-  getStringValue(from: any, to: any) {
-    if (this.time >= this.keyframe.startAt) {
+  private getStringValue(from: any, to: any) {
+    if (this._time >= this._keyframe.startAt) {
       return to;
     } else {
       return from;
     }
   }
 
-  traverse(
+  private traverse(
     fromObject: any,
     controlsObject: any,
     toObject: any,
-    resultObject: any
+    resultObject: any,
+    deltaObject: any
   ) {
     for (let key in fromObject) {
       const from = fromObject[key];
@@ -57,45 +71,55 @@ export default class Animator<T> {
 
       if (typeof from === "number") {
         resultObject[key] = this.getNumberValue(from, controls, to);
+        deltaObject[key] = this.getDeltaValue(from, controls, to);
       } else if (typeof from === "string") {
         resultObject[key] = this.getStringValue(from, to);
+        deltaObject[key] = to;
       } else if (typeof from === "object" && from != null) {
         this.traverse(
           fromObject[key],
           controls || emptyArray,
           toObject[key],
-          resultObject[key]
+          resultObject[key],
+          deltaObject[key]
         );
       }
     }
   }
 
   update(time: number) {
-    this.time = time;
+    this._time = time;
 
-    if (typeof this.keyframe.from === "string") {
-      this.keyframe.result = this.getStringValue(
-        this.keyframe.from,
-        this.keyframe.to
+    if (typeof this._keyframe.from === "string") {
+      this._keyframe.result = this.getStringValue(
+        this._keyframe.from,
+        this._keyframe.to
       );
-    } else if (typeof this.keyframe.from === "number") {
-      this.keyframe.result = this.getNumberValue(
-        this.keyframe.from,
-        this.keyframe.controls,
-        this.keyframe.to
+
+      this._keyframe.delta = this._keyframe.to;
+    } else if (typeof this._keyframe.from === "number") {
+      this._keyframe.result = this.getNumberValue(
+        this._keyframe.from,
+        this._keyframe.controls as number[],
+        this._keyframe.to as number
+      ) as any as T;
+
+      this._keyframe.delta = this.getDeltaValue(
+        this._keyframe.from,
+        this._keyframe.controls as number[],
+        this._keyframe.to as number
       ) as any as T;
     } else if (
-      typeof this.keyframe.from === "object" &&
-      this.keyframe.from != null
+      typeof this._keyframe.from === "object" &&
+      this._keyframe.from != null
     ) {
       this.traverse(
-        this.keyframe.from,
-        this.keyframe.controls,
-        this.keyframe.to,
-        this.keyframe.result
+        this._keyframe.from,
+        this._keyframe.controls,
+        this._keyframe.to,
+        this._keyframe.result,
+        this._keyframe.delta
       );
     }
-
-    return this.keyframe.result;
   }
 }

@@ -59,7 +59,7 @@ document.body.addEventListener("pointerdown", (event) => {
   lastX = event.pageX;
   lastY = event.pageY;
 
-  motion.segueTo(animation, 1000, easings.easeOutExpo);
+  motion.segueTo(animation, 1000, easings.easeOutQuint);
 });
 
 function animateLoop() {

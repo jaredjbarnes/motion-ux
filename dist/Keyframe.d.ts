@@ -16,11 +16,14 @@ export interface KeyframeConfig<T> {
     controls?: T[];
     easing?: EasingFunction;
 }
+export declare function generateInitialDelta<T>(delta: T): T;
 export default class Keyframe<T> {
     property: string;
     to: T;
     from: T;
     result: T;
+    delta: T;
+    fromDelta: T;
     startAt: number;
     endAt: number;
     controls: T[];

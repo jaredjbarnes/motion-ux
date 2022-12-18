@@ -1,13 +1,13 @@
-import BezierCurve from "./BezierCurve";
 import Keyframe from "./Keyframe";
 export default class Animator<T> {
-    keyframe: Keyframe<T>;
-    bezierCurve: BezierCurve;
-    time: number;
+    private _keyframe;
+    private _bezierCurve;
+    private _time;
+    get keyframe(): Keyframe<T>;
     constructor(keyframe: Keyframe<T>);
-    getNumberValue(from: any, controls: any[] | undefined, to: any): number;
-    getDeltaValue(from: any, controls: any[] | undefined, to: any): number;
-    getStringValue(from: any, to: any): any;
-    traverse(fromObject: any, controlsObject: any, toObject: any, resultObject: any): void;
-    update(time: number): T;
+    private getNumberValue;
+    private getDeltaValue;
+    private getStringValue;
+    private traverse;
+    update(time: number): void;
 }

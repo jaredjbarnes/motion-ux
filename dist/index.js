@@ -2,6 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+// https://en.wikipedia.org/wiki/Simpson%27s_rule
 function simpsonsRule(lowerBound, upperBound, f, n = 4) {
     let stripAmount = f(lowerBound);
     const stepAmount = (upperBound - lowerBound) / n;
@@ -17,10 +18,12 @@ function simpsonsRule(lowerBound, upperBound, f, n = 4) {
     stripAmount += f(upperBound);
     return (stepAmount / 3) * stripAmount;
 }
+// https://en.wikipedia.org/wiki/Bernstein_polynomial
 function bernsteinPolynomial(v, n, x) {
     if (v > n || v < 0) {
         return 0;
     }
+    // https://en.wikipedia.org/wiki/Binomial_coefficient
     const binomialCoefficient = nChooseK(n, v);
     // This is almost a 10 times faster than math.pow.
     let tValue = x;
@@ -36,13 +39,21 @@ function bernsteinPolynomial(v, n, x) {
     remainingT = n - v <= 0 ? 1 : remainingT;
     return binomialCoefficient * tValue * remainingT;
 }
+// We cache factorials so we can save on computations.
+const factorialCache = new Map();
+// https://en.wikipedia.org/wiki/Factorial
 function factorial(num) {
-    let rval = 1;
+    const cache = factorialCache.get(num);
+    if (cache != null) {
+        return cache;
+    }
+    let result = 1;
     for (let i = 2; i <= num; i++)
-        rval = rval * i;
-    return rval;
+        result = result * i;
+    factorialCache.set(num, result);
+    return result;
 }
-// We need to cache nChooseK for performance reasons.
+// We cache nChooseK so we can save on computations.
 const nChooseKCache = new Map();
 function nChooseK(n, k) {
     const key = `${n}|${k}`;
@@ -148,63 +159,70 @@ class BezierCurve {
 const emptyArray = [];
 class Animator {
     constructor(keyframe) {
-        this.keyframe = keyframe;
-        this.time = 0;
-        this.bezierCurve = new BezierCurve([]);
+        this._keyframe = keyframe;
+        this._time = 0;
+        this._bezierCurve = new BezierCurve([]);
+        this.update(0);
+    }
+    get keyframe() {
+        return this._keyframe;
     }
     getNumberValue(from, controls = emptyArray, to) {
-        const elapsedTime = this.time - this.keyframe.startAt;
-        const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
-        const timeWithEasing = this.keyframe.easing(elapsedTime / animationDuration);
+        const elapsedTime = this._time - this._keyframe.startAt;
+        const animationDuration = this._keyframe.endAt - this._keyframe.startAt;
+        const timeWithEasing = this._keyframe.easing(elapsedTime / animationDuration);
         const points = [from, ...controls, to];
-        this.bezierCurve.setPoints(points);
-        return this.bezierCurve.valueAt(timeWithEasing);
+        this._bezierCurve.setPoints(points);
+        return this._bezierCurve.valueAt(timeWithEasing);
     }
     getDeltaValue(from, controls = emptyArray, to) {
-        const elapsedTime = this.time - this.keyframe.startAt;
-        const animationDuration = this.keyframe.endAt - this.keyframe.startAt;
-        const timeWithEasing = this.keyframe.easing(elapsedTime / animationDuration);
+        const elapsedTime = this._time - this._keyframe.startAt;
+        const animationDuration = this._keyframe.endAt - this._keyframe.startAt;
+        const timeWithEasing = this._keyframe.easing(elapsedTime / animationDuration);
         const points = [from, ...controls, to];
-        this.bezierCurve.setPoints(points);
-        return this.bezierCurve.deltaAt(timeWithEasing);
+        this._bezierCurve.setPoints(points);
+        return this._bezierCurve.deltaAt(timeWithEasing);
     }
     getStringValue(from, to) {
-        if (this.time >= this.keyframe.startAt) {
+        if (this._time >= this._keyframe.startAt) {
             return to;
         }
         else {
             return from;
         }
     }
-    traverse(fromObject, controlsObject, toObject, resultObject) {
+    traverse(fromObject, controlsObject, toObject, resultObject, deltaObject) {
         for (let key in fromObject) {
             const from = fromObject[key];
             const to = toObject[key];
             const controls = controlsObject.map((c) => c[key]);
             if (typeof from === "number") {
                 resultObject[key] = this.getNumberValue(from, controls, to);
+                deltaObject[key] = this.getDeltaValue(from, controls, to);
             }
             else if (typeof from === "string") {
                 resultObject[key] = this.getStringValue(from, to);
+                deltaObject[key] = to;
             }
             else if (typeof from === "object" && from != null) {
-                this.traverse(fromObject[key], controls || emptyArray, toObject[key], resultObject[key]);
+                this.traverse(fromObject[key], controls || emptyArray, toObject[key], resultObject[key], deltaObject[key]);
             }
         }
     }
     update(time) {
-        this.time = time;
-        if (typeof this.keyframe.from === "string") {
-            this.keyframe.result = this.getStringValue(this.keyframe.from, this.keyframe.to);
+        this._time = time;
+        if (typeof this._keyframe.from === "string") {
+            this._keyframe.result = this.getStringValue(this._keyframe.from, this._keyframe.to);
+            this._keyframe.delta = this._keyframe.to;
         }
-        else if (typeof this.keyframe.from === "number") {
-            this.keyframe.result = this.getNumberValue(this.keyframe.from, this.keyframe.controls, this.keyframe.to);
+        else if (typeof this._keyframe.from === "number") {
+            this._keyframe.result = this.getNumberValue(this._keyframe.from, this._keyframe.controls, this._keyframe.to);
+            this._keyframe.delta = this.getDeltaValue(this._keyframe.from, this._keyframe.controls, this._keyframe.to);
         }
-        else if (typeof this.keyframe.from === "object" &&
-            this.keyframe.from != null) {
-            this.traverse(this.keyframe.from, this.keyframe.controls, this.keyframe.to, this.keyframe.result);
+        else if (typeof this._keyframe.from === "object" &&
+            this._keyframe.from != null) {
+            this.traverse(this._keyframe.from, this._keyframe.controls, this._keyframe.to, this._keyframe.result, this._keyframe.delta);
         }
-        return this.keyframe.result;
     }
 }
 
@@ -217,6 +235,7 @@ class Animation {
         this.time = 0;
         this.name = name;
         this.currentValues = {};
+        this.deltaValues = {};
         this.keyframes = keyframes;
     }
     set keyframes(keyframes) {
@@ -234,27 +253,28 @@ class Animation {
             results[property] = keyframe.result;
             return results;
         }, {});
+        this.deltaValues = this.animators.reduce((results, animator) => {
+            const keyframe = animator.keyframe;
+            const property = keyframe.property;
+            results[property] = keyframe.delta;
+            return results;
+        }, {});
     }
     _saveCurrentValues() {
         const visitedMap = new Map();
         const animators = this.animators;
         const length = animators.length;
-        // Assign all values at least once.
-        // These are the initials values beyond the time we are at.
         for (let x = 0; x < length; x++) {
             const keyframe = animators[x].keyframe;
             const key = keyframe.property;
             if (!visitedMap.has(key)) {
                 visitedMap.set(key, true);
                 this.currentValues[keyframe.property] = keyframe.from;
+                this.deltaValues[keyframe.property] = keyframe.fromDelta;
             }
-        }
-        // Assign if the value of the start at was before the time now.
-        // Since we have it sorted, the most current will win.
-        for (let x = 0; x < length; x++) {
-            const keyframe = animators[x].keyframe;
             if (keyframe.startAt <= this.time) {
                 this.currentValues[keyframe.property] = keyframe.result;
+                this.deltaValues[keyframe.property] = keyframe.delta;
             }
         }
     }
@@ -403,6 +423,7 @@ class DefaultClock {
     }
 }
 
+const NEARLY_ZERO = 0.00001;
 const defaultClock = new DefaultClock();
 function defaultRender() { }
 exports.PlayerState = void 0;
@@ -422,7 +443,7 @@ class Player extends Observable {
         this._timeScale = 1;
         this._time = 0;
         this._step = 0;
-        this._duration = 0;
+        this._duration = NEARLY_ZERO;
         this._lastTimestamp = 0;
         this._iterations = 0;
         this._repeat = 1;
@@ -455,7 +476,7 @@ class Player extends Observable {
         }
         // Virtually Nothing. All Math blows up if the duration is "0".
         if (value <= 0) {
-            value = 0.00001;
+            value = NEARLY_ZERO;
         }
         this._duration = value;
     }
@@ -907,6 +928,126 @@ function deepClone(value) {
     return JSON.parse(JSON.stringify(value));
 }
 
+const emptyFn$1 = () => 0;
+class ObjectVisitor {
+    constructor(callback = emptyFn$1) {
+        this.visitor = emptyFn$1;
+        this.setVisitor(callback);
+    }
+    visit(object) {
+        this.walk(object);
+    }
+    walk(object) {
+        if (typeof object === "object" && object != null) {
+            for (let key in object) {
+                if (typeof object[key] === "number") {
+                    object[key] = this.visitor(object[key]);
+                }
+                else if (typeof object[key] === "object") {
+                    this.walk(object[key]);
+                }
+            }
+        }
+    }
+    setVisitor(visitor) {
+        if (typeof visitor === "function") {
+            this.visitor = visitor;
+        }
+        else {
+            this.visitor = emptyFn$1;
+        }
+        this.visitor = visitor;
+    }
+}
+
+const emptyFn = () => 0;
+class ObjectsVisitor {
+    constructor(callback = emptyFn) {
+        this.visitor = emptyFn;
+        this.setVisitor(callback);
+    }
+    visit(left, right, output) {
+        this.walk(left, right, output);
+    }
+    walk(left, right, output) {
+        if (typeof left === "object" && left != null) {
+            for (let key in left) {
+                if (typeof left[key] === "number" &&
+                    typeof right[key] === "number" &&
+                    typeof output[key] === "number") {
+                    output[key] = this.visitor(left[key], right[key]);
+                }
+                else if (typeof left[key] === "object") {
+                    this.walk(left[key], right[key], output[key]);
+                }
+            }
+        }
+    }
+    setVisitor(visitor) {
+        if (typeof visitor === "function") {
+            this.visitor = visitor;
+        }
+        else {
+            this.visitor = emptyFn;
+        }
+        this.visitor = visitor;
+    }
+}
+
+const add = (left, right) => {
+    return left + right;
+};
+const subtract = (left, right) => {
+    return left - right;
+};
+const multiply = (left, right) => {
+    return left * right;
+};
+const divide = (left, right) => {
+    return left / right;
+};
+class ObjectOperator {
+    constructor() {
+        this.objectsVisitor = new ObjectsVisitor();
+        this.visitor = new ObjectVisitor();
+    }
+    assign(object, number) {
+        this.visitor.setVisitor(() => {
+            return number;
+        });
+        this.visitor.visit(object);
+    }
+    add(left, right, output) {
+        this.objectsVisitor.setVisitor(add);
+        this.objectsVisitor.visit(left, right, output);
+    }
+    subtract(left, right, output) {
+        this.objectsVisitor.setVisitor(subtract);
+        this.objectsVisitor.visit(left, right, output);
+    }
+    multiply(left, right, output) {
+        this.objectsVisitor.setVisitor(multiply);
+        this.objectsVisitor.visit(left, right, output);
+    }
+    divide(left, right, output) {
+        this.objectsVisitor.setVisitor(divide);
+        this.objectsVisitor.visit(left, right, output);
+    }
+}
+
+const objectOperator$1 = new ObjectOperator();
+function generateInitialDelta(delta) {
+    if (typeof delta === "number") {
+        return 0;
+    }
+    else if (typeof delta === "string") {
+        return delta;
+    }
+    else {
+        objectOperator$1.assign(delta, 0);
+        return delta;
+    }
+}
 class Keyframe {
     constructor(config) {
         this.property = config.property;
@@ -918,6 +1059,8 @@ class Keyframe {
         this.controls = Array.isArray(config.controls) ? config.controls : [];
         this.easing =
             typeof config.easing === "function" ? config.easing : easings.linear;
+        this.delta = generateInitialDelta(deepClone(config.from));
+        this.fromDelta = generateInitialDelta(deepClone(config.from));
     }
     clone() {
         return new Keyframe({
@@ -2471,113 +2614,6 @@ class CSSKeyframesGenerator {
             }
         }
         return keyframes;
-    }
-}
-
-const emptyFn$1 = () => 0;
-class ObjectVisitor {
-    constructor(callback = emptyFn$1) {
-        this.visitor = emptyFn$1;
-        this.setVisitor(callback);
-    }
-    visit(object) {
-        this.walk(object);
-    }
-    walk(object) {
-        if (typeof object === "object" && object != null) {
-            for (let key in object) {
-                if (typeof object[key] === "number") {
-                    object[key] = this.visitor(object[key]);
-                }
-                else if (typeof object[key] === "object") {
-                    this.walk(object[key]);
-                }
-            }
-        }
-    }
-    setVisitor(visitor) {
-        if (typeof visitor === "function") {
-            this.visitor = visitor;
-        }
-        else {
-            this.visitor = emptyFn$1;
-        }
-        this.visitor = visitor;
-    }
-}
-
-const emptyFn = () => 0;
-class ObjectsVisitor {
-    constructor(callback = emptyFn) {
-        this.visitor = emptyFn;
-        this.setVisitor(callback);
-    }
-    visit(left, right, output) {
-        this.walk(left, right, output);
-    }
-    walk(left, right, output) {
-        if (typeof left === "object" && left != null) {
-            for (let key in left) {
-                if (typeof left[key] === "number" &&
-                    typeof right[key] === "number" &&
-                    typeof output[key] === "number") {
-                    output[key] = this.visitor(left[key], right[key]);
-                }
-                else if (typeof left[key] === "object") {
-                    this.walk(left[key], right[key], output[key]);
-                }
-            }
-        }
-    }
-    setVisitor(visitor) {
-        if (typeof visitor === "function") {
-            this.visitor = visitor;
-        }
-        else {
-            this.visitor = emptyFn;
-        }
-        this.visitor = visitor;
-    }
-}
-
-const add = (left, right) => {
-    return left + right;
-};
-const subtract = (left, right) => {
-    return left - right;
-};
-const multiply = (left, right) => {
-    return left * right;
-};
-const divide = (left, right) => {
-    return left / right;
-};
-class ObjectOperator {
-    constructor() {
-        this.objectsVisitor = new ObjectsVisitor();
-        this.visitor = new ObjectVisitor();
-    }
-    assign(object, number) {
-        this.visitor.setVisitor(() => {
-            return number;
-        });
-        this.visitor.visit(object);
-    }
-    add(left, right, output) {
-        this.objectsVisitor.setVisitor(add);
-        this.objectsVisitor.visit(left, right, output);
-    }
-    subtract(left, right, output) {
-        this.objectsVisitor.setVisitor(subtract);
-        this.objectsVisitor.visit(left, right, output);
-    }
-    multiply(left, right, output) {
-        this.objectsVisitor.setVisitor(multiply);
-        this.objectsVisitor.visit(left, right, output);
-    }
-    divide(left, right, output) {
-        this.objectsVisitor.setVisitor(divide);
-        this.objectsVisitor.visit(left, right, output);
     }
 }
 

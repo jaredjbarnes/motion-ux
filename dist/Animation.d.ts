@@ -14,6 +14,7 @@ export default class Animation<T> implements IAnimation<T> {
     protected time: number;
     name: string;
     currentValues: T;
+    deltaValues: T;
     constructor(name: string, keyframes: Keyframe<unknown>[]);
     set keyframes(keyframes: Keyframe<unknown>[]);
     get keyframes(): Keyframe<unknown>[];

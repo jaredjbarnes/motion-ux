@@ -1,3 +1,4 @@
+// https://en.wikipedia.org/wiki/Simpson%27s_rule
 export function simpsonsRule(
   lowerBound: number,
   upperBound: number,
@@ -24,10 +25,13 @@ export function simpsonsRule(
   return (stepAmount / 3) * stripAmount;
 }
 
+// https://en.wikipedia.org/wiki/Bernstein_polynomial
 export function bernsteinPolynomial(v: number, n: number, x: number) {
   if (v > n || v < 0) {
     return 0;
   }
+
+  // https://en.wikipedia.org/wiki/Binomial_coefficient
   const binomialCoefficient = nChooseK(n, v);
 
   // This is almost a 10 times faster than math.pow.
@@ -47,13 +51,25 @@ export function bernsteinPolynomial(v: number, n: number, x: number) {
   return binomialCoefficient * tValue * remainingT;
 }
 
+// We cache factorials so we can save on computations.
+const factorialCache = new Map<number, number>();
+
+// https://en.wikipedia.org/wiki/Factorial
 export function factorial(num: number) {
-  let rval = 1;
-  for (let i = 2; i <= num; i++) rval = rval * i;
-  return rval;
+  const cache = factorialCache.get(num);
+
+  if (cache != null){
+    return cache;
+  }
+
+  let result = 1;
+  for (let i = 2; i <= num; i++) result = result * i;
+
+  factorialCache.set(num, result);
+  return result;
 }
 
-// We need to cache nChooseK for performance reasons.
+// We cache nChooseK so we can save on computations.
 const nChooseKCache = new Map<string, number>();
 export function nChooseK(n: number, k: number) {
   const key = `${n}|${k}`;

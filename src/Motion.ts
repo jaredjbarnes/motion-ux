@@ -22,7 +22,7 @@ export default class Motion<T> {
     setOnFirst = false,
     player?: Player
   ) {
-    this.player = player || new Player<T>();
+    this.player = player || new Player();
     this.player.render = (time: number) => {
       if (this.animation != null) {
         this.animation.update(time);

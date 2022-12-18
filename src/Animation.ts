@@ -1,5 +1,5 @@
 import Animator from "./Animator";
-import Keyframe from "./Keyframe";
+import Keyframe, { generateInitialDelta } from "./Keyframe";
 
 export type AnimationState<T> = { [key: string]: T };
 
@@ -20,10 +20,12 @@ export default class Animation<T> implements IAnimation<T> {
 
   public name: string;
   public currentValues: T;
+  public deltaValues: T;
 
   constructor(name: string, keyframes: Keyframe<unknown>[]) {
     this.name = name;
     this.currentValues = {} as T;
+    this.deltaValues = {} as T;
     this.keyframes = keyframes;
   }
 
@@ -45,6 +47,14 @@ export default class Animation<T> implements IAnimation<T> {
 
       return results;
     }, {} as T);
+
+    this.deltaValues = this.animators.reduce((results: any, animator) => {
+      const keyframe = animator.keyframe;
+      const property = keyframe.property;
+      results[property] = keyframe.delta;
+
+      return results;
+    }, {} as T);
   }
 
   private _saveCurrentValues() {
@@ -52,8 +62,6 @@ export default class Animation<T> implements IAnimation<T> {
     const animators = this.animators;
     const length = animators.length;
 
-    // Assign all values at least once.
-    // These are the initials values beyond the time we are at.
     for (let x = 0; x < length; x++) {
       const keyframe = animators[x].keyframe;
       const key = keyframe.property;
@@ -61,16 +69,12 @@ export default class Animation<T> implements IAnimation<T> {
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
         (this.currentValues as any)[keyframe.property] = keyframe.from;
+        (this.deltaValues as any)[keyframe.property] = keyframe.fromDelta;
       }
-    }
-
-    // Assign if the value of the start at was before the time now.
-    // Since we have it sorted, the most current will win.
-    for (let x = 0; x < length; x++) {
-      const keyframe = animators[x].keyframe;
 
       if (keyframe.startAt <= this.time) {
         (this.currentValues as any)[keyframe.property] = keyframe.result;
+        (this.deltaValues as any)[keyframe.property] = keyframe.delta;
       }
     }
   }
@@ -79,7 +83,7 @@ export default class Animation<T> implements IAnimation<T> {
     this.time = time;
 
     this.animators.forEach((animator) => {
-      animator.update( this.time);
+      animator.update(this.time);
     });
 
     this._saveCurrentValues();

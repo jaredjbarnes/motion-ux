@@ -1,8 +1,8 @@
 import Observable from "./Observable";
 import DefaultClock from "./DefaultClock";
 import { IClock } from "./IClock";
-import { IAnimation } from "./Animation";
 
+const NEARLY_ZERO = 0.00001;
 const defaultClock = new DefaultClock();
 function defaultRender() {}
 
@@ -17,7 +17,7 @@ export enum RepeatDirection {
   ALTERNATE = 1,
 }
 
-export default class Player<T = any> extends Observable {
+export default class Player extends Observable {
   private _timeScale: number;
   private _time: number;
   private _step: number;
@@ -35,7 +35,7 @@ export default class Player<T = any> extends Observable {
     this._timeScale = 1;
     this._time = 0;
     this._step = 0;
-    this._duration = 0;
+    this._duration = NEARLY_ZERO;
     this._lastTimestamp = 0;
     this._iterations = 0;
     this._repeat = 1;
@@ -75,7 +75,7 @@ export default class Player<T = any> extends Observable {
 
     // Virtually Nothing. All Math blows up if the duration is "0".
     if (value <= 0) {
-      value = 0.00001;
+      value = NEARLY_ZERO;
     }
 
     this._duration = value;

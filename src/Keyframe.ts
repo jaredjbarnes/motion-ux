@@ -1,6 +1,9 @@
 import easings, { EasingFunction } from "./easings";
 import { DynamicEasingNames } from "./createDynamicEasing";
 import { deepClone } from "./deepClone";
+import ObjectOperator from "./ObjectOperator";
+
+const objectOperator = new ObjectOperator();
 
 export interface IComplexKeyframeValue<T> {
   value: T;
@@ -20,11 +23,24 @@ export interface KeyframeConfig<T> {
   easing?: EasingFunction;
 }
 
+export function generateInitialDelta<T>(delta: T) {
+  if (typeof delta === "number") {
+    return 0 as any as T;
+  } else if (typeof delta === "string") {
+    return delta;
+  } else {
+    objectOperator.assign(delta, 0);
+    return delta;
+  }
+}
+
 export default class Keyframe<T> {
   public property: string;
   public to: T;
   public from: T;
   public result: T;
+  public delta: T;
+  public fromDelta: T;
   public startAt: number;
   public endAt: number;
   public controls: T[];
@@ -40,6 +56,8 @@ export default class Keyframe<T> {
     this.controls = Array.isArray(config.controls) ? config.controls : [];
     this.easing =
       typeof config.easing === "function" ? config.easing : easings.linear;
+    this.delta = generateInitialDelta(deepClone(config.from));
+    this.fromDelta = generateInitialDelta(deepClone(config.from));
   }
 
   clone() {

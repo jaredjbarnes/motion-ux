@@ -9,7 +9,7 @@ export declare enum RepeatDirection {
     DEFAULT = 0,
     ALTERNATE = 1
 }
-export default class Player<T = any> extends Observable {
+export default class Player extends Observable {
     private _timeScale;
     private _time;
     private _step;
