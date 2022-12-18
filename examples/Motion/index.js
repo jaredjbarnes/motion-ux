@@ -49,7 +49,7 @@ document.body.addEventListener("pointerdown", (event) => {
       left: {
         from: `${lastX}px`,
         to: {
-          value: `${event.pageX}`,
+          value: `${event.pageX}px`,
           easeIn: "expo",
         },
       },

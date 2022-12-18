@@ -38,9 +38,6 @@ export default class Keyframe<T> {
   public property: string;
   public to: T;
   public from: T;
-  public result: T;
-  public delta: T;
-  public fromDelta: T;
   public startAt: number;
   public endAt: number;
   public controls: T[];
@@ -50,14 +47,11 @@ export default class Keyframe<T> {
     this.property = config.property;
     this.to = config.to;
     this.from = config.from;
-    this.result = deepClone(config.from);
     this.startAt = typeof config.startAt === "number" ? config.startAt : 0;
     this.endAt = typeof config.endAt === "number" ? config.endAt : 1;
     this.controls = Array.isArray(config.controls) ? config.controls : [];
     this.easing =
       typeof config.easing === "function" ? config.easing : easings.linear;
-    this.delta = generateInitialDelta(deepClone(config.from));
-    this.fromDelta = generateInitialDelta(deepClone(config.from));
   }
 
   clone() {

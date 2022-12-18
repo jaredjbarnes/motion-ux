@@ -21,9 +21,6 @@ export default class Keyframe<T> {
     property: string;
     to: T;
     from: T;
-    result: T;
-    delta: T;
-    fromDelta: T;
     startAt: number;
     endAt: number;
     controls: T[];

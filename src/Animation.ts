@@ -15,22 +15,22 @@ const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
 };
 
 export default class Animation<T> implements IAnimation<T> {
-  protected animators: Animator<unknown>[] = [];
+  protected animators: Animator<T>[] = [];
   protected time = 0;
 
   public name: string;
   public currentValues: T;
   public deltaValues: T;
 
-  constructor(name: string, keyframes: Keyframe<unknown>[]) {
+  constructor(name: string, keyframes: Keyframe<T>[]) {
     this.name = name;
     this.currentValues = {} as T;
     this.deltaValues = {} as T;
     this.keyframes = keyframes;
   }
 
-  set keyframes(keyframes: Keyframe<unknown>[]) {
-    this.animators = keyframes.map((keyframe) => new Animator(keyframe));
+  set keyframes(keyframes: Keyframe<T>[]) {
+    this.animators = keyframes.map((keyframe) => new Animator<T>(keyframe));
     this._createCurrentValues();
     this.animators.sort(sortTime);
   }
@@ -40,21 +40,15 @@ export default class Animation<T> implements IAnimation<T> {
   }
 
   protected _createCurrentValues() {
-    this.currentValues = this.animators.reduce((results: any, animator) => {
+    this.currentValues = {} as T;
+    this.deltaValues = {} as T;
+
+    this.animators.forEach((animator) => {
       const keyframe = animator.keyframe;
       const property = keyframe.property;
-      results[property] = keyframe.result;
-
-      return results;
-    }, {} as T);
-
-    this.deltaValues = this.animators.reduce((results: any, animator) => {
-      const keyframe = animator.keyframe;
-      const property = keyframe.property;
-      results[property] = keyframe.delta;
-
-      return results;
-    }, {} as T);
+      (this.currentValues as any)[property] = animator.value;
+      (this.deltaValues as any)[property] = animator.delta;
+    });
   }
 
   private _saveCurrentValues() {
@@ -63,18 +57,19 @@ export default class Animation<T> implements IAnimation<T> {
     const length = animators.length;
 
     for (let x = 0; x < length; x++) {
-      const keyframe = animators[x].keyframe;
+      const animator = animators[x];
+      const keyframe = animator.keyframe;
       const key = keyframe.property;
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        (this.currentValues as any)[keyframe.property] = keyframe.from;
-        (this.deltaValues as any)[keyframe.property] = keyframe.fromDelta;
+        (this.currentValues as any)[keyframe.property] = animator.initialValue;
+        (this.deltaValues as any)[keyframe.property] = animator.initialDelta;
       }
 
       if (keyframe.startAt <= this.time) {
-        (this.currentValues as any)[keyframe.property] = keyframe.result;
-        (this.deltaValues as any)[keyframe.property] = keyframe.delta;
+        (this.currentValues as any)[keyframe.property] = animator.value;
+        (this.deltaValues as any)[keyframe.property] = animator.delta;
       }
     }
   }

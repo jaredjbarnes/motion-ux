@@ -158,16 +158,36 @@
       }
   }
 
+  function deepClone(value) {
+      return JSON.parse(JSON.stringify(value));
+  }
+
   const emptyArray = [];
   class Animator {
       constructor(keyframe) {
           this._keyframe = keyframe;
           this._time = 0;
           this._bezierCurve = new BezierCurve([]);
+          this._value = deepClone(keyframe.from);
+          this._delta = deepClone(keyframe.from);
           this.update(0);
+          this._initialValue = deepClone(this._value);
+          this._initialDelta = deepClone(this._delta);
       }
       get keyframe() {
           return this._keyframe;
+      }
+      get value() {
+          return this._value;
+      }
+      get delta() {
+          return this._delta;
+      }
+      get initialDelta() {
+          return this._initialDelta;
+      }
+      get initialValue() {
+          return this._initialValue;
       }
       getNumberValue(from, controls = emptyArray, to) {
           const elapsedTime = this._time - this._keyframe.startAt;
@@ -198,32 +218,44 @@
               const from = fromObject[key];
               const to = toObject[key];
               const controls = controlsObject.map((c) => c[key]);
-              if (typeof from === "number") {
+              const isNumber = typeof from === "number";
+              const isString = typeof from === "string";
+              const isObject = typeof from === "object" && from != null;
+              if (isNumber) {
                   resultObject[key] = this.getNumberValue(from, controls, to);
                   deltaObject[key] = this.getDeltaValue(from, controls, to);
               }
-              else if (typeof from === "string") {
+              else if (isString) {
                   resultObject[key] = this.getStringValue(from, to);
                   deltaObject[key] = to;
               }
-              else if (typeof from === "object" && from != null) {
+              else if (isObject) {
                   this.traverse(fromObject[key], controls || emptyArray, toObject[key], resultObject[key], deltaObject[key]);
+              }
+              else {
+                  throw new Error("Only strings, numbers, and objects are animatable.");
               }
           }
       }
       update(time) {
+          const isNull = this._keyframe.from == null;
+          const isString = typeof this._keyframe.from === "string";
+          const isNumber = typeof this._keyframe.from === "number";
+          const isObject = typeof this._keyframe.from === "object" && !isNull;
           this._time = time;
-          if (typeof this._keyframe.from === "string") {
-              this._keyframe.result = this.getStringValue(this._keyframe.from, this._keyframe.to);
-              this._keyframe.delta = this._keyframe.to;
+          if (isString) {
+              this._value = this.getStringValue(this._keyframe.from, this._keyframe.to);
+              this._delta = this._keyframe.to;
           }
-          else if (typeof this._keyframe.from === "number") {
-              this._keyframe.result = this.getNumberValue(this._keyframe.from, this._keyframe.controls, this._keyframe.to);
-              this._keyframe.delta = this.getDeltaValue(this._keyframe.from, this._keyframe.controls, this._keyframe.to);
+          else if (isNumber) {
+              this._value = this.getNumberValue(this._keyframe.from, this._keyframe.controls, this._keyframe.to);
+              this._delta = this.getDeltaValue(this._keyframe.from, this._keyframe.controls, this._keyframe.to);
           }
-          else if (typeof this._keyframe.from === "object" &&
-              this._keyframe.from != null) {
-              this.traverse(this._keyframe.from, this._keyframe.controls, this._keyframe.to, this._keyframe.result, this._keyframe.delta);
+          else if (isObject) {
+              this.traverse(this._keyframe.from, this._keyframe.controls, this._keyframe.to, this._value, this._delta);
+          }
+          else {
+              throw new Error("Only strings, numbers, and objects are animatable.");
           }
       }
   }
@@ -249,34 +281,31 @@
           return this.animators.map((a) => a.keyframe);
       }
       _createCurrentValues() {
-          this.currentValues = this.animators.reduce((results, animator) => {
+          this.currentValues = {};
+          this.deltaValues = {};
+          this.animators.forEach((animator) => {
               const keyframe = animator.keyframe;
               const property = keyframe.property;
-              results[property] = keyframe.result;
-              return results;
-          }, {});
-          this.deltaValues = this.animators.reduce((results, animator) => {
-              const keyframe = animator.keyframe;
-              const property = keyframe.property;
-              results[property] = keyframe.delta;
-              return results;
-          }, {});
+              this.currentValues[property] = animator.value;
+              this.deltaValues[property] = animator.delta;
+          });
       }
       _saveCurrentValues() {
           const visitedMap = new Map();
           const animators = this.animators;
           const length = animators.length;
           for (let x = 0; x < length; x++) {
-              const keyframe = animators[x].keyframe;
+              const animator = animators[x];
+              const keyframe = animator.keyframe;
               const key = keyframe.property;
               if (!visitedMap.has(key)) {
                   visitedMap.set(key, true);
-                  this.currentValues[keyframe.property] = keyframe.from;
-                  this.deltaValues[keyframe.property] = keyframe.fromDelta;
+                  this.currentValues[keyframe.property] = animator.initialValue;
+                  this.deltaValues[keyframe.property] = animator.initialDelta;
               }
               if (keyframe.startAt <= this.time) {
-                  this.currentValues[keyframe.property] = keyframe.result;
-                  this.deltaValues[keyframe.property] = keyframe.delta;
+                  this.currentValues[keyframe.property] = animator.value;
+                  this.deltaValues[keyframe.property] = animator.delta;
               }
           }
       }
@@ -926,10 +955,6 @@
       linear: easeLinear,
   };
 
-  function deepClone(value) {
-      return JSON.parse(JSON.stringify(value));
-  }
-
   const emptyFn$1 = () => 0;
   class ObjectVisitor {
       constructor(callback = emptyFn$1) {
@@ -1037,32 +1062,17 @@
       }
   }
 
-  const objectOperator$1 = new ObjectOperator();
-  function generateInitialDelta(delta) {
-      if (typeof delta === "number") {
-          return 0;
-      }
-      else if (typeof delta === "string") {
-          return delta;
-      }
-      else {
-          objectOperator$1.assign(delta, 0);
-          return delta;
-      }
-  }
+  new ObjectOperator();
   class Keyframe {
       constructor(config) {
           this.property = config.property;
           this.to = config.to;
           this.from = config.from;
-          this.result = deepClone(config.from);
           this.startAt = typeof config.startAt === "number" ? config.startAt : 0;
           this.endAt = typeof config.endAt === "number" ? config.endAt : 1;
           this.controls = Array.isArray(config.controls) ? config.controls : [];
           this.easing =
               typeof config.easing === "function" ? config.easing : easings.linear;
-          this.delta = generateInitialDelta(deepClone(config.from));
-          this.fromDelta = generateInitialDelta(deepClone(config.from));
       }
       clone() {
           return new Keyframe({
