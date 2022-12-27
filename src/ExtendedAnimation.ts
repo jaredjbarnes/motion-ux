@@ -1,4 +1,4 @@
-import { IAnimation, AnimationState } from "./Animation";
+import { IAnimation } from "./Animation";
 import SlopeAnimationBuilder from "./SlopeAnimationBuilder";
 
 const slopeAnimationBuilder = new SlopeAnimationBuilder();
@@ -11,6 +11,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
   private extendDurationBy;
 
   public currentValues: T;
+  public deltaValues: T;
   public name: string;
   public time: number = 0;
 
@@ -26,15 +27,10 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
 
     this.animation = animation;
     this.currentValues = this.animation.currentValues;
+    this.deltaValues = this.animation.deltaValues;
     this.name = this.animation.name;
 
-    this.slopeAnimation = slopeAnimationBuilder.build(
-      this.animation,
-      duration,
-      1,
-      extendDurationBy,
-      1
-    );
+    this.slopeAnimation = this.animation
   }
 
   private getSafeDuration(value: number) {
@@ -61,6 +57,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
       const overflowTime = offsetTime + slopeAnimationBuilder.delta - 1;
       this.slopeAnimation.update(overflowTime);
       this.currentValues = this.slopeAnimation.currentValues;
+      this.deltaValues = this.slopeAnimation.deltaValues;
     } else {
       if (this.animation == null) {
         return this;
@@ -68,6 +65,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
 
       this.animation.update(offsetTime);
       this.currentValues = this.animation.currentValues;
+      this.deltaValues = this.animation.deltaValues;
     }
 
     return this;

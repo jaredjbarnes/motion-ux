@@ -6,6 +6,7 @@ export type AnimationState<T> = { [key: string]: T };
 export interface IAnimation<T> {
   name: string;
   currentValues: T;
+  deltaValues: T;
   update(time: number): IAnimation<T>;
   clone(): IAnimation<T>;
 }

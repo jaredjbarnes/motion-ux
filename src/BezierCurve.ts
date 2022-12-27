@@ -44,9 +44,6 @@ export default class BezierCurve {
     this.normalizedPoints = this.points.map((point) => {
       return point - root;
     });
-
-    Object.freeze(this.points);
-    Object.freeze(this.normalizedPoints);
   }
 
   valueAt(x: number) {

@@ -1,32 +1,25 @@
 import "../../dist/index.browser.js";
-const { StatefulMotion } = motionUX;
+const { createCssAnimation } = motionUX;
 
 const ANIMATION_DURATION = 1000;
-const first = {
-  "@segueTo": "second",
-  "@loop": {
-    iterationCount: 3,
-    easing: "easeOutQuad",
-    duration: ANIMATION_DURATION,
-    keyframes: {
-      transform: {
-        from: {
-          value: "translate(0px, 0px)",
-          easeOut: "quad",
-        },
-        "50%": {
-          value: "translate(500px, 500px)",
-          easeIn: "quad",
-          easeOut: "quad",
-        },
-        to: {
-          value: "translate(0px, 0px)",
-          easeIn: "quad",
-        },
-      },
+
+const first = createCssAnimation({
+  transform: {
+    from: {
+      value: "translate(0px, 0px)",
+      easeOut: "quad",
+    },
+    "50%": {
+      value: "translate(500px, 500px)",
+      easeIn: "quad",
+      easeOut: "quad",
+    },
+    to: {
+      value: "translate(0px, 0px)",
+      easeIn: "quad",
     },
   },
-};
+});
 
 const second = {
   "@segueTo": "third",
@@ -107,7 +100,7 @@ const fourth = {
 const fifth = {
   "@values": {
     transform: "translate(250px, 250px)",
-  }
+  },
 };
 
 const sixth = {
@@ -130,8 +123,8 @@ const sixth = {
           value: "translate(500px, 0px)",
           easeIn: "quad",
         },
-      }
-    }
+      },
+    },
   },
 };
 
@@ -180,8 +173,7 @@ const eight = {
           easeIn: "expo",
         },
       },
-    }
-
+    },
   },
   "@leave": {
     keyframes: {
@@ -192,7 +184,7 @@ const eight = {
         },
         to: "translate(300px, 300px)",
       },
-    }
+    },
   },
 };
 

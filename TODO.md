@@ -13,3 +13,7 @@ interface Keyframe<T> {
 ```
 
 We would then create function or classes to implement that interface.
+
+
+There is a problem with extend animation changing its currentValues from the original then
+to the extended slopes. We need to make one object that both animations assign on update.

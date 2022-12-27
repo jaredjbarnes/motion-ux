@@ -29,6 +29,11 @@ export class UniformPathAnimation
     y: 0,
   };
 
+  readonly deltaValues = {
+    x: 0,
+    y: 0,
+  };
+
   get distance() {
     return this._distance;
   }
@@ -116,6 +121,8 @@ export class UniformPathAnimation
 
     this.currentValues.x = curve.x.valueAt(uniformTime);
     this.currentValues.y = curve.y.valueAt(uniformTime);
+    this.deltaValues.x = curve.x.deltaAt(uniformTime);
+    this.deltaValues.y = curve.y.deltaAt(uniformTime);
 
     return this;
   }
