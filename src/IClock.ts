@@ -4,4 +4,5 @@ export interface IClock {
   register(callback: TickCallback): void;
   unregister(callback: TickCallback): void;
   now(): number;
+  getRegisteredCallbacks(): TickCallback[];
 }

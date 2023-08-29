@@ -37,4 +37,8 @@ export default class DefaultClock implements IClock {
   now() {
     return performance.now();
   }
+
+  getRegisteredCallbacks(): TickCallback[] {
+    return Array.from(this.registeredCallbacks.values());
+  }
 }

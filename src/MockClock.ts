@@ -33,4 +33,8 @@ export default class MockClock implements IClock {
       callback();
     });
   }
+
+  getRegisteredCallbacks(): TickCallback[] {
+    return Array.from(this.requests.values());
+  }
 }

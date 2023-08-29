@@ -16,15 +16,17 @@ describe("Motion", () => {
     };
 
     const mockClock = new MockClock();
-    const player = new Player(mockClock);
-    const motion = new Motion<Style>(
-      (animation) => {
-        style.opacity = animation.currentValues.opacity;
-        style.scale = animation.currentValues.scale;
-      },
-      true,
-      player
-    );
+    Player.setClock(mockClock);
+
+    const initialAnimation = createAnimation({
+      opacity: 0,
+      scale: 0.25,
+    });
+
+    const motion = new Motion<Style>((animation) => {
+      style.opacity = animation.currentValues.opacity;
+      style.scale = animation.currentValues.scale;
+    }, initialAnimation);
 
     motion.segueTo(
       createAnimation({

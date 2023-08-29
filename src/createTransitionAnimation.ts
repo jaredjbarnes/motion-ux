@@ -5,6 +5,7 @@ import { deepClone } from "./deepClone";
 import BlendedAnimation from "./BlendedAnimation";
 import easings from "./easings";
 
+const NEARLY_ZERO = 0.00001;
 const DESIRED_FPS = 1000 / 60;
 
 const objectOperator = new ObjectOperator();
@@ -20,7 +21,9 @@ export function createTransitionAnimation<T extends {}>(
   const to = deepClone(from);
   const multiplier = deepClone(from);
   const change = deepClone(from);
-  const frames = duration / DESIRED_FPS;
+  let frames = duration / DESIRED_FPS;
+
+  frames = frames === 0 ? NEARLY_ZERO : frames;
 
   objectOperator.assign(multiplier, frames);
   objectOperator.divide(delta, multiplier, delta);

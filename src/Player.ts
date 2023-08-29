@@ -18,6 +18,7 @@ export enum RepeatDirection {
 }
 
 export default class Player extends Observable {
+  private static _clock: IClock = defaultClock;
   private _timeScale: number;
   private _time: number;
   private _step: number;
@@ -26,11 +27,10 @@ export default class Player extends Observable {
   private _iterations: number;
   private _repeat: number;
   private _repeatDirection: RepeatDirection;
-  private _clock: IClock;
   private _state: PlayerState;
   private _render: (time: number) => void;
 
-  constructor(clock?: IClock) {
+  constructor() {
     super();
     this._timeScale = 1;
     this._time = 0;
@@ -40,7 +40,6 @@ export default class Player extends Observable {
     this._iterations = 0;
     this._repeat = 1;
     this._repeatDirection = RepeatDirection.DEFAULT;
-    this._clock = clock || defaultClock;
     this._state = PlayerState.STOPPED;
     this._render = defaultRender;
     this.tick = this.tick.bind(this);
@@ -127,16 +126,8 @@ export default class Player extends Observable {
     }
   }
 
-  get clock() {
-    return this._clock;
-  }
-
-  set clock(value: IClock) {
-    this._clock = value;
-  }
-
   private tick() {
-    const timestamp = this._clock.now();
+    const timestamp = Player._clock.now();
     const deltaTime = timestamp - this._lastTimestamp;
     this._step = (deltaTime / this._duration) * this._timeScale;
 
@@ -280,7 +271,7 @@ export default class Player extends Observable {
       this._state = PlayerState.STOPPED;
       this._render(this._time);
 
-      this._clock.unregister(this.tick);
+      Player._clock.unregister(this.tick);
 
       this.notify({
         type: "STOPPED",
@@ -292,10 +283,10 @@ export default class Player extends Observable {
 
   play() {
     if (this._state !== PlayerState.FORWARD) {
-      this._lastTimestamp = this._clock.now();
+      this._lastTimestamp = Player._clock.now();
 
       this._state = PlayerState.FORWARD;
-      this._clock.register(this.tick);
+      Player._clock.register(this.tick);
 
       this.notify({
         type: "PLAYED",
@@ -307,10 +298,10 @@ export default class Player extends Observable {
 
   reverse() {
     if (this._state !== PlayerState.REVERSE) {
-      this._lastTimestamp = this._clock.now();
+      this._lastTimestamp = Player._clock.now();
 
       this._state = PlayerState.REVERSE;
-      this._clock.register(this.tick);
+      Player._clock.register(this.tick);
 
       this.notify({
         type: "REVERSED",
@@ -323,5 +314,17 @@ export default class Player extends Observable {
   dispose() {
     this.stop();
     super.dispose();
+  }
+
+  static setClock(clock: IClock) {
+    const oldClock = Player._clock;
+    const registeredCallbacks = oldClock.getRegisteredCallbacks();
+
+    registeredCallbacks.forEach((c) => {
+      oldClock.unregister(c);
+      clock.register(c);
+    });
+
+    Player._clock = clock;
   }
 }
