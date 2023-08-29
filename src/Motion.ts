@@ -15,6 +15,8 @@ export default class Motion<T extends {}> {
   protected keyframeGenerator = new KeyframeGenerator();
   protected player: Player;
   protected animation: IAnimation<T>;
+  protected animationAfterSegue: IAnimation<T>;
+  protected onComplete = defaultOnComplete;
 
   constructor(
     render: (animation: IAnimation<T>) => void,
@@ -22,6 +24,7 @@ export default class Motion<T extends {}> {
     duration = 0
   ) {
     this.animation = initialAnimation;
+    this.animationAfterSegue = initialAnimation;
     this.player = new Player();
     this.player.duration = duration;
     this.player.render = (time: number) => {
@@ -30,6 +33,11 @@ export default class Motion<T extends {}> {
         render(this.animation);
       }
     };
+
+    this.player.observeTime(1, () => {
+      this.animation = this.animationAfterSegue;
+      this.onComplete();
+    });
   }
 
   inject(animation: IAnimation<T>) {
@@ -49,19 +57,15 @@ export default class Motion<T extends {}> {
   ) {
     const transitionAnimation = this.createTransition(to, duration);
 
-    this.player.observeTimeOnce(1, () => {
-      const isSameAnimation = transitionAnimation === this.animation;
+    this.onComplete = onComplete;
+    to.update(1);
+    this.animationAfterSegue = this.makeAnimationFromLastValues(
+      to.currentValues
+    );
 
-      if (isSameAnimation) {
-        this.animation = this.makeAnimationFromLastValues(
-          this.animation.currentValues
-        );
-
-        onComplete();
-      }
-    });
-
+    to.update(0);
     this.animation = transitionAnimation;
+
     this.player.repeat = 1;
     this.player.play();
 
@@ -70,16 +74,9 @@ export default class Motion<T extends {}> {
 
   segueToLoop(to: IAnimation<T>, duration = 0, onComplete = defaultOnComplete) {
     const transitionAnimation = this.createTransition(to, duration);
-
-    this.player.observeTimeOnce(1, () => {
-      const isSameAnimation = transitionAnimation === this.animation;
-
-      if (isSameAnimation) {
-        this.animation = to;
-        onComplete();
-      }
-    });
-
+    
+    this.onComplete = onComplete;
+    this.animationAfterSegue = to;
     this.animation = transitionAnimation;
     this.player.repeat = Infinity;
     this.player.play();

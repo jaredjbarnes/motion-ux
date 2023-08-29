@@ -585,6 +585,11 @@ class Player extends Observable {
             }
             if (repeatDirection === exports.RepeatDirection.ALTERNATE) {
                 const adjustedTime = 1 - (time - 1);
+                this.notify({
+                    type: "TICK",
+                    time: 1,
+                    lastTime,
+                });
                 this._time = 1;
                 this.seek(adjustedTime);
                 this._state = exports.PlayerState.REVERSE;
@@ -623,6 +628,11 @@ class Player extends Observable {
             }
             if (repeatDirection === exports.RepeatDirection.ALTERNATE) {
                 const adjustedTime = time * -1;
+                this.notify({
+                    type: "TICK",
+                    time: 0,
+                    lastTime,
+                });
                 this._time = 0;
                 this.seek(adjustedTime);
                 this._state = exports.PlayerState.FORWARD;
@@ -2909,7 +2919,7 @@ function createTransitionAnimation(fromAnimation, toAnimation, duration) {
         return acc;
     }, {});
     const slopeAnimation = new Animation("slope-animation", keyframeGenerator.generate(keyframes));
-    const animation = new BlendedAnimation(slopeAnimation, toAnimation.clone(), easings.linear);
+    const animation = new BlendedAnimation(slopeAnimation, toAnimation, easings.linear);
     return animation;
 }
 
@@ -2919,7 +2929,9 @@ class Motion {
     constructor(render, initialAnimation, duration = 0) {
         this.currentDuration = 0;
         this.keyframeGenerator = new KeyframesGenerator();
+        this.onComplete = defaultOnComplete;
         this.animation = initialAnimation;
+        this.animationAfterSegue = initialAnimation;
         this.player = new Player();
         this.player.duration = duration;
         this.player.render = (time) => {
@@ -2928,6 +2940,10 @@ class Motion {
                 render(this.animation);
             }
         };
+        this.player.observeTime(1, () => {
+            this.animation = this.animationAfterSegue;
+            this.onComplete();
+        });
     }
     inject(animation) {
         this.animation = animation;
@@ -2938,13 +2954,10 @@ class Motion {
     }
     segueTo(to, duration = 0, onComplete = defaultOnComplete) {
         const transitionAnimation = this.createTransition(to, duration);
-        this.player.observeTimeOnce(1, () => {
-            const isSameAnimation = transitionAnimation === this.animation;
-            if (isSameAnimation) {
-                this.animation = this.makeAnimationFromLastValues(this.animation.currentValues);
-                onComplete();
-            }
-        });
+        this.onComplete = onComplete;
+        to.update(1);
+        this.animationAfterSegue = this.makeAnimationFromLastValues(to.currentValues);
+        to.update(0);
         this.animation = transitionAnimation;
         this.player.repeat = 1;
         this.player.play();
@@ -2952,13 +2965,8 @@ class Motion {
     }
     segueToLoop(to, duration = 0, onComplete = defaultOnComplete) {
         const transitionAnimation = this.createTransition(to, duration);
-        this.player.observeTimeOnce(1, () => {
-            const isSameAnimation = transitionAnimation === this.animation;
-            if (isSameAnimation) {
-                this.animation = to;
-                onComplete();
-            }
-        });
+        this.onComplete = onComplete;
+        this.animationAfterSegue = to;
         this.animation = transitionAnimation;
         this.player.repeat = Infinity;
         this.player.play();

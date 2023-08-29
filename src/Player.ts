@@ -182,6 +182,12 @@ export default class Player extends Observable {
       if (repeatDirection === RepeatDirection.ALTERNATE) {
         const adjustedTime = 1 - (time - 1);
 
+        this.notify({
+          type: "TICK",
+          time: 1,
+          lastTime,
+        });
+
         this._time = 1;
         this.seek(adjustedTime);
         this._state = PlayerState.REVERSE;
@@ -226,6 +232,12 @@ export default class Player extends Observable {
 
       if (repeatDirection === RepeatDirection.ALTERNATE) {
         const adjustedTime = time * -1;
+
+        this.notify({
+          type: "TICK",
+          time: 0,
+          lastTime,
+        });
 
         this._time = 0;
         this.seek(adjustedTime);

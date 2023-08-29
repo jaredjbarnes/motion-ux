@@ -7,6 +7,8 @@ export default class Motion<T extends {}> {
     protected keyframeGenerator: KeyframeGenerator;
     protected player: Player;
     protected animation: IAnimation<T>;
+    protected animationAfterSegue: IAnimation<T>;
+    protected onComplete: typeof defaultOnComplete;
     constructor(render: (animation: IAnimation<T>) => void, initialAnimation: IAnimation<T>, duration?: number);
     inject(animation: IAnimation<T>): this;
     segueTo(to: IAnimation<T>, duration?: number, onComplete?: typeof defaultOnComplete): this;

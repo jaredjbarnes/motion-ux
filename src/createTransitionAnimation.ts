@@ -44,7 +44,7 @@ export function createTransitionAnimation<T extends {}>(
 
   const animation = new BlendedAnimation(
     slopeAnimation,
-    toAnimation.clone(),
+    toAnimation,
     easings.linear
   );
 
