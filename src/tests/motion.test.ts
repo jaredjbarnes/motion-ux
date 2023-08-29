@@ -26,7 +26,7 @@ describe("Motion", () => {
     const motion = new Motion<Style>((animation) => {
       style.opacity = animation.currentValues.opacity;
       style.scale = animation.currentValues.scale;
-    }, initialAnimation);
+    }, style);
 
     motion.segueTo(
       createAnimation({

@@ -9,13 +9,13 @@ export default class Motion<T extends {}> {
     protected animation: IAnimation<T>;
     protected animationAfterSegue: IAnimation<T>;
     protected onComplete: typeof defaultOnComplete;
-    constructor(render: (animation: IAnimation<T>) => void, initialAnimation: IAnimation<T>, duration?: number);
+    constructor(render: (animation: IAnimation<T>) => void, initialValue: T, duration?: number);
     inject(animation: IAnimation<T>): this;
     segueTo(to: IAnimation<T>, duration?: number, onComplete?: typeof defaultOnComplete): this;
     segueToLoop(to: IAnimation<T>, duration?: number, onComplete?: typeof defaultOnComplete): this;
     private createTransition;
     stop(): this;
     play(): this;
-    protected makeAnimationFromLastValues(values: any): Animation<T>;
+    protected makeAnimationFromValues(values: any): Animation<T>;
 }
 export {};

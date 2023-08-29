@@ -20,11 +20,11 @@ export default class Motion<T extends {}> {
 
   constructor(
     render: (animation: IAnimation<T>) => void,
-    initialAnimation: IAnimation<T>,
+    initialValue: T,
     duration = 0
   ) {
-    this.animation = initialAnimation;
-    this.animationAfterSegue = initialAnimation;
+    this.animation = this.makeAnimationFromValues(initialValue);
+    this.animationAfterSegue = this.animation;
     this.player = new Player();
     this.player.duration = duration;
     this.player.render = (time: number) => {
@@ -59,9 +59,7 @@ export default class Motion<T extends {}> {
 
     this.onComplete = onComplete;
     to.update(1);
-    this.animationAfterSegue = this.makeAnimationFromLastValues(
-      to.currentValues
-    );
+    this.animationAfterSegue = this.makeAnimationFromValues(to.currentValues);
 
     to.update(0);
     this.animation = transitionAnimation;
@@ -74,7 +72,7 @@ export default class Motion<T extends {}> {
 
   segueToLoop(to: IAnimation<T>, duration = 0, onComplete = defaultOnComplete) {
     const transitionAnimation = this.createTransition(to, duration);
-    
+
     this.onComplete = onComplete;
     this.animationAfterSegue = to;
     this.animation = transitionAnimation;
@@ -107,7 +105,7 @@ export default class Motion<T extends {}> {
     return this;
   }
 
-  protected makeAnimationFromLastValues(values: any) {
+  protected makeAnimationFromValues(values: any) {
     const keyframes = Object.keys(values).reduce((acc, key) => {
       acc[key] = {
         from: deepClone(values[key]),

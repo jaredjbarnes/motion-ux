@@ -450,9 +450,12 @@
       now() {
           return performance.now();
       }
+      getRegisteredCallbacks() {
+          return Array.from(this.registeredCallbacks.values());
+      }
   }
 
-  const NEARLY_ZERO = 0.00001;
+  const NEARLY_ZERO$1 = 0.00001;
   const defaultClock = new DefaultClock();
   function defaultRender() { }
   exports.PlayerState = void 0;
@@ -467,17 +470,16 @@
       RepeatDirection[RepeatDirection["ALTERNATE"] = 1] = "ALTERNATE";
   })(exports.RepeatDirection || (exports.RepeatDirection = {}));
   class Player extends Observable {
-      constructor(clock) {
+      constructor() {
           super();
           this._timeScale = 1;
           this._time = 0;
           this._step = 0;
-          this._duration = NEARLY_ZERO;
+          this._duration = NEARLY_ZERO$1;
           this._lastTimestamp = 0;
           this._iterations = 0;
           this._repeat = 1;
           this._repeatDirection = exports.RepeatDirection.DEFAULT;
-          this._clock = clock || defaultClock;
           this._state = exports.PlayerState.STOPPED;
           this._render = defaultRender;
           this.tick = this.tick.bind(this);
@@ -505,7 +507,7 @@
           }
           // Virtually Nothing. All Math blows up if the duration is "0".
           if (value <= 0) {
-              value = NEARLY_ZERO;
+              value = NEARLY_ZERO$1;
           }
           this._duration = value;
       }
@@ -544,14 +546,8 @@
               this._iterations = value;
           }
       }
-      get clock() {
-          return this._clock;
-      }
-      set clock(value) {
-          this._clock = value;
-      }
       tick() {
-          const timestamp = this._clock.now();
+          const timestamp = Player._clock.now();
           const deltaTime = timestamp - this._lastTimestamp;
           this._step = (deltaTime / this._duration) * this._timeScale;
           if (this._step > 1) {
@@ -670,7 +666,7 @@
           if (this._state !== exports.PlayerState.STOPPED) {
               this._state = exports.PlayerState.STOPPED;
               this._render(this._time);
-              this._clock.unregister(this.tick);
+              Player._clock.unregister(this.tick);
               this.notify({
                   type: "STOPPED",
               });
@@ -679,9 +675,9 @@
       }
       play() {
           if (this._state !== exports.PlayerState.FORWARD) {
-              this._lastTimestamp = this._clock.now();
+              this._lastTimestamp = Player._clock.now();
               this._state = exports.PlayerState.FORWARD;
-              this._clock.register(this.tick);
+              Player._clock.register(this.tick);
               this.notify({
                   type: "PLAYED",
               });
@@ -690,9 +686,9 @@
       }
       reverse() {
           if (this._state !== exports.PlayerState.REVERSE) {
-              this._lastTimestamp = this._clock.now();
+              this._lastTimestamp = Player._clock.now();
               this._state = exports.PlayerState.REVERSE;
-              this._clock.register(this.tick);
+              Player._clock.register(this.tick);
               this.notify({
                   type: "REVERSED",
               });
@@ -703,7 +699,17 @@
           this.stop();
           super.dispose();
       }
+      static setClock(clock) {
+          const oldClock = Player._clock;
+          const registeredCallbacks = oldClock.getRegisteredCallbacks();
+          registeredCallbacks.forEach((c) => {
+              oldClock.unregister(c);
+              clock.register(c);
+          });
+          Player._clock = clock;
+      }
   }
+  Player._clock = defaultClock;
 
   var easeInQuad = (percentage) => {
       return percentage * percentage;
@@ -2898,6 +2904,7 @@
       }
   }
 
+  const NEARLY_ZERO = 0.00001;
   const DESIRED_FPS$1 = 1000 / 60;
   const objectOperator = new ObjectOperator();
   const keyframeGenerator = new KeyframesGenerator();
@@ -2907,7 +2914,8 @@
       const to = deepClone(from);
       const multiplier = deepClone(from);
       const change = deepClone(from);
-      const frames = duration / DESIRED_FPS$1;
+      let frames = duration / DESIRED_FPS$1;
+      frames = frames === 0 ? NEARLY_ZERO : frames;
       objectOperator.assign(multiplier, frames);
       objectOperator.divide(delta, multiplier, delta);
       objectOperator.multiply(delta, multiplier, change);
@@ -2928,12 +2936,12 @@
   function defaultOnComplete() { }
   const DESIRED_FPS = 1000 / 60;
   class Motion {
-      constructor(render, initialAnimation, duration = 0) {
+      constructor(render, initialValue, duration = 0) {
           this.currentDuration = 0;
           this.keyframeGenerator = new KeyframesGenerator();
           this.onComplete = defaultOnComplete;
-          this.animation = initialAnimation;
-          this.animationAfterSegue = initialAnimation;
+          this.animation = this.makeAnimationFromValues(initialValue);
+          this.animationAfterSegue = this.animation;
           this.player = new Player();
           this.player.duration = duration;
           this.player.render = (time) => {
@@ -2958,7 +2966,7 @@
           const transitionAnimation = this.createTransition(to, duration);
           this.onComplete = onComplete;
           to.update(1);
-          this.animationAfterSegue = this.makeAnimationFromLastValues(to.currentValues);
+          this.animationAfterSegue = this.makeAnimationFromValues(to.currentValues);
           to.update(0);
           this.animation = transitionAnimation;
           this.player.repeat = 1;
@@ -2991,7 +2999,7 @@
           this.player.play();
           return this;
       }
-      makeAnimationFromLastValues(values) {
+      makeAnimationFromValues(values) {
           const keyframes = Object.keys(values).reduce((acc, key) => {
               acc[key] = {
                   from: deepClone(values[key]),

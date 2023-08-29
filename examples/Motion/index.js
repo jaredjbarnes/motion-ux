@@ -2,7 +2,6 @@ import {
   Motion,
   CssKeyframesGenerator,
   Animation,
-  easings,
 } from "../../dist/index.esm.js";
 
 const subject = document.querySelector("#subject");
@@ -25,12 +24,14 @@ const animation1 = new Animation(
   })
 );
 
-const motion = new Motion((animation) => {
-  const values = animation.currentValues;
-  Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
-}, animation1, true);
-
-motion.segueTo(animation1, 2000);
+const motion = new Motion(
+  (animation) => {
+    const values = animation.currentValues;
+    Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
+  },
+  { left: "0px", top: "0px" },
+  true
+);
 
 let lastX = 0;
 let lastY = 0;

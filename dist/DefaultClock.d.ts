@@ -7,4 +7,5 @@ export default class DefaultClock implements IClock {
     register(callback: TickCallback): void;
     unregister(callback: TickCallback): void;
     now(): number;
+    getRegisteredCallbacks(): TickCallback[];
 }

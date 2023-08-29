@@ -1,4 +1,4 @@
-import Animation, { AnimationState, IAnimation } from "./Animation";
+import Animation, { IAnimation } from "./Animation";
 import Player, { PlayerState, RepeatDirection } from "./Player";
 import Animator from "./Animator";
 import Keyframe, { IComplexKeyframeValue, KeyframeConfig } from "./Keyframe";
@@ -47,7 +47,6 @@ export {
   KeyframeConfig,
   PlayerState,
   RepeatDirection,
-  AnimationState,
   CssKeyframesGenerator,
   Motion,
   PathAnimation,

@@ -10,6 +10,7 @@ export declare enum RepeatDirection {
     ALTERNATE = 1
 }
 export default class Player extends Observable {
+    private static _clock;
     private _timeScale;
     private _time;
     private _step;
@@ -18,10 +19,9 @@ export default class Player extends Observable {
     private _iterations;
     private _repeat;
     private _repeatDirection;
-    private _clock;
     private _state;
     private _render;
-    constructor(clock?: IClock);
+    constructor();
     get time(): number;
     set time(value: number);
     get timeScale(): number;
@@ -37,8 +37,6 @@ export default class Player extends Observable {
     set render(render: (time: number) => void);
     get iterations(): number;
     set iterations(value: number);
-    get clock(): IClock;
-    set clock(value: IClock);
     private tick;
     private stepForward;
     private stepBackward;
@@ -47,4 +45,5 @@ export default class Player extends Observable {
     play(): this;
     reverse(): this;
     dispose(): void;
+    static setClock(clock: IClock): void;
 }
