@@ -1,5 +1,6 @@
 import {
   Motion,
+  easings,
   CssKeyframesGenerator,
   Animation,
 } from "../../dist/index.esm.js";
@@ -60,7 +61,7 @@ document.body.addEventListener("pointerdown", (event) => {
   lastX = event.pageX;
   lastY = event.pageY;
 
-  motion.segueTo(animation, 1000);
+  motion.segueTo(animation, 1000, easings.easeOutQuint);
 });
 
 function animateLoop() {
@@ -88,7 +89,7 @@ function animateLoop() {
 
   const animation = new Animation("loop", keyframes);
 
-  motion.segueToLoop(animation, 1000);
+  motion.segueToLoop(animation, 1000, easings.easeOutQuint);
 }
 
 const button = document.querySelector("#button");

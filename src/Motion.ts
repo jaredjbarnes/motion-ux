@@ -3,7 +3,7 @@ import Player from "./Player";
 import KeyframeGenerator from "./KeyframesGenerator";
 import { createTransitionAnimation } from "./createTransitionAnimation";
 import BlendedAnimation from "./BlendedAnimation";
-import easings from "./easings";
+import easings, { EasingFunction } from "./easings";
 import { deepClone } from "./deepClone";
 
 function defaultOnComplete() {}
@@ -53,9 +53,10 @@ export default class Motion<T extends {}> {
   segueTo(
     to: IAnimation<T>,
     duration: number = 0,
+    easing: EasingFunction = easings.linear,
     onComplete = defaultOnComplete
   ) {
-    const transitionAnimation = this.createTransition(to, duration);
+    const transitionAnimation = this.createTransition(to, duration, easing);
 
     this.onComplete = onComplete;
     to.update(1);
@@ -70,8 +71,13 @@ export default class Motion<T extends {}> {
     return this;
   }
 
-  segueToLoop(to: IAnimation<T>, duration = 0, onComplete = defaultOnComplete) {
-    const transitionAnimation = this.createTransition(to, duration);
+  segueToLoop(
+    to: IAnimation<T>,
+    duration = 0,
+    easing: EasingFunction,
+    onComplete = defaultOnComplete
+  ) {
+    const transitionAnimation = this.createTransition(to, duration, easing);
 
     this.onComplete = onComplete;
     this.animationAfterSegue = to;
@@ -82,11 +88,11 @@ export default class Motion<T extends {}> {
     return this;
   }
 
-  private createTransition(to: IAnimation<T>, duration: number = 0) {
+  private createTransition(to: IAnimation<T>, duration: number = 0, easing: EasingFunction = easings.linear) {
     const currentAnimation = this.animation;
     const from = createTransitionAnimation(currentAnimation, to, duration);
 
-    const blendedAnimation = new BlendedAnimation(from, to, easings.linear);
+    const blendedAnimation = new BlendedAnimation(from, to, easing);
 
     this.player.time = 0;
     this.player.duration = duration;

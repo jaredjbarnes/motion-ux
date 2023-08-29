@@ -2960,8 +2960,8 @@ class Motion {
         this.player.play();
         return this;
     }
-    segueTo(to, duration = 0, onComplete = defaultOnComplete) {
-        const transitionAnimation = this.createTransition(to, duration);
+    segueTo(to, duration = 0, easing = easings.linear, onComplete = defaultOnComplete) {
+        const transitionAnimation = this.createTransition(to, duration, easing);
         this.onComplete = onComplete;
         to.update(1);
         this.animationAfterSegue = this.makeAnimationFromValues(to.currentValues);
@@ -2971,8 +2971,8 @@ class Motion {
         this.player.play();
         return this;
     }
-    segueToLoop(to, duration = 0, onComplete = defaultOnComplete) {
-        const transitionAnimation = this.createTransition(to, duration);
+    segueToLoop(to, duration = 0, easing, onComplete = defaultOnComplete) {
+        const transitionAnimation = this.createTransition(to, duration, easing);
         this.onComplete = onComplete;
         this.animationAfterSegue = to;
         this.animation = transitionAnimation;
@@ -2980,10 +2980,10 @@ class Motion {
         this.player.play();
         return this;
     }
-    createTransition(to, duration = 0) {
+    createTransition(to, duration = 0, easing = easings.linear) {
         const currentAnimation = this.animation;
         const from = createTransitionAnimation(currentAnimation, to, duration);
-        const blendedAnimation = new BlendedAnimation(from, to, easings.linear);
+        const blendedAnimation = new BlendedAnimation(from, to, easing);
         this.player.time = 0;
         this.player.duration = duration;
         this.player.iterations = 0;
