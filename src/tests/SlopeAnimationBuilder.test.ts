@@ -5,19 +5,16 @@ import Keyframe from "../Keyframe";
 
 describe("SlopeAnimationBuilder", () => {
   test("Forward", () => {
-    const animation = new Animation<{ left: { property: number } }>(
-      "position",
-      [
-        new Keyframe({
-          property: "left",
-          from: 100,
-          to: 200,
-          startAt: 0,
-          endAt: 1,
-          easing: easings.linear,
-        }),
-      ]
-    );
+    const animation = new Animation<{ left: number }>("position", [
+      new Keyframe<{ left: number }>({
+        property: "left",
+        from: 100,
+        to: 200,
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
 
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 1000, 0.5, 1000, 1);
@@ -28,19 +25,16 @@ describe("SlopeAnimationBuilder", () => {
   });
 
   test("Forward with longer duration.", () => {
-    const animation = new Animation<{ left: { property: number } }>(
-      "position",
-      [
-        new Keyframe({
-          property: "left",
-          from: 100,
-          to: 200,
-          startAt: 0,
-          endAt: 1,
-          easing: easings.linear,
-        }),
-      ]
-    );
+    const animation = new Animation<{left: number; right: string }>("position", [
+      new Keyframe({
+        property: "left",
+        from: 100,
+        to: 200,
+        startAt: 0,
+        endAt: 1,
+        easing: easings.linear,
+      }),
+    ]);
 
     const builder = new SlopeAnimationBuilder();
     const slopeAnimation = builder.build(animation, 1000, 0.5, 2000, 1);

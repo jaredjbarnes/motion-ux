@@ -4,12 +4,12 @@ import Keyframe from "./Keyframe";
 
 const emptyArray: any[] = [];
 
-export default class Animator<T> {
-  private _initialValue: T;
-  private _initialDelta: T;
-  private _value: T;
-  private _delta: T;
-  private _keyframe: Keyframe<T>;
+export default class Animator<T, K extends keyof T = keyof T> {
+  private _initialValue: T[K];
+  private _initialDelta: T[K];
+  private _value: T[K];
+  private _delta: T[K];
+  private _keyframe: Keyframe<T, K>;
   private _bezierCurve: BezierCurve;
   private _time: number;
 
@@ -33,7 +33,7 @@ export default class Animator<T> {
     return this._initialValue;
   }
 
-  constructor(keyframe: Keyframe<T>) {
+  constructor(keyframe: Keyframe<T, K>) {
     this._keyframe = keyframe;
     this._time = 0;
     this._bezierCurve = new BezierCurve([]);
@@ -135,13 +135,13 @@ export default class Animator<T> {
         this._keyframe.from as number,
         this._keyframe.controls as number[],
         this._keyframe.to as number
-      ) as any as T;
+      ) as any as T[K];
 
       this._delta = this.getDeltaValue(
         this._keyframe.from as number,
         this._keyframe.controls as number[],
         this._keyframe.to as number
-      ) as any as T;
+      ) as any as T[K];
     } else if (isObject) {
       this.traverse(
         this._keyframe.from,

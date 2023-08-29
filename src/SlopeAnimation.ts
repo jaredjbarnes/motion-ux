@@ -5,7 +5,7 @@ import ObjectOperator from "./ObjectOperator";
 
 const objectOperator = new ObjectOperator();
 
-export default class SlopeAnimation<T> extends Animation<T> {
+export class SlopeAnimation<T extends {}> extends Animation<T> {
   constructor(currentValues: T, delta: T, duration: number) {
     const durationObject = deepClone(currentValues);
     const totalChange = deepClone(currentValues);
@@ -16,15 +16,16 @@ export default class SlopeAnimation<T> extends Animation<T> {
     objectOperator.multiply(delta, durationObject, totalChange);
     objectOperator.add(from, totalChange, to);
 
-    const keyframes = Object.keys(currentValues as any).map((property) => {
-      return new Keyframe({
+    const keys = Object.keys(currentValues) as unknown as (keyof T)[];
+    const keyframes = keys.map((property) => {
+      return new Keyframe<T, keyof T>({
         property,
-        from: (from as any)[property],
-        to: (to as any)[property],
+        from: from[property],
+        to: to[property],
         startAt: 0,
         endAt: 1,
       });
-    }) as any;
+    });
 
     super("slope-animation", keyframes);
   }

@@ -1,7 +1,7 @@
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import CssKeyframe from "./CssKeyframe";
 
-export type ICssAnimatedProperties<T> = {
+export type ICssAnimatedProperties<T extends {}> = {
   [P in keyof T]: T[P] | ICssPercentageKeyframes<T[P]>;
 };
 
@@ -191,7 +191,7 @@ export default class CSSKeyframesGenerator {
     }
   }
 
-  generate<T>(animatedProperties: ICssAnimatedProperties<T>) {
+  generate<T extends {}>(animatedProperties: ICssAnimatedProperties<T>) {
     const animatedPropertyNames = Object.keys(
       animatedProperties
     ) as (keyof T)[];

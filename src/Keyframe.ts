@@ -13,13 +13,13 @@ export interface IComplexKeyframeValue<T> {
   easeOut?: DynamicEasingNames;
 }
 
-export interface KeyframeConfig<T> {
-  property: string;
-  to: T;
-  from: T;
+export interface KeyframeConfig<T, K extends keyof T = keyof T> {
+  property: K;
+  to: T[K];
+  from: T[K];
   endAt?: number;
   startAt?: number;
-  controls?: T[];
+  controls?: T[K][];
   easing?: EasingFunction;
 }
 
@@ -34,16 +34,16 @@ export function generateInitialDelta<T>(delta: T) {
   }
 }
 
-export default class Keyframe<T> {
-  public property: string;
-  public to: T;
-  public from: T;
+export default class Keyframe<T, K extends keyof T = keyof T> {
+  public property: K;
+  public to: T[K];
+  public from: T[K];
   public startAt: number;
   public endAt: number;
-  public controls: T[];
+  public controls: T[K][];
   public easing: EasingFunction;
 
-  constructor(config: KeyframeConfig<T>) {
+  constructor(config: KeyframeConfig<T, K>) {
     this.property = config.property;
     this.to = config.to;
     this.from = config.from;

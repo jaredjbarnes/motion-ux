@@ -6,6 +6,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
     private duration;
     private extendDurationBy;
     currentValues: T;
+    deltaValues: T;
     name: string;
     time: number;
     constructor(animation: IAnimation<T>, duration: number, offset: number, extendDurationBy?: number);

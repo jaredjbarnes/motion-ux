@@ -23,6 +23,10 @@ export declare class UniformPathAnimation implements IAnimation<{
         x: number;
         y: number;
     };
+    readonly deltaValues: {
+        x: number;
+        y: number;
+    };
     get distance(): number;
     constructor(path: Path, easing?: EasingFunction);
     update(time: number): this;

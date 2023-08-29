@@ -30,7 +30,7 @@ export default class ExtendedAnimation<T> implements IAnimation<T> {
     this.deltaValues = this.animation.deltaValues;
     this.name = this.animation.name;
 
-    this.slopeAnimation = this.animation
+    this.slopeAnimation = this.animation;
   }
 
   private getSafeDuration(value: number) {

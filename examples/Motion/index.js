@@ -28,7 +28,7 @@ const animation1 = new Animation(
 const motion = new Motion((animation) => {
   const values = animation.currentValues;
   Object.keys(values).forEach((k) => (subject.style[k] = values[k].join("")));
-}, true);
+}, animation1, true);
 
 motion.segueTo(animation1, 2000);
 
@@ -59,7 +59,7 @@ document.body.addEventListener("pointerdown", (event) => {
   lastX = event.pageX;
   lastY = event.pageY;
 
-  motion.segueTo(animation, 1000, easings.easeOutQuint);
+  motion.segueTo(animation, 1000);
 });
 
 function animateLoop() {
@@ -86,7 +86,6 @@ function animateLoop() {
   });
 
   const animation = new Animation("loop", keyframes);
-  animation.repeat = Infinity;
 
   motion.segueToLoop(animation, 1000);
 }

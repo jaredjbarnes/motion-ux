@@ -1,8 +1,7 @@
 import { CompositeNode, Cursor, Visitor } from "clarity-pattern-parser";
 import BezierCurve from "./BezierCurve";
-import Animation, { AnimationState, IAnimation } from "./Animation";
+import { IAnimation } from "./Animation";
 import easings, { EasingFunction } from "./easings";
-import Keyframe from "./Keyframe";
 import { path } from "./patterns/path";
 
 const visitor = new Visitor();
@@ -33,7 +32,7 @@ export class PathAnimation implements IAnimation<{ x: number; y: number }> {
     return this._currentValues;
   }
 
-  get deltaValues(): AnimationState<number> {
+  get deltaValues(): { x: number; y: number } {
     return this._deltaValues;
   }
 

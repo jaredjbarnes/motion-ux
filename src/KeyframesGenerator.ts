@@ -1,7 +1,7 @@
 import createDynamicEasing, { DynamicEasingNames } from "./createDynamicEasing";
 import Keyframe from "./Keyframe";
 
-export type IAnimatedProperties<T> = {
+export type IAnimatedProperties<T extends {}> = {
   [P in keyof T]: T[P] | IPercentageKeyframes<T[P]>;
 };
 
@@ -208,11 +208,11 @@ export default class KeyframesGenerator {
     }
   }
 
-  generate<T>(animatedProperties: IAnimatedProperties<T>) {
+  generate<T extends {}>(animatedProperties: IAnimatedProperties<T>) {
     const animatedPropertyNames = Object.keys(
       animatedProperties
     ) as (keyof T)[];
-    const keyframes: Keyframe<T>[] = [];
+    const keyframes: Keyframe<T, keyof T>[] = [];
 
     for (let x = 0; x < animatedPropertyNames.length; x++) {
       const property = animatedPropertyNames[x];
@@ -243,8 +243,8 @@ export default class KeyframesGenerator {
         const from = this.getFrom(currentValue);
         const to = this.getTo(nextValue);
 
-        const keyframe = new Keyframe({
-          property: property.toString(),
+        const keyframe = new Keyframe<T, keyof T>({
+          property: property,
           from,
           to,
           controls,

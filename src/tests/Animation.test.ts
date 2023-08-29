@@ -4,8 +4,7 @@ import CssKeyframe from "../CssKeyframe";
 
 describe("Animation", () => {
   test("Get current values as 0.", () => {
-    const name = "my-animation";
-    const animation = new Animation<{ opacity: number }>("css", [
+    const animation = new Animation<{ opacity: number[] }>("css", [
       new Keyframe({
         property: "opacity",
         startAt: 0,
@@ -73,7 +72,7 @@ describe("Animation", () => {
     const from = "M 0 0 C 0 0, 0 0, 0 0";
     const to = "M 10 10 C 150 150,30 30,20 20";
 
-    const animation = new Animation<{ path: (number | string)[] }>("css", [
+    const animation = new Animation("css", [
       new CssKeyframe({
         property: "path",
         from,
@@ -175,5 +174,4 @@ describe("Animation", () => {
     expect(display).toBe("none");
     expect(opacity).toBe(1);
   });
-
 });

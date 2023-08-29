@@ -1,5 +1,5 @@
 import BezierCurve from "./BezierCurve";
-import { AnimationState, IAnimation } from "./Animation";
+import { IAnimation } from "./Animation";
 import { EasingFunction } from "./easings";
 export declare class PathAnimation implements IAnimation<{
     x: number;
@@ -27,7 +27,10 @@ export declare class PathAnimation implements IAnimation<{
         x: number;
         y: number;
     };
-    get deltaValues(): AnimationState<number>;
+    get deltaValues(): {
+        x: number;
+        y: number;
+    };
     constructor(pathString: string, easing?: EasingFunction);
     private moveTo;
     private absoluteVerticalLine;

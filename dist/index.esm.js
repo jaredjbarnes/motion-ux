@@ -115,8 +115,6 @@ class BezierCurve {
         this.normalizedPoints = this.points.map((point) => {
             return point - root;
         });
-        Object.freeze(this.points);
-        Object.freeze(this.normalizedPoints);
     }
     valueAt(x) {
         return valueAt(x, this.points);
@@ -993,12 +991,15 @@ class ObjectsVisitor {
     walk(left, right, output) {
         if (typeof left === "object" && left != null) {
             for (let key in left) {
-                if (typeof left[key] === "number" &&
-                    typeof right[key] === "number" &&
-                    typeof output[key] === "number") {
+                const leftKey = typeof left[key];
+                const rightKey = typeof right[key];
+                if (leftKey === "number" && rightKey === "number") {
                     output[key] = this.visitor(left[key], right[key]);
                 }
-                else if (typeof left[key] === "object") {
+                else if (leftKey === "string" && rightKey === "string") {
+                    output[key] = right[key];
+                }
+                else if (leftKey === "object" && rightKey === "object") {
                     this.walk(left[key], right[key], output[key]);
                 }
             }
@@ -2623,233 +2624,6 @@ class CSSKeyframesGenerator {
     }
 }
 
-const nullableAnimation = new Animation("null", [
-    new Keyframe({ from: 0, to: 0, property: "null" }),
-]);
-const objectOperator = new ObjectOperator();
-const FORWARD = 1;
-class SlopeAnimationBuilder {
-    constructor() {
-        this.direction = 0;
-        this.newDuration = 0;
-        this.duration = 0;
-        this.offset = 0;
-        this.delta = 0.01;
-        this.animation = nullableAnimation;
-    }
-    cloneValues(values) {
-        return deepClone(values);
-    }
-    build(animation, duration, offset, extendDurationBy, direction = 0) {
-        this.animation = animation;
-        this.offset = offset;
-        this.duration = this.getSafeDuration(duration);
-        this.newDuration = extendDurationBy;
-        this.direction = direction;
-        // If the offset is at or near the end get the last slope.
-        if (this.offset + this.delta > 1) {
-            this.offset -= this.delta;
-        }
-        this.calculate();
-        this.createSlopeTimeline();
-        return this.slopeAnimation;
-    }
-    getSafeDuration(value) {
-        if (typeof value !== "number") {
-            value = 0;
-        }
-        // Virtually Nothing. All Math blows up if the duration is "0".
-        if (value <= 0) {
-            value = 0.00001;
-        }
-        return value;
-    }
-    cacheValues() {
-        this.deltaStepValues = this.cloneValues(this.nowValues);
-        this.scaleValues = this.cloneValues(this.nowValues);
-        this.dynamicValues = this.cloneValues(this.nowValues);
-        this.cacheDeltaStepValues();
-        this.cacheScaleValues();
-    }
-    cacheDeltaStepValues() {
-        Object.keys(this.deltaStepValues).forEach((property) => {
-            objectOperator.assign(this.deltaStepValues[property], this.delta);
-        });
-    }
-    cacheScaleValues() {
-        const scale = this.newDuration / this.duration;
-        Object.keys(this.scaleValues).forEach((property) => {
-            objectOperator.assign(this.scaleValues[property], scale);
-        });
-    }
-    cacheDeltaValueForward() {
-        this.animation.update(this.offset + this.delta);
-        this.deltaValues = this.cloneValues(this.animation.currentValues);
-    }
-    cacheDeltaValueStopped() {
-        this.animation.update(this.offset);
-        this.deltaValues = this.cloneValues(this.animation.currentValues);
-    }
-    calculate() {
-        this.animation.update(this.offset);
-        this.nowValues = this.cloneValues(this.animation.currentValues);
-        this.toValues = this.cloneValues(this.nowValues);
-        if (this.direction === FORWARD) {
-            this.cacheDeltaValueForward();
-        }
-        else {
-            this.cacheDeltaValueStopped();
-        }
-        Object.keys(this.nowValues).forEach((property) => {
-            const value = this.nowValues[property];
-            if (typeof value === "object" && value != null) {
-                this.cacheValues();
-                this.calculateObject(property);
-            }
-            else {
-                this.calculatePrimitive(property);
-            }
-        });
-    }
-    calculatePrimitive(property) {
-        const now = this.nowValues[property];
-        const dxNow = this.deltaValues[property];
-        const scale = this.newDuration / this.duration;
-        const diff = dxNow - now;
-        const derivative = diff / this.delta;
-        const scaled = derivative * scale;
-        const to = now + scaled;
-        this.toValues[property] = to;
-    }
-    calculateObject(property) {
-        const now = this.nowValues[property];
-        const delta = this.deltaValues[property];
-        const deltaStep = this.deltaStepValues[property];
-        const scale = this.scaleValues[property];
-        const dynamicValue = this.dynamicValues[property];
-        const to = this.toValues[property];
-        objectOperator.subtract(delta, now, dynamicValue);
-        objectOperator.divide(dynamicValue, deltaStep, dynamicValue);
-        objectOperator.multiply(dynamicValue, scale, dynamicValue);
-        objectOperator.add(now, dynamicValue, to);
-        this.toValues[property] = to;
-    }
-    createSlopeTimeline() {
-        const keyframes = Object.keys(this.nowValues)
-            .map((property) => {
-            return new Keyframe({
-                property,
-                from: this.nowValues[property],
-                controls: [],
-                to: this.toValues[property],
-                startAt: 0,
-                endAt: 1,
-                easing: easings.linear,
-            });
-        })
-            .flat();
-        this.slopeAnimation = new Animation("slope", keyframes);
-    }
-}
-
-const slopeAnimationBuilder = new SlopeAnimationBuilder();
-class ExtendedAnimation {
-    constructor(animation, duration, offset, extendDurationBy = 0) {
-        this.time = 0;
-        this.duration = this.getSafeDuration(duration);
-        this.offset = offset;
-        this.extendDurationBy = extendDurationBy;
-        this.animation = animation;
-        this.currentValues = this.animation.currentValues;
-        this.name = this.animation.name;
-        this.slopeAnimation = slopeAnimationBuilder.build(this.animation, duration, 1, extendDurationBy, 1);
-    }
-    getSafeDuration(value) {
-        if (typeof value !== "number") {
-            value = 0;
-        }
-        // Virtually Nothing. All Math blows up if the duration is "0".
-        if (value <= 0) {
-            value = 0.00001;
-        }
-        return value;
-    }
-    update(time) {
-        this.time = time;
-        const offsetTime = this.offset + time;
-        if (offsetTime + slopeAnimationBuilder.delta > 1) {
-            if (this.slopeAnimation == null) {
-                return this;
-            }
-            const overflowTime = offsetTime + slopeAnimationBuilder.delta - 1;
-            this.slopeAnimation.update(overflowTime);
-            this.currentValues = this.slopeAnimation.currentValues;
-        }
-        else {
-            if (this.animation == null) {
-                return this;
-            }
-            this.animation.update(offsetTime);
-            this.currentValues = this.animation.currentValues;
-        }
-        return this;
-    }
-    clone() {
-        return new ExtendedAnimation(this.animation.clone(), this.duration, this.offset, this.extendDurationBy);
-    }
-}
-
-class BlendedAnimation extends Animation {
-    constructor(fromAnimation, toAnimation, easing = easings.easeOutExpo) {
-        const fromValues = fromAnimation.currentValues;
-        const toValues = toAnimation.currentValues;
-        const properties = Object.keys(fromValues);
-        const keyframes = properties
-            .map((name) => {
-            const from = fromValues[name];
-            const to = toValues[name];
-            if (to == null) {
-                throw new Error(`Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(Object.keys(from))}, To Animation: ${JSON.stringify(Object.keys(to))}`);
-            }
-            return new Keyframe({
-                property: name,
-                startAt: 0,
-                endAt: 1,
-                from,
-                to,
-                controls: [],
-                easing: easing || easings.linear,
-            });
-        })
-            .flat();
-        super(`${fromAnimation.name}-${toAnimation.name}-blended`, keyframes);
-        this.easing = easing;
-        this.properties = properties;
-        this.fromAnimation = fromAnimation;
-        this.toAnimation = toAnimation;
-    }
-    updateKeyframes() {
-        const length = this.properties.length;
-        for (let x = 0; x < length; x++) {
-            const animator = this.animators[x];
-            const property = animator.keyframe.property;
-            const keyframe = animator.keyframe;
-            keyframe.to = this.toAnimation.currentValues[property];
-            keyframe.from = this.fromAnimation.currentValues[property];
-        }
-    }
-    update(time) {
-        this.fromAnimation.update(time);
-        this.toAnimation.update(time);
-        this.updateKeyframes();
-        super.update(time);
-        return this;
-    }
-    clone() {
-        return new BlendedAnimation(this.fromAnimation.clone(), this.toAnimation.clone(), this.easing);
-    }
-}
-
 class KeyframesGenerator {
     constructor() {
         this.transformValue = (value) => value;
@@ -3040,7 +2814,7 @@ class KeyframesGenerator {
                 const from = this.getFrom(currentValue);
                 const to = this.getTo(nextValue);
                 const keyframe = new Keyframe({
-                    property: property.toString(),
+                    property: property,
                     from,
                     to,
                     controls,
@@ -3055,116 +2829,145 @@ class KeyframesGenerator {
     }
 }
 
+class BlendedAnimation extends Animation {
+    constructor(fromAnimation, toAnimation, easing = easings.easeOutExpo) {
+        const _fromAnimation = fromAnimation.clone();
+        const _toAnimation = toAnimation.clone();
+        const fromValues = _fromAnimation.currentValues;
+        const toValues = _toAnimation.clone().currentValues;
+        const properties = Object.keys(fromValues);
+        const keyframes = properties
+            .map((name) => {
+            const from = fromValues[name];
+            const to = toValues[name];
+            if (to == null) {
+                throw new Error(`Blended animations need to have the same properties to animate.  From Animation: ${JSON.stringify(Object.keys(from))}, To Animation: ${JSON.stringify(Object.keys(to))}`);
+            }
+            return new Keyframe({
+                property: name,
+                startAt: 0,
+                endAt: 1,
+                from,
+                to,
+                controls: [],
+                easing: easing || easings.linear,
+            });
+        })
+            .flat();
+        super(`${_fromAnimation.name}-${_toAnimation.name}-blended`, keyframes);
+        this.easing = easing;
+        this.properties = properties;
+        this.fromAnimation = _fromAnimation;
+        this.toAnimation = _toAnimation;
+    }
+    updateKeyframes() {
+        const length = this.properties.length;
+        for (let x = 0; x < length; x++) {
+            const animator = this.animators[x];
+            const property = animator.keyframe.property;
+            const keyframe = animator.keyframe;
+            keyframe.to = this.toAnimation.currentValues[property];
+            keyframe.from = this.fromAnimation.currentValues[property];
+        }
+    }
+    update(time) {
+        this.fromAnimation.update(time);
+        this.toAnimation.update(time);
+        this.updateKeyframes();
+        super.update(time);
+        return this;
+    }
+    clone() {
+        return new BlendedAnimation(this.fromAnimation, this.toAnimation, this.easing);
+    }
+}
+
+const DESIRED_FPS$1 = 1000 / 60;
+const objectOperator = new ObjectOperator();
+const keyframeGenerator = new KeyframesGenerator();
+function createTransitionAnimation(fromAnimation, toAnimation, duration) {
+    const from = deepClone(fromAnimation.currentValues);
+    const delta = deepClone(fromAnimation.deltaValues);
+    const to = deepClone(from);
+    const multiplier = deepClone(from);
+    const change = deepClone(from);
+    const frames = duration / DESIRED_FPS$1;
+    objectOperator.assign(multiplier, frames);
+    objectOperator.divide(delta, multiplier, delta);
+    objectOperator.multiply(delta, multiplier, change);
+    objectOperator.add(from, change, to);
+    const keys = Object.keys(from);
+    const keyframes = keys.reduce((acc, key) => {
+        acc[key] = {
+            from: deepClone(from[key]),
+            to: deepClone(to[key]),
+        };
+        return acc;
+    }, {});
+    const slopeAnimation = new Animation("slope-animation", keyframeGenerator.generate(keyframes));
+    const animation = new BlendedAnimation(slopeAnimation, toAnimation.clone(), easings.linear);
+    return animation;
+}
+
 function defaultOnComplete() { }
+const DESIRED_FPS = 1000 / 60;
 class Motion {
-    constructor(render, setOnFirst = false, player) {
+    constructor(render, initialAnimation, duration = 0) {
         this.currentDuration = 0;
         this.keyframeGenerator = new KeyframesGenerator();
-        this.observer = null;
-        this.animation = null;
-        this.player = player || new Player();
+        this.animation = initialAnimation;
+        this.player = new Player();
+        this.player.duration = duration;
         this.player.render = (time) => {
             if (this.animation != null) {
                 this.animation.update(time);
                 render(this.animation);
             }
         };
-        this.setOnFirst = setOnFirst;
     }
     inject(animation) {
         this.animation = animation;
-        this.player.duration = 16.667;
+        this.player.duration = DESIRED_FPS;
         this.player.time = 0.999;
         this.player.play();
         return this;
     }
-    segueTo(animation, duration = 0, easing, onComplete = defaultOnComplete) {
-        var _a;
-        const currentDuration = this.currentDuration;
-        const currentAnimation = this.animation;
-        const currentTime = this.player.time;
-        this.player.duration = this.currentDuration = duration;
-        this.player.iterations = 0;
-        this.player.repeat = 1;
-        if (duration === 0) {
-            animation.update(1);
-            const values = animation.currentValues;
-            this.animation = this.makeAnimationFromLastValues(values);
-            this.player.duration = 0;
-            this.player.time = 1;
-            this.player.render(1);
-            onComplete();
-            return;
-        }
-        if (currentAnimation == null) {
-            if (this.setOnFirst) {
-                animation.update(1);
-                const values = animation.currentValues;
-                this.animation = this.makeAnimationFromLastValues(values);
-                this.player.duration = 0;
-                this.player.time = 1;
-                this.player.render(1);
+    segueTo(to, duration = 0, onComplete = defaultOnComplete) {
+        const transitionAnimation = this.createTransition(to, duration);
+        this.player.observeTimeOnce(1, () => {
+            const isSameAnimation = transitionAnimation === this.animation;
+            if (isSameAnimation) {
+                this.animation = this.makeAnimationFromLastValues(this.animation.currentValues);
                 onComplete();
-                return;
             }
-            else {
-                this.animation = animation;
-            }
-        }
-        else {
-            const extendDurationBy = duration - currentDuration * currentTime;
-            let fromAnimation;
-            if (extendDurationBy > 0) {
-                fromAnimation = new ExtendedAnimation(currentAnimation, currentDuration, currentTime, extendDurationBy);
-            }
-            else {
-                const values = currentAnimation.currentValues;
-                const animation = this.makeAnimationFromLastValues(values);
-                fromAnimation = animation;
-            }
-            const newAnimation = new BlendedAnimation(fromAnimation, animation, easing);
-            this.animation = newAnimation;
-            (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
-            this.observer = this.player.observeTimeOnce(1, () => {
-                newAnimation.update(1);
-                const values = newAnimation.currentValues;
-                this.animation = this.makeAnimationFromLastValues(values);
-                onComplete && onComplete();
-            });
-        }
-        this.player.time = 0;
-        this.player.play();
-    }
-    segueToLoop(animation, duration = 0, easing) {
-        var _a;
-        const currentDuration = this.currentDuration;
-        const currentAnimation = this.animation;
-        const currentTime = this.player.time;
-        this.player.duration = this.currentDuration = duration;
-        this.player.iterations = 0;
+        });
+        this.animation = transitionAnimation;
         this.player.repeat = 1;
-        this.player.repeat = Infinity;
-        this.player.repeatDirection = RepeatDirection.DEFAULT;
-        if (currentAnimation == null) {
-            this.animation = animation;
-        }
-        else {
-            const extendDurationBy = duration - currentDuration * currentTime;
-            let fromAnimation;
-            if (extendDurationBy > 0) {
-                fromAnimation = new ExtendedAnimation(currentAnimation, currentDuration, currentTime, extendDurationBy);
-            }
-            else {
-                fromAnimation = currentAnimation;
-            }
-            this.animation = new BlendedAnimation(fromAnimation, animation, easing);
-            (_a = this.observer) === null || _a === void 0 ? void 0 : _a.dispose();
-            this.observer = this.player.observeTimeOnce(1, () => {
-                this.animation = animation;
-            });
-        }
-        this.player.time = 0;
         this.player.play();
+        return this;
+    }
+    segueToLoop(to, duration = 0, onComplete = defaultOnComplete) {
+        const transitionAnimation = this.createTransition(to, duration);
+        this.player.observeTimeOnce(1, () => {
+            const isSameAnimation = transitionAnimation === this.animation;
+            if (isSameAnimation) {
+                this.animation = to;
+                onComplete();
+            }
+        });
+        this.animation = transitionAnimation;
+        this.player.repeat = Infinity;
+        this.player.play();
+        return this;
+    }
+    createTransition(to, duration = 0) {
+        const currentAnimation = this.animation;
+        const from = createTransitionAnimation(currentAnimation, to, duration);
+        const blendedAnimation = new BlendedAnimation(from, to, easings.linear);
+        this.player.time = 0;
+        this.player.duration = duration;
+        this.player.iterations = 0;
+        return blendedAnimation;
     }
     stop() {
         this.player.stop();
@@ -3177,12 +2980,12 @@ class Motion {
     makeAnimationFromLastValues(values) {
         const keyframes = Object.keys(values).reduce((acc, key) => {
             acc[key] = {
-                from: JSON.parse(JSON.stringify(values[key])),
-                to: JSON.parse(JSON.stringify(values[key])),
+                from: deepClone(values[key]),
+                to: deepClone(values[key]),
             };
             return acc;
         }, {});
-        return new Animation("last-animation", this.keyframeGenerator.generate(keyframes));
+        return new Animation("completed-animation", this.keyframeGenerator.generate(keyframes));
     }
 }
 
@@ -3401,6 +3204,10 @@ class UniformPathAnimation {
             x: 0,
             y: 0,
         };
+        this.deltaValues = {
+            x: 0,
+            y: 0,
+        };
         this.easing = easing;
         this._path = path;
         this._curveData = this._path.xCurves.map((xCurve, index) => {
@@ -3461,6 +3268,8 @@ class UniformPathAnimation {
         }, integrand, adjustedTime, 10);
         this.currentValues.x = curve.x.valueAt(uniformTime);
         this.currentValues.y = curve.y.valueAt(uniformTime);
+        this.deltaValues.x = curve.x.deltaAt(uniformTime);
+        this.deltaValues.y = curve.y.deltaAt(uniformTime);
         return this;
     }
     clone() {

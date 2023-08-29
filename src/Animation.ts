@@ -1,7 +1,5 @@
 import Animator from "./Animator";
-import Keyframe, { generateInitialDelta } from "./Keyframe";
-
-export type AnimationState<T> = { [key: string]: T };
+import Keyframe from "./Keyframe";
 
 export interface IAnimation<T> {
   name: string;
@@ -15,7 +13,7 @@ const sortTime = (animatorA: Animator<any>, animatorB: Animator<any>) => {
   return animatorA.keyframe.startAt - animatorB.keyframe.startAt;
 };
 
-export default class Animation<T> implements IAnimation<T> {
+export default class Animation<T extends {}> implements IAnimation<T> {
   protected animators: Animator<T>[] = [];
   protected time = 0;
 
@@ -23,14 +21,14 @@ export default class Animation<T> implements IAnimation<T> {
   public currentValues: T;
   public deltaValues: T;
 
-  constructor(name: string, keyframes: Keyframe<T>[]) {
+  constructor(name: string, keyframes: Keyframe<T, keyof T>[]) {
     this.name = name;
     this.currentValues = {} as T;
     this.deltaValues = {} as T;
     this.keyframes = keyframes;
   }
 
-  set keyframes(keyframes: Keyframe<T>[]) {
+  set keyframes(keyframes: Keyframe<T, keyof T>[]) {
     this.animators = keyframes.map((keyframe) => new Animator<T>(keyframe));
     this._createCurrentValues();
     this.animators.sort(sortTime);
@@ -64,13 +62,13 @@ export default class Animation<T> implements IAnimation<T> {
 
       if (!visitedMap.has(key)) {
         visitedMap.set(key, true);
-        (this.currentValues as any)[keyframe.property] = animator.initialValue;
-        (this.deltaValues as any)[keyframe.property] = animator.initialDelta;
+        this.currentValues[keyframe.property] = animator.initialValue;
+        this.deltaValues[keyframe.property] = animator.initialDelta;
       }
 
       if (keyframe.startAt <= this.time) {
-        (this.currentValues as any)[keyframe.property] = animator.value;
-        (this.deltaValues as any)[keyframe.property] = animator.delta;
+        this.currentValues[keyframe.property] = animator.value;
+        this.deltaValues[keyframe.property] = animator.delta;
       }
     }
   }

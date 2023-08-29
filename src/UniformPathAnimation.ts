@@ -1,4 +1,3 @@
-import { PathAnimation } from "./PathAnimation";
 import { IAnimation } from "./Animation";
 import easings, { EasingFunction } from "./easings";
 import { newtonsMethod, simpsonsRule } from "./math";

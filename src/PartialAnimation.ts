@@ -1,6 +1,6 @@
 import { IAnimation } from "./Animation";
 
-export class PartialAnimation<T> implements IAnimation<T> {
+export class PartialAnimation<T extends {}> implements IAnimation<T> {
   private animation: IAnimation<T>;
   private from: number;
   private to: number;
@@ -11,6 +11,10 @@ export class PartialAnimation<T> implements IAnimation<T> {
 
   get currentValues() {
     return this.animation.currentValues;
+  }
+
+  get deltaValues() {
+    return this.animation.deltaValues;
   }
 
   constructor(animation: IAnimation<T>, from: number, to: number) {

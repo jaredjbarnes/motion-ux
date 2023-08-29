@@ -34,14 +34,16 @@ const convertValue = (value: string) => {
   });
 };
 
-export default class CssKeyframe extends Keyframe<(string | number)[]> {
+export default class CssKeyframe extends Keyframe<
+  Record<string, (string | number)[]>
+> {
   constructor({
     from,
     to,
     easing = easings.linear,
     controls = [],
     ...config
-  }: KeyframeConfig<string>) {
+  }: KeyframeConfig<Record<string, string>>) {
     const toValue = convertValue(to);
     const fromValue = convertValue(from);
     const controlsValues = controls.map((c) => convertValue(c));
@@ -54,6 +56,4 @@ export default class CssKeyframe extends Keyframe<(string | number)[]> {
       easing,
     });
   }
-
-
 }

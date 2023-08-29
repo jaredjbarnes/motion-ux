@@ -2,7 +2,7 @@ import Animation, { IAnimation } from "./Animation";
 import Keyframe from "./Keyframe";
 import easings, { EasingFunction } from "./easings";
 
-export default class BlendedAnimation<T> extends Animation<T> {
+export default class BlendedAnimation<T extends {}> extends Animation<T> {
   public fromAnimation: IAnimation<T>;
   public toAnimation: IAnimation<T>;
   public properties: string[];
@@ -13,9 +13,11 @@ export default class BlendedAnimation<T> extends Animation<T> {
     toAnimation: IAnimation<T>,
     easing: EasingFunction = easings.easeOutExpo
   ) {
-    const fromValues = fromAnimation.currentValues;
-    const toValues = toAnimation.currentValues;
-    const properties = Object.keys(fromValues as any);
+    const _fromAnimation = fromAnimation.clone();
+    const _toAnimation = toAnimation.clone();
+    const fromValues = _fromAnimation.currentValues;
+    const toValues = _toAnimation.clone().currentValues;
+    const properties = Object.keys(fromValues);
 
     const keyframes = properties
       .map((name) => {
@@ -30,8 +32,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
           );
         }
 
-        return new Keyframe({
-          property: name,
+        return new Keyframe<T>({
+          property: name as keyof T,
           startAt: 0,
           endAt: 1,
           from,
@@ -42,12 +44,12 @@ export default class BlendedAnimation<T> extends Animation<T> {
       })
       .flat();
 
-    super(`${fromAnimation.name}-${toAnimation.name}-blended`, keyframes);
+    super(`${_fromAnimation.name}-${_toAnimation.name}-blended`, keyframes);
 
     this.easing = easing;
     this.properties = properties;
-    this.fromAnimation = fromAnimation;
-    this.toAnimation = toAnimation;
+    this.fromAnimation = _fromAnimation;
+    this.toAnimation = _toAnimation;
   }
 
   updateKeyframes() {
@@ -74,8 +76,8 @@ export default class BlendedAnimation<T> extends Animation<T> {
 
   clone() {
     return new BlendedAnimation<T>(
-      this.fromAnimation.clone(),
-      this.toAnimation.clone(),
+      this.fromAnimation,
+      this.toAnimation,
       this.easing
     );
   }

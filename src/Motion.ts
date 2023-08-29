@@ -1,41 +1,41 @@
-import ExtendedAnimation from "./ExtendedAnimation";
 import Animation, { IAnimation } from "./Animation";
-import Player, { RepeatDirection } from "./Player";
-import BlendedAnimation from "./BlendedAnimation";
-import { EasingFunction } from "./easings";
+import Player from "./Player";
 import KeyframeGenerator from "./KeyframesGenerator";
-import TimeObserver from "./TimeObserver";
+import { createTransitionAnimation } from "./createTransitionAnimation";
+import BlendedAnimation from "./BlendedAnimation";
+import easings from "./easings";
+import { deepClone } from "./deepClone";
 
 function defaultOnComplete() {}
 
-export default class Motion<T> {
-  protected setOnFirst: boolean;
+const DESIRED_FPS = 1000 / 60;
+
+export default class Motion<T extends {}> {
   protected currentDuration = 0;
   protected keyframeGenerator = new KeyframeGenerator();
-  protected observer: TimeObserver<any> | null = null;
   protected player: Player;
-
-  animation: IAnimation<T> | null = null;
+  protected animation: IAnimation<T>;
 
   constructor(
     render: (animation: IAnimation<T>) => void,
-    setOnFirst = false,
-    player?: Player
+    initialAnimation: IAnimation<T>,
+    duration = 0
   ) {
-    this.player = player || new Player();
+    this.animation = initialAnimation;
+    this.player = new Player();
+    this.player.duration = duration;
     this.player.render = (time: number) => {
       if (this.animation != null) {
         this.animation.update(time);
         render(this.animation);
       }
     };
-    this.setOnFirst = setOnFirst;
   }
 
   inject(animation: IAnimation<T>) {
     this.animation = animation;
 
-    this.player.duration = 16.667;
+    this.player.duration = DESIRED_FPS;
     this.player.time = 0.999;
     this.player.play();
 
@@ -43,125 +43,61 @@ export default class Motion<T> {
   }
 
   segueTo(
-    animation: IAnimation<T>,
+    to: IAnimation<T>,
     duration: number = 0,
-    easing?: EasingFunction,
     onComplete = defaultOnComplete
   ) {
-    const currentDuration = this.currentDuration;
-    const currentAnimation = this.animation;
-    const currentTime = this.player.time;
+    const transitionAnimation = this.createTransition(to, duration);
 
-    this.player.duration = this.currentDuration = duration;
-    this.player.iterations = 0;
-    this.player.repeat = 1;
+    this.player.observeTimeOnce(1, () => {
+      const isSameAnimation = transitionAnimation === this.animation;
 
-    if (duration === 0) {
-      animation.update(1);
-      const values = animation.currentValues;
-      this.animation = this.makeAnimationFromLastValues(values);
-      this.player.duration = 0;
-      this.player.time = 1;
-      this.player.render(1);
-      onComplete();
-      return;
-    }
-
-    if (currentAnimation == null) {
-      if (this.setOnFirst) {
-        animation.update(1);
-        const values = animation.currentValues;
-        this.animation = this.makeAnimationFromLastValues(values);
-        this.player.duration = 0;
-        this.player.time = 1;
-        this.player.render(1);
-        onComplete();
-        return;
-      } else {
-        this.animation = animation;
-      }
-    } else {
-      const extendDurationBy = duration - currentDuration * currentTime;
-
-      let fromAnimation: IAnimation<T>;
-
-      if (extendDurationBy > 0) {
-        fromAnimation = new ExtendedAnimation(
-          currentAnimation,
-          currentDuration,
-          currentTime,
-          extendDurationBy
+      if (isSameAnimation) {
+        this.animation = this.makeAnimationFromLastValues(
+          this.animation.currentValues
         );
-      } else {
-        const values = currentAnimation.currentValues;
-        const animation = this.makeAnimationFromLastValues(values);
-        fromAnimation = animation;
+
+        onComplete();
       }
+    });
 
-      const newAnimation = new BlendedAnimation<T>(
-        fromAnimation,
-        animation,
-        easing
-      );
-
-      this.animation = newAnimation;
-
-      this.observer?.dispose();
-      this.observer = this.player.observeTimeOnce(1, () => {
-        newAnimation.update(1);
-        const values = newAnimation.currentValues;
-        this.animation = this.makeAnimationFromLastValues(values);
-        onComplete && onComplete();
-      });
-    }
-
-    this.player.time = 0;
+    this.animation = transitionAnimation;
+    this.player.repeat = 1;
     this.player.play();
+
+    return this;
   }
 
-  segueToLoop(animation: IAnimation<T>, duration = 0, easing?: EasingFunction) {
-    const currentDuration = this.currentDuration;
-    const currentAnimation = this.animation;
-    const currentTime = this.player.time;
+  segueToLoop(to: IAnimation<T>, duration = 0, onComplete = defaultOnComplete) {
+    const transitionAnimation = this.createTransition(to, duration);
 
-    this.player.duration = this.currentDuration = duration;
-    this.player.iterations = 0;
-    this.player.repeat = 1;
+    this.player.observeTimeOnce(1, () => {
+      const isSameAnimation = transitionAnimation === this.animation;
 
-    this.player.repeat = Infinity;
-    this.player.repeatDirection = RepeatDirection.DEFAULT;
-
-    if (currentAnimation == null) {
-      this.animation = animation;
-    } else {
-      const extendDurationBy = duration - currentDuration * currentTime;
-
-      let fromAnimation: IAnimation<T>;
-
-      if (extendDurationBy > 0) {
-        fromAnimation = new ExtendedAnimation(
-          currentAnimation,
-          currentDuration,
-          currentTime,
-          extendDurationBy
-        );
-      } else {
-        fromAnimation = currentAnimation;
+      if (isSameAnimation) {
+        this.animation = to;
+        onComplete();
       }
+    });
 
-      this.animation = new BlendedAnimation<T>(
-        fromAnimation,
-        animation,
-        easing
-      );
-
-      this.observer?.dispose();
-      this.observer = this.player.observeTimeOnce(1, () => {
-        this.animation = animation;
-      });
-    }
-    this.player.time = 0;
+    this.animation = transitionAnimation;
+    this.player.repeat = Infinity;
     this.player.play();
+
+    return this;
+  }
+
+  private createTransition(to: IAnimation<T>, duration: number = 0) {
+    const currentAnimation = this.animation;
+    const from = createTransitionAnimation(currentAnimation, to, duration);
+
+    const blendedAnimation = new BlendedAnimation(from, to, easings.linear);
+
+    this.player.time = 0;
+    this.player.duration = duration;
+    this.player.iterations = 0;
+
+    return blendedAnimation;
   }
 
   stop() {
@@ -177,14 +113,14 @@ export default class Motion<T> {
   protected makeAnimationFromLastValues(values: any) {
     const keyframes = Object.keys(values).reduce((acc, key) => {
       acc[key] = {
-        from: JSON.parse(JSON.stringify(values[key])),
-        to: JSON.parse(JSON.stringify(values[key])),
+        from: deepClone(values[key]),
+        to: deepClone(values[key]),
       };
       return acc;
     }, {} as any);
 
     return new Animation<T>(
-      "last-animation",
+      "completed-animation",
       this.keyframeGenerator.generate(keyframes)
     );
   }

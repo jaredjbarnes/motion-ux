@@ -4,7 +4,7 @@ import Keyframe from "../Keyframe";
 
 describe("Animator", () => {
   test("Get value at 0.5.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number[] }>({
       property: "property",
       from: [0],
       to: [1],
@@ -22,7 +22,7 @@ describe("Animator", () => {
   });
 
   test("Get value at beyond 1.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number[] }>({
       property: "property",
       from: [0],
       to: [1],
@@ -40,7 +40,7 @@ describe("Animator", () => {
   });
 
   test("Get value at 0.5 with quad easing.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number[] }>({
       property: "property",
       from: [0],
       to: [1],
@@ -58,7 +58,7 @@ describe("Animator", () => {
   });
 
   test("Get value at 0.5 with control.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number }>({
       property: "property",
       from: 0,
       to: 1,
@@ -76,7 +76,7 @@ describe("Animator", () => {
   });
 
   test("Get value at 1 with control.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number }>({
       property: "property",
       from: 0,
       to: 1,
@@ -94,7 +94,7 @@ describe("Animator", () => {
   });
 
   test("Get value at beyond on with control.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number }>({
       property: "property",
       from: 0,
       to: 1,
@@ -112,7 +112,7 @@ describe("Animator", () => {
   });
 
   test("Get value at 0 with control.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number }>({
       property: "property",
       from: 0,
       to: 1,
@@ -130,7 +130,7 @@ describe("Animator", () => {
   });
 
   test("Get value at 0 with control.", () => {
-    const keyframe = new Keyframe({
+    const keyframe = new Keyframe<{ property: number }>({
       property: "property",
       from: 0,
       to: 2,
@@ -141,9 +141,9 @@ describe("Animator", () => {
     });
 
     const animator = new Animator(keyframe);
-    animator.update(1);
+    animator.update(0);
 
     expect(animator.value).toBe(0);
-    expect(animator.delta).toBe(2);
+    expect(animator.delta).toBe(5);
   });
 });

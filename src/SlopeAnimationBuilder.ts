@@ -4,7 +4,7 @@ import Animation, { IAnimation } from "./Animation";
 import ObjectOperator from "./ObjectOperator";
 import { deepClone } from "./deepClone";
 
-const nullableAnimation = new Animation("null", [
+const nullableAnimation = new Animation<any>("null", [
   new Keyframe({ from: 0, to: 0, property: "null" }),
 ]);
 
@@ -155,7 +155,7 @@ export default class SlopeAnimationBuilder {
   private createSlopeTimeline() {
     const keyframes = Object.keys(this.nowValues)
       .map((property) => {
-        return new Keyframe({
+        return new Keyframe<any>({
           property,
           from: this.nowValues[property],
           controls: [],

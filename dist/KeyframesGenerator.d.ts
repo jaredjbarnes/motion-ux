@@ -1,6 +1,6 @@
 import { DynamicEasingNames } from "./createDynamicEasing";
 import Keyframe from "./Keyframe";
-export declare type IAnimatedProperties<T> = {
+export declare type IAnimatedProperties<T extends {}> = {
     [P in keyof T]: T[P] | IPercentageKeyframes<T[P]>;
 };
 export interface IPercentageKeyframes<TValue> {
@@ -32,5 +32,5 @@ export default class KeyframesGenerator {
     wrapValue<T>(value: T): IKeyframeControls<T>;
     normalizeValue<T>(value: T | IKeyframeControls<T>): IKeyframeControls<T>;
     normalizeKeyframeValue<T>(value: T | IKeyframeControls<T> | IPercentageKeyframes<T>): IPercentageKeyframes<T>;
-    generate<T>(animatedProperties: IAnimatedProperties<T>): Keyframe<T>[];
+    generate<T extends {}>(animatedProperties: IAnimatedProperties<T>): Keyframe<T, keyof T>[];
 }

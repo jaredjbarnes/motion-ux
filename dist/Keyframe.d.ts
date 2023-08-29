@@ -7,24 +7,24 @@ export interface IComplexKeyframeValue<T> {
     easeIn?: DynamicEasingNames;
     easeOut?: DynamicEasingNames;
 }
-export interface KeyframeConfig<T> {
-    property: string;
-    to: T;
-    from: T;
+export interface KeyframeConfig<T, K extends keyof T = keyof T> {
+    property: K;
+    to: T[K];
+    from: T[K];
     endAt?: number;
     startAt?: number;
-    controls?: T[];
+    controls?: T[K][];
     easing?: EasingFunction;
 }
 export declare function generateInitialDelta<T>(delta: T): T;
-export default class Keyframe<T> {
-    property: string;
-    to: T;
-    from: T;
+export default class Keyframe<T, K extends keyof T = keyof T> {
+    property: K;
+    to: T[K];
+    from: T[K];
     startAt: number;
     endAt: number;
-    controls: T[];
+    controls: T[K][];
     easing: EasingFunction;
-    constructor(config: KeyframeConfig<T>);
-    clone(): Keyframe<T>;
+    constructor(config: KeyframeConfig<T, K>);
+    clone(): Keyframe<T, K>;
 }

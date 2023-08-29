@@ -4,13 +4,12 @@ import CssKeyframesGenerator, {
 import Animation from "./Animation";
 
 const cssKeyframesGenerator = new CssKeyframesGenerator();
-type CssType<T> = { [P in keyof T]: (string | number)[] };
 
-export function createCssAnimation<T>(
+export function createCssAnimation<T extends {}>(
   animatedProperties: ICssAnimatedProperties<T>
 ) {
   const keyframes = cssKeyframesGenerator.generate<T>(animatedProperties);
-  const animation = new Animation<CssType<T>>("", keyframes);
+  const animation = new Animation("", keyframes);
 
   return animation;
 }
